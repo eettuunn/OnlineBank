@@ -3,12 +3,14 @@ import { Spin } from 'antd';
 
 import { IRoute } from '../../shared/types';
 
+const UserList = React.lazy(() => import('./UserList'));
+
 export const UserRoutes: IRoute[] = [
     {
         path: '',
         element: (
             <Suspense fallback={<Spin className="main-loader" />}>
-                <div>пользователи таблица</div>
+                <UserList />
             </Suspense>
         ),
         title: '',
