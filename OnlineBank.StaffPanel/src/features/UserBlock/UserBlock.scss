@@ -1,0 +1,57 @@
+@use '/src/shared/scss/color';
+
+.user-block {
+    display: inline-flex;
+    align-items: center;
+    width: calc(100% + 1px);
+    margin: 10px 0;
+    padding: 12px 0;
+    white-space: pre;
+    border-top: solid 1px rgb(242 242 242 / 100%);
+    border-bottom: solid 1px rgb(242 242 242 / 100%);
+
+    &_collapsed {
+        justify-content: center;
+        text-overflow: clip;
+    }
+
+    &__info {
+        display: inline-flex;
+        flex: 1;
+        flex-direction: column;
+        padding: 0 16px;
+        overflow: hidden;
+        text-transform: capitalize;
+        text-overflow: clip;
+
+        &_collapsed {
+            display: inline-flex;
+            white-space: pre;
+            opacity: 0;
+        }
+    }
+
+    &__info-name {
+        font-size: 16px;
+        line-height: 21px;
+        letter-spacing: 0.02em;
+    }
+
+    &__info-role {
+        color: color.$secondary;
+        font-size: 14px;
+        line-height: 14px;
+        letter-spacing: 0.01em;
+    }
+
+    &__button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+
+        &_collapsed {
+            display: none;
+        }
+    }
+}
