@@ -1,7 +1,7 @@
 import { Role } from '../constants';
 
 export interface IUser {
-    id: string,
+    id?: string,
     email: string,
     fullName: string,
     isLocked: boolean,

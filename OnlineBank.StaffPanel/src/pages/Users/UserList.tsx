@@ -11,6 +11,7 @@ import { BlockIcon } from '../../shared/img/BlockIcon';
 
 import { UsersMock } from './__mocks';
 import { Role, RoleRus, Status, columnsUser } from './constants';
+import ModalCreateUser from './components/ModalCreateUser/ModalCreateUser';
 
 import './UserList.scss';
 
@@ -21,6 +22,7 @@ const UserList: React.FC = () => {
     const { setConfig } = useLayoutConfig();
 
     const [ indexRow, setIndexRow ] = useState<undefined | number>(undefined);
+    const [ visible, setVisible ] = useState(false);
 
     // const { isLoading, data: dataEnginesWithTestsQuery, isError: isErrorEngine, refetch } = useGetEnginesWithTestsQuery({ search, ...pagination });
 
@@ -84,7 +86,7 @@ const UserList: React.FC = () => {
     return (
         <div className={b().toString()}>
             <MainHeader>
-                <Button type="primary">
+                <Button type="primary" onClick={() => setVisible(true)}>
                     Добавить пользователя
                 </Button>
             </MainHeader>
@@ -97,6 +99,10 @@ const UserList: React.FC = () => {
                     onRow={onRow}
                 />
             </Content>
+            <ModalCreateUser isLoading={false} modal={{
+                visible: visible,
+                setVisible: setVisible,
+            }} />
         </div>
     );
 };
