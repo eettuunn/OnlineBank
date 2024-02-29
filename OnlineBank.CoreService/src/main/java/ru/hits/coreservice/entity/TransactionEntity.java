@@ -37,7 +37,7 @@ public class TransactionEntity {
     private TransactionType transactionType;
 
     @ManyToOne
-    @JoinColumn(name = "bank_account_id")
+    @JoinColumn(name = "bank_account_id", nullable = false)
     private BankAccountEntity bankAccount;
 
 }

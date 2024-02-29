@@ -34,6 +34,9 @@ public class BankAccountEntity {
     @Column(name = "owner_id")
     private UUID ownerId;
 
+    @Column(name = "is_closed")
+    private Boolean isClosed;
+
     @OneToMany(mappedBy = "bankAccount")
     private List<TransactionEntity> transactions;
 
