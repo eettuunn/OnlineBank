@@ -8,6 +8,9 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.hits.coreservice.dto.BankAccountDto;
 import ru.hits.coreservice.dto.CreateBankAccountDto;
 import ru.hits.coreservice.entity.BankAccountEntity;
+import ru.hits.coreservice.exception.ConflictException;
+import ru.hits.coreservice.exception.ForbiddenException;
+import ru.hits.coreservice.exception.NotFoundException;
 import ru.hits.coreservice.repository.BankAccountRepository;
 import ru.hits.coreservice.security.JwtUserData;
 
@@ -34,6 +37,29 @@ public class BankAccountService {
                 .isClosed(false)
                 .transactions(Collections.emptyList())
                 .build();
+
+        bankAccount = bankAccountRepository.save(bankAccount);
+
+        return new BankAccountDto(bankAccount);
+    }
+
+    @Transactional
+    public BankAccountDto closeBankAccount(UUID id) {
+        UUID authenticatedUserId = getAuthenticatedUserId();
+
+        BankAccountEntity bankAccount = bankAccountRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Банковский счет с ID " + id + " не найден"));
+
+        if (!bankAccount.getOwnerId().equals(authenticatedUserId)) {
+            throw new ForbiddenException("Пользователь с ID " + authenticatedUserId + " не является " +
+                    " владельцем банковского счета с ID " + id);
+        }
+
+        if (Boolean.TRUE.equals(bankAccount.getIsClosed())) {
+            throw new ConflictException("Банковский счет с ID " + id + " уже закрыт");
+        }
+
+        bankAccount.setIsClosed(true);
 
         bankAccount = bankAccountRepository.save(bankAccount);
 

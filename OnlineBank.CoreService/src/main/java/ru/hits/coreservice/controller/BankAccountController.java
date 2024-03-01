@@ -29,12 +29,21 @@ public class BankAccountController {
     private final JWTUtil jwtUtil;
 
     @Operation(
-            summary = "Открыть счёт.",
+            summary = "Открыть банковский счёт.",
             security = @SecurityRequirement(name = "bearerAuth")
     )
-    @PostMapping
+    @PostMapping("/open")
     public ResponseEntity<BankAccountDto> createBankAccount(@RequestBody @Valid CreateBankAccountDto createBankAccountDto) {
         return new ResponseEntity<>(bankAccountService.createBankAccount(createBankAccountDto), HttpStatus.OK);
+    }
+
+    @Operation(
+            summary = "Закрыть банковский счёт.",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @PostMapping("/close/{id}")
+    public ResponseEntity<BankAccountDto> closeBankAccount(@PathVariable("id") UUID id) {
+        return new ResponseEntity<>(bankAccountService.closeBankAccount(id), HttpStatus.OK);
     }
 
     @GetMapping("/token")
