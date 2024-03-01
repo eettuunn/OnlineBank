@@ -1,6 +1,5 @@
 package ru.hits.coreservice.controller;
 
-import com.auth0.jwt.JWT;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -11,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.hits.coreservice.dto.BankAccountDto;
 import ru.hits.coreservice.dto.CreateBankAccountDto;
+import ru.hits.coreservice.dto.DepositDto;
 import ru.hits.coreservice.security.JWTUtil;
 import ru.hits.coreservice.service.BankAccountService;
 
@@ -41,9 +41,19 @@ public class BankAccountController {
             summary = "Закрыть банковский счёт.",
             security = @SecurityRequirement(name = "bearerAuth")
     )
-    @PostMapping("/close/{id}")
-    public ResponseEntity<BankAccountDto> closeBankAccount(@PathVariable("id") UUID id) {
-        return new ResponseEntity<>(bankAccountService.closeBankAccount(id), HttpStatus.OK);
+    @PostMapping("/{id}/close")
+    public ResponseEntity<BankAccountDto> closeBankAccount(@PathVariable("id") UUID bankAccountId) {
+        return new ResponseEntity<>(bankAccountService.closeBankAccount(bankAccountId), HttpStatus.OK);
+    }
+
+    @Operation(
+            summary = "Пополнить банковский счёт.",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @PostMapping("/{id}/deposit")
+    public ResponseEntity<BankAccountDto> depositMoney(@PathVariable("id") UUID bankAccountId,
+                                                       @RequestBody @Valid DepositDto depositDto) {
+        return new ResponseEntity<>(bankAccountService.depositMoney(bankAccountId, depositDto.getAmount()), HttpStatus.OK);
     }
 
     @GetMapping("/token")

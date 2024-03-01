@@ -4,7 +4,9 @@ import lombok.*;
 import ru.hits.coreservice.entity.BankAccountEntity;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Data
 @AllArgsConstructor
@@ -25,6 +27,8 @@ public class BankAccountDto {
 
     private Boolean isClosed;
 
+    private List<TransactionDto> transactions;
+
     public BankAccountDto(BankAccountEntity bankAccount) {
         this.id = bankAccount.getId();
         this.name = bankAccount.getName();
@@ -32,6 +36,9 @@ public class BankAccountDto {
         this.balance = bankAccount.getBalance();
         this.ownerId = bankAccount.getOwnerId();
         this.isClosed = bankAccount.getIsClosed();
+        this.transactions = bankAccount.getTransactions().stream()
+                .map(TransactionDto::new)
+                .collect(Collectors.toList());
     }
 
 }

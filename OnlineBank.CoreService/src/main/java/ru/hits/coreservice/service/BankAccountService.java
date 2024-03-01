@@ -8,13 +8,18 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.hits.coreservice.dto.BankAccountDto;
 import ru.hits.coreservice.dto.CreateBankAccountDto;
 import ru.hits.coreservice.entity.BankAccountEntity;
+import ru.hits.coreservice.entity.TransactionEntity;
+import ru.hits.coreservice.enumeration.TransactionType;
+import ru.hits.coreservice.exception.BadRequestException;
 import ru.hits.coreservice.exception.ConflictException;
 import ru.hits.coreservice.exception.ForbiddenException;
 import ru.hits.coreservice.exception.NotFoundException;
 import ru.hits.coreservice.repository.BankAccountRepository;
+import ru.hits.coreservice.repository.TransactionRepository;
 import ru.hits.coreservice.security.JwtUserData;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Random;
 import java.util.UUID;
@@ -24,16 +29,15 @@ import java.util.UUID;
 public class BankAccountService {
 
     private final BankAccountRepository bankAccountRepository;
+    private final TransactionRepository transactionRepository;
 
     @Transactional
     public BankAccountDto createBankAccount(CreateBankAccountDto createBankAccountDto) {
-        UUID authenticatedUserId = getAuthenticatedUserId();
-
         BankAccountEntity bankAccount = BankAccountEntity.builder()
                 .name(createBankAccountDto.getName())
                 .number(generateAccountNumber())
                 .balance(BigDecimal.ZERO)
-                .ownerId(authenticatedUserId)
+                .ownerId(getAuthenticatedUserId())
                 .isClosed(false)
                 .transactions(Collections.emptyList())
                 .build();
@@ -44,22 +48,61 @@ public class BankAccountService {
     }
 
     @Transactional
-    public BankAccountDto closeBankAccount(UUID id) {
+    public BankAccountDto closeBankAccount(UUID bankAccountId) {
         UUID authenticatedUserId = getAuthenticatedUserId();
 
-        BankAccountEntity bankAccount = bankAccountRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Банковский счет с ID " + id + " не найден"));
+        BankAccountEntity bankAccount = bankAccountRepository.findById(bankAccountId)
+                .orElseThrow(() -> new NotFoundException("Банковский счет с ID " + bankAccountId + " не найден"));
 
         if (!bankAccount.getOwnerId().equals(authenticatedUserId)) {
             throw new ForbiddenException("Пользователь с ID " + authenticatedUserId + " не является " +
-                    " владельцем банковского счета с ID " + id);
+                    " владельцем банковского счета с ID " + bankAccountId);
         }
 
         if (Boolean.TRUE.equals(bankAccount.getIsClosed())) {
-            throw new ConflictException("Банковский счет с ID " + id + " уже закрыт");
+            throw new ConflictException("Банковский счет с ID " + bankAccountId + " уже закрыт");
         }
 
         bankAccount.setIsClosed(true);
+
+        bankAccount = bankAccountRepository.save(bankAccount);
+
+        return new BankAccountDto(bankAccount);
+    }
+
+    @Transactional
+    public BankAccountDto depositMoney(UUID bankAccountId, BigDecimal amount) {
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BadRequestException("Сумма для зачисления должна быть положительным числом");
+        }
+
+        UUID authenticatedUserId = getAuthenticatedUserId();
+
+        BankAccountEntity bankAccount = bankAccountRepository.findById(bankAccountId)
+                .orElseThrow(() -> new NotFoundException("Банковский счет с ID " + bankAccountId + " не найден"));
+
+        if (!bankAccount.getOwnerId().equals(authenticatedUserId)) {
+            throw new ForbiddenException("Пользователь с ID " + authenticatedUserId + " не является " +
+                    " владельцем банковского счета с ID " + bankAccountId);
+        }
+
+        if (Boolean.TRUE.equals(bankAccount.getIsClosed())) {
+            throw new ConflictException("Банковский счет с ID " + bankAccountId + " закрыт");
+        }
+
+        BigDecimal newBalance = bankAccount.getBalance().add(amount);
+        bankAccount.setBalance(newBalance);
+
+        TransactionEntity transaction = TransactionEntity.builder()
+                .transactionDate(LocalDateTime.now())
+                .amount(amount)
+                .transactionType(TransactionType.DEPOSIT)
+                .bankAccount(bankAccount)
+                .build();
+
+        transaction = transactionRepository.save(transaction);
+
+        bankAccount.getTransactions().add(transaction);
 
         bankAccount = bankAccountRepository.save(bankAccount);
 
