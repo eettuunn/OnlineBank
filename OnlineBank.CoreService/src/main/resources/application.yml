@@ -8,3 +8,16 @@ spring:
     hibernate:
       ddl-auto: ${spring_jpa_hibernate_ddl-auto:update}
     database-platform: org.hibernate.dialect.PostgreSQL9Dialect
+
+app:
+  security:
+    jwt-token:
+      permit-all:
+        - /api/bank-accounts/token
+      root-path: /api
+      secret: qqqwwweeerrrtttyyyuuuiiiooopppqqqwwweeerrrtttyyyuuuiiiooopppqqqwwweeerrrtttyyyuuuiiiooopppqqqwwweeerrrtttyyyuuuiiiooopppqqqwwweeerrrtttyyyuuuiiiooopppqqqwwweeerrrtttyyyuuuiiiooopppqqqwwweeerrrtttyyyuuuiiiooopppqqqwwweeerrrtttyyyuuuiiiooopppqqqwwweeerrrttty
+      issuer: online-bank-api
+      subject: User details
+    integrations:
+      root-path: /integration
+      api-key: ac816388c1c44ac2b2ae431f89c82e7e345d25a0e6474e75a78f9a5ce496060c

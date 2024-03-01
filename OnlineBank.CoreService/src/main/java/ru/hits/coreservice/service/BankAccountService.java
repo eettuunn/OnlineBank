@@ -1,12 +1,15 @@
 package ru.hits.coreservice.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.hits.coreservice.dto.BankAccountDto;
 import ru.hits.coreservice.dto.CreateBankAccountDto;
 import ru.hits.coreservice.entity.BankAccountEntity;
 import ru.hits.coreservice.repository.BankAccountRepository;
+import ru.hits.coreservice.security.JwtUserData;
 
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -21,11 +24,13 @@ public class BankAccountService {
 
     @Transactional
     public BankAccountDto createBankAccount(CreateBankAccountDto createBankAccountDto) {
+        UUID authenticatedUserId = getAuthenticatedUserId();
+
         BankAccountEntity bankAccount = BankAccountEntity.builder()
                 .name(createBankAccountDto.getName())
                 .number(generateAccountNumber())
                 .balance(BigDecimal.ZERO)
-                .ownerId(UUID.fromString("77141e72-da79-44c8-b057-ea1ea39bac2a"))
+                .ownerId(authenticatedUserId)
                 .isClosed(false)
                 .transactions(Collections.emptyList())
                 .build();
@@ -39,12 +44,22 @@ public class BankAccountService {
         StringBuilder sb = new StringBuilder();
         Random random = new Random();
 
-        // Генерируем 12 цифр
         for (int i = 0; i < 20; i++) {
-            sb.append(random.nextInt(10)); // Добавляем случайную цифру от 0 до 9
+            sb.append(random.nextInt(10));
         }
 
         return sb.toString();
+    }
+
+    /**
+     * Метод для получения ID аутентифицированного пользователя.
+     *
+     * @return ID аутентифицированного пользователя.
+     */
+    private UUID getAuthenticatedUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        JwtUserData userData = (JwtUserData) authentication.getPrincipal();
+        return userData.getId();
     }
 
 }
