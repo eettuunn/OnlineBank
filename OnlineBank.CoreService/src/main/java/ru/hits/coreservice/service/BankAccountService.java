@@ -1,6 +1,7 @@
 package ru.hits.coreservice.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -10,7 +11,6 @@ import ru.hits.coreservice.dto.CreateBankAccountDto;
 import ru.hits.coreservice.entity.BankAccountEntity;
 import ru.hits.coreservice.entity.TransactionEntity;
 import ru.hits.coreservice.enumeration.TransactionType;
-import ru.hits.coreservice.exception.BadRequestException;
 import ru.hits.coreservice.exception.ConflictException;
 import ru.hits.coreservice.exception.ForbiddenException;
 import ru.hits.coreservice.exception.NotFoundException;
@@ -21,8 +21,10 @@ import ru.hits.coreservice.security.JwtUserData;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +32,14 @@ public class BankAccountService {
 
     private final BankAccountRepository bankAccountRepository;
     private final TransactionRepository transactionRepository;
+
+    public List<BankAccountDto> getAllBankAccounts(Sort.Direction creationDateSortDirection) {
+        List<BankAccountEntity> bankAccounts = bankAccountRepository.findAll(Sort.by(creationDateSortDirection, "creationDate"));
+
+        return bankAccounts.stream()
+                .map(BankAccountDto::new)
+                .collect(Collectors.toList());
+    }
 
     @Transactional
     public BankAccountDto createBankAccount(CreateBankAccountDto createBankAccountDto) {
@@ -39,6 +49,7 @@ public class BankAccountService {
                 .balance(BigDecimal.ZERO)
                 .ownerId(getAuthenticatedUserId())
                 .isClosed(false)
+                .creationDate(LocalDateTime.now())
                 .transactions(Collections.emptyList())
                 .build();
 

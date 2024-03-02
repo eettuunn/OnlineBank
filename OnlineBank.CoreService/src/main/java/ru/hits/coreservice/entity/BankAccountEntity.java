@@ -5,6 +5,7 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,6 +37,9 @@ public class BankAccountEntity {
 
     @Column(name = "is_closed")
     private Boolean isClosed;
+
+    @Column(name = "transaction_date")
+    private LocalDateTime creationDate;
 
     @OneToMany(mappedBy = "bankAccount")
     @OrderBy("transactionDate DESC")
