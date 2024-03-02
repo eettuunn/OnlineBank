@@ -2,8 +2,6 @@ package ru.hits.coreservice.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.hits.coreservice.dto.BankAccountDto;
@@ -17,7 +15,7 @@ import ru.hits.coreservice.exception.ForbiddenException;
 import ru.hits.coreservice.exception.NotFoundException;
 import ru.hits.coreservice.repository.BankAccountRepository;
 import ru.hits.coreservice.repository.TransactionRepository;
-import ru.hits.coreservice.security.JwtUserData;
+//import ru.hits.coreservice.security.JwtUserData;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -65,7 +63,7 @@ public class BankAccountService {
                 .name(createBankAccountDto.getName())
                 .number(generateAccountNumber())
                 .balance(BigDecimal.ZERO)
-                .ownerId(getAuthenticatedUserId())
+                .ownerId(UUID.fromString("77141e72-da79-44c8-b057-ea1ea39bac2a"))
                 .isClosed(false)
                 .creationDate(LocalDateTime.now())
                 .transactions(Collections.emptyList())
@@ -78,7 +76,7 @@ public class BankAccountService {
 
     @Transactional
     public BankAccountWithoutTransactionsDto closeBankAccount(UUID bankAccountId) {
-        UUID authenticatedUserId = getAuthenticatedUserId();
+        UUID authenticatedUserId = UUID.fromString("77141e72-da79-44c8-b057-ea1ea39bac2a");
 
         BankAccountEntity bankAccount = bankAccountRepository.findById(bankAccountId)
                 .orElseThrow(() -> new NotFoundException("Банковский счет с ID " + bankAccountId + " не найден"));
@@ -101,7 +99,7 @@ public class BankAccountService {
 
     @Transactional
     public BankAccountDto depositMoney(UUID bankAccountId, BigDecimal amount) {
-        UUID authenticatedUserId = getAuthenticatedUserId();
+        UUID authenticatedUserId = UUID.fromString("77141e72-da79-44c8-b057-ea1ea39bac2a");
 
         BankAccountEntity bankAccount = bankAccountRepository.findById(bankAccountId)
                 .orElseThrow(() -> new NotFoundException("Банковский счет с ID " + bankAccountId + " не найден"));
@@ -136,7 +134,7 @@ public class BankAccountService {
 
     @Transactional
     public BankAccountDto withdrawMoney(UUID bankAccountId, BigDecimal amount) {
-        UUID authenticatedUserId = getAuthenticatedUserId();
+        UUID authenticatedUserId = UUID.fromString("77141e72-da79-44c8-b057-ea1ea39bac2a");
 
         BankAccountEntity bankAccount = bankAccountRepository.findById(bankAccountId)
                 .orElseThrow(() -> new NotFoundException("Банковский счет с ID " + bankAccountId + " не найден"));
@@ -184,15 +182,15 @@ public class BankAccountService {
         return sb.toString();
     }
 
-    /**
-     * Метод для получения ID аутентифицированного пользователя.
-     *
-     * @return ID аутентифицированного пользователя.
-     */
-    private UUID getAuthenticatedUserId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        JwtUserData userData = (JwtUserData) authentication.getPrincipal();
-        return userData.getId();
-    }
+//    /**
+//     * Метод для получения ID аутентифицированного пользователя.
+//     *
+//     * @return ID аутентифицированного пользователя.
+//     */
+//    private UUID getAuthenticatedUserId() {
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        JwtUserData userData = (JwtUserData) authentication.getPrincipal();
+//        return userData.getId();
+//    }
 
 }

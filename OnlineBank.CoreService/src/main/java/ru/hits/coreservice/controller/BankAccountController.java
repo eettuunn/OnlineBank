@@ -1,17 +1,15 @@
 package ru.hits.coreservice.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.hits.coreservice.dto.*;
 import ru.hits.coreservice.enumeration.SortDirection;
-import ru.hits.coreservice.security.JWTUtil;
+//import ru.hits.coreservice.security.JWTUtil;
 import ru.hits.coreservice.service.BankAccountService;
 
 import javax.validation.Valid;
@@ -27,11 +25,11 @@ public class BankAccountController {
 
     private final BankAccountService bankAccountService;
 
-    private final JWTUtil jwtUtil;
+//    private final JWTUtil jwtUtil;
 
     @Operation(
-            summary = "Посмотреть банковские счета всех клиентов.",
-            security = @SecurityRequirement(name = "bearerAuth")
+            summary = "Посмотреть банковские счета всех клиентов."
+//            security = @SecurityRequirement(name = "bearerAuth")
     )
     @GetMapping
     public ResponseEntity<List<BankAccountWithoutTransactionsDto>> getAllBankAccounts(@RequestParam(defaultValue = "ASC") SortDirection creationDateSortDirection) {
@@ -39,8 +37,8 @@ public class BankAccountController {
     }
 
     @Operation(
-            summary = "Посмотреть банковские счета клиента.",
-            security = @SecurityRequirement(name = "bearerAuth")
+            summary = "Посмотреть банковские счета клиента."
+//            security = @SecurityRequirement(name = "bearerAuth")
     )
     @GetMapping("/owner/{id}")
     public ResponseEntity<List<BankAccountWithoutTransactionsDto>> getBankAccountsByOwnerId(@RequestParam(defaultValue = "ASC") SortDirection creationDateSortDirection,
@@ -49,8 +47,8 @@ public class BankAccountController {
     }
 
     @Operation(
-            summary = "Посмотреть информацию о банковском счёте.",
-            security = @SecurityRequirement(name = "bearerAuth")
+            summary = "Посмотреть информацию о банковском счёте."
+//            security = @SecurityRequirement(name = "bearerAuth")
     )
     @GetMapping("/{id}")
     public ResponseEntity<BankAccountWithoutTransactionsDto> getBankAccountsByOwnerId(@PathVariable("id") UUID bankAccountId) {
@@ -58,8 +56,8 @@ public class BankAccountController {
     }
 
     @Operation(
-            summary = "Открыть банковский счёт.",
-            security = @SecurityRequirement(name = "bearerAuth")
+            summary = "Открыть банковский счёт."
+//            security = @SecurityRequirement(name = "bearerAuth")
     )
     @PostMapping("/open")
     public ResponseEntity<BankAccountWithoutTransactionsDto> createBankAccount(@RequestBody @Valid CreateBankAccountDto createBankAccountDto) {
@@ -67,8 +65,8 @@ public class BankAccountController {
     }
 
     @Operation(
-            summary = "Закрыть банковский счёт.",
-            security = @SecurityRequirement(name = "bearerAuth")
+            summary = "Закрыть банковский счёт."
+//            security = @SecurityRequirement(name = "bearerAuth")
     )
     @PostMapping("/{id}/close")
     public ResponseEntity<BankAccountWithoutTransactionsDto> closeBankAccount(@PathVariable("id") UUID bankAccountId) {
@@ -76,8 +74,8 @@ public class BankAccountController {
     }
 
     @Operation(
-            summary = "Пополнить банковский счёт.",
-            security = @SecurityRequirement(name = "bearerAuth")
+            summary = "Пополнить банковский счёт."
+//            security = @SecurityRequirement(name = "bearerAuth")
     )
     @PostMapping("/{id}/deposit")
     public ResponseEntity<BankAccountDto> depositMoney(@PathVariable("id") UUID bankAccountId,
@@ -86,8 +84,8 @@ public class BankAccountController {
     }
 
     @Operation(
-            summary = "Снять деньги с банковского счёта.",
-            security = @SecurityRequirement(name = "bearerAuth")
+            summary = "Снять деньги с банковского счёта."
+//            security = @SecurityRequirement(name = "bearerAuth")
     )
     @PostMapping("/{id}/withdraw")
     public ResponseEntity<BankAccountDto> withdrawMoney(@PathVariable("id") UUID bankAccountId,
@@ -95,9 +93,9 @@ public class BankAccountController {
         return new ResponseEntity<>(bankAccountService.withdrawMoney(bankAccountId, withdrawMoneyDto.getAmount()), HttpStatus.OK);
     }
 
-    @GetMapping("/token")
-    public ResponseEntity<String> getToken() {
-        return new ResponseEntity<>(jwtUtil.generateToken(UUID.fromString("77141e72-da79-44c8-b057-ea1ea39bac2a")), HttpStatus.OK);
-    }
+//    @GetMapping("/token")
+//    public ResponseEntity<String> getToken() {
+//        return new ResponseEntity<>(jwtUtil.generateToken(UUID.fromString("77141e72-da79-44c8-b057-ea1ea39bac2a")), HttpStatus.OK);
+//    }
 
 }
