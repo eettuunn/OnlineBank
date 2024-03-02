@@ -7,6 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.hits.coreservice.dto.BankAccountDto;
+import ru.hits.coreservice.dto.BankAccountWithoutTransactionsDto;
 import ru.hits.coreservice.dto.CreateBankAccountDto;
 import ru.hits.coreservice.entity.BankAccountEntity;
 import ru.hits.coreservice.entity.TransactionEntity;
@@ -33,26 +34,33 @@ public class BankAccountService {
     private final BankAccountRepository bankAccountRepository;
     private final TransactionRepository transactionRepository;
 
-    public List<BankAccountDto> getAllBankAccounts(Sort.Direction creationDateSortDirection) {
+    public List<BankAccountWithoutTransactionsDto> getAllBankAccounts(Sort.Direction creationDateSortDirection) {
         List<BankAccountEntity> bankAccounts = bankAccountRepository.findAll(Sort.by(creationDateSortDirection, "creationDate"));
 
         return bankAccounts.stream()
-                .map(BankAccountDto::new)
+                .map(BankAccountWithoutTransactionsDto::new)
                 .collect(Collectors.toList());
     }
 
-    public List<BankAccountDto> getBankAccountsByOwnerId(UUID ownerId, Sort.Direction creationDateSortDirection) {
+    public List<BankAccountWithoutTransactionsDto> getBankAccountsByOwnerId(UUID ownerId, Sort.Direction creationDateSortDirection) {
         Sort sortByCreationDate = Sort.by(creationDateSortDirection, "creationDate");
 
         List<BankAccountEntity> bankAccounts = bankAccountRepository.findAllByOwnerId(ownerId, sortByCreationDate);
 
         return bankAccounts.stream()
-                .map(BankAccountDto::new)
+                .map(BankAccountWithoutTransactionsDto::new)
                 .collect(Collectors.toList());
     }
 
+    public BankAccountWithoutTransactionsDto getBankAccountById(UUID bankAccountId) {
+        BankAccountEntity bankAccount = bankAccountRepository.findById(bankAccountId)
+                .orElseThrow(() -> new NotFoundException("Банковский счет с ID " + bankAccountId + " не найден"));
+
+        return new BankAccountWithoutTransactionsDto(bankAccount);
+    }
+
     @Transactional
-    public BankAccountDto createBankAccount(CreateBankAccountDto createBankAccountDto) {
+    public BankAccountWithoutTransactionsDto createBankAccount(CreateBankAccountDto createBankAccountDto) {
         BankAccountEntity bankAccount = BankAccountEntity.builder()
                 .name(createBankAccountDto.getName())
                 .number(generateAccountNumber())
@@ -65,11 +73,11 @@ public class BankAccountService {
 
         bankAccount = bankAccountRepository.save(bankAccount);
 
-        return new BankAccountDto(bankAccount);
+        return new BankAccountWithoutTransactionsDto(bankAccount);
     }
 
     @Transactional
-    public BankAccountDto closeBankAccount(UUID bankAccountId) {
+    public BankAccountWithoutTransactionsDto closeBankAccount(UUID bankAccountId) {
         UUID authenticatedUserId = getAuthenticatedUserId();
 
         BankAccountEntity bankAccount = bankAccountRepository.findById(bankAccountId)
@@ -88,7 +96,7 @@ public class BankAccountService {
 
         bankAccount = bankAccountRepository.save(bankAccount);
 
-        return new BankAccountDto(bankAccount);
+        return new BankAccountWithoutTransactionsDto(bankAccount);
     }
 
     @Transactional
