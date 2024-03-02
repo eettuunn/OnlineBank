@@ -38,6 +38,7 @@ public class BankAccountEntity {
     private Boolean isClosed;
 
     @OneToMany(mappedBy = "bankAccount")
+    @OrderBy("transactionDate DESC")
     private List<TransactionEntity> transactions;
 
 }

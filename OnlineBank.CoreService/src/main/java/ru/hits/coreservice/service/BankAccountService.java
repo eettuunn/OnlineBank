@@ -102,7 +102,7 @@ public class BankAccountService {
 
         transaction = transactionRepository.save(transaction);
 
-        bankAccount.getTransactions().add(transaction);
+        bankAccount.getTransactions().add(0, transaction);
 
         bankAccount = bankAccountRepository.save(bankAccount);
 

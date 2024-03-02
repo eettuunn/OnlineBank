@@ -1,5 +1,6 @@
 package ru.hits.coreservice.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import ru.hits.coreservice.entity.TransactionEntity;
 import ru.hits.coreservice.enumeration.TransactionType;
@@ -15,6 +16,8 @@ import java.util.UUID;
 @Setter
 public class TransactionDto {
     private UUID id;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime transactionDate;
     private BigDecimal amount;
     private String additionalInformation;
