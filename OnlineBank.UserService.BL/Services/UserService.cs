@@ -1,4 +1,5 @@
 using AutoMapper;
+using Common.Exceptions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OnlineBank.UserService.Common.Dtos;
@@ -47,5 +48,21 @@ public class UserService : IUserService
         {
             await _userManager.AddToRoleAsync(user, role.ToString());
         }
+    }
+
+    public async Task BanUser(Guid userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString()) 
+                   ?? throw new CantFindByIdException("User", userId);
+        user.Ban = true;
+        await _userManager.UpdateAsync(user);
+    }
+
+    public async Task UnbanUser(Guid userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString())
+                    ?? throw new CantFindByIdException("User", userId);
+        user.Ban = false;
+        await _userManager.UpdateAsync(user);
     }
 }

@@ -1,6 +1,8 @@
 using System.Text;
 using System.Text.Json.Serialization;
+using Common.Policies.Ban;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using OnlineBank.Common.Middlewares.ExceptionHandler;
@@ -25,6 +27,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddSingleton<IAuthorizationHandler, BanPolicyHandler>();
 builder.Services.AddAutoMapper(typeof(UserServiceMapper));
 
 builder.Services.AddAuthentication(opt => {
@@ -44,6 +47,17 @@ builder.Services.AddAuthentication(opt => {
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(JwtConfig.Key))
         };
     });
+builder.Services.AddAuthorization(options =>
+{
+    options.DefaultPolicy =
+        new AuthorizationPolicyBuilder
+                (JwtBearerDefaults.AuthenticationScheme)
+            .RequireAuthenticatedUser()
+            .Build();
+    options.AddPolicy(
+        "Ban",
+        policy => policy.Requirements.Add(new BanPolicy()));
+});
 builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
     {
         options.Password.RequiredLength = 6;

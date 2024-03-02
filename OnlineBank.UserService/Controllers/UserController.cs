@@ -32,4 +32,18 @@ public class UserController : ControllerBase
 
         return BadRequest(ModelState);
     }
+
+    [HttpPut]
+    [Route("{userId}/ban")]
+    public async Task BanUser(Guid userId)
+    {
+        await _userService.BanUser(userId);
+    }
+    
+    [HttpPut]
+    [Route("{userId}/unban")]
+    public async Task UnbanUser(Guid userId)
+    {
+        await _userService.UnbanUser(userId);
+    }
 }

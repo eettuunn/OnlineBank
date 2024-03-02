@@ -7,4 +7,6 @@ public interface IUserService
 {
     Task<List<UserDto>> GetUsers();
     Task CreateUser(CreateUserDto createUserDto);
+    Task BanUser(Guid userId);
+    Task UnbanUser(Guid userId);
 }

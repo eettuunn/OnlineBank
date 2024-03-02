@@ -6,4 +6,5 @@ public class UserDto
     public string email { get; set; }
     public string userName { get; set; }
     public List<string> roles { get; set; }
+    public bool ban { get; set; }
 }
