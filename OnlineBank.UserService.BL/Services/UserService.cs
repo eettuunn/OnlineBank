@@ -1,6 +1,7 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using OnlineBank.UserService.Common.Dtos;
 using OnlineBank.UserService.Common.Dtos.User;
 using OnlineBank.UserService.Common.Interfaces;
 using OnlineBank.UserService.DAL;
@@ -34,5 +35,17 @@ public class UserService : IUserService
         }
 
         return usersDto;
+    }
+
+    public async Task CreateUser(CreateUserDto createUserDto)
+    {
+        var newUser = _mapper.Map<AppUser>(createUserDto);
+        var result = await _userManager.CreateAsync(newUser);
+
+        var user = await _userManager.FindByEmailAsync(createUserDto.email);
+        foreach (var role in createUserDto.roles)
+        {
+            await _userManager.AddToRoleAsync(user, role.ToString());
+        }
     }
 }

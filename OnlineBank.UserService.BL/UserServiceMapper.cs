@@ -1,4 +1,5 @@
 using AutoMapper;
+using OnlineBank.UserService.Common.Dtos;
 using OnlineBank.UserService.Common.Dtos.User;
 using OnlineBank.UserService.DAL.Entities;
 
@@ -9,5 +10,6 @@ public class UserServiceMapper : Profile
     public UserServiceMapper()
     {
         CreateMap<AppUser, UserDto>();
+        CreateMap<CreateUserDto, AppUser>();
     }
 }

@@ -43,7 +43,6 @@ public static class UserServiceDALConfigurator
             {
                 UserName = "Customer",
                 Email = "customer@gmail.com",
-                FullName = "Customer Customer",
                 Passport = "1234 123456",
                 PhoneNumber = "89999999999"
             };
@@ -53,7 +52,6 @@ public static class UserServiceDALConfigurator
             {
                 UserName = "Staff",
                 Email = "staff@gmail.com",
-                FullName = "Staff Staff",
                 Passport = "4321 654321",
                 PhoneNumber = "81111111111"
             };
