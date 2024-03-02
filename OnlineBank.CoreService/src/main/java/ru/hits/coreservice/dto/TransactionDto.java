@@ -15,10 +15,12 @@ import java.util.UUID;
 @Getter
 @Setter
 public class TransactionDto {
+
     private UUID id;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime transactionDate;
+
     private BigDecimal amount;
     private String additionalInformation;
     private TransactionType transactionType;

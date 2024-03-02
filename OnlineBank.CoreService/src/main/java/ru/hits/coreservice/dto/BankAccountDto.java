@@ -16,17 +16,11 @@ import java.util.stream.Collectors;
 public class BankAccountDto {
 
     private UUID id;
-
     private String name;
-
     private String number;
-
     private BigDecimal balance;
-
     private UUID ownerId;
-
     private Boolean isClosed;
-
     private List<TransactionDto> transactions;
 
     public BankAccountDto(BankAccountEntity bankAccount) {

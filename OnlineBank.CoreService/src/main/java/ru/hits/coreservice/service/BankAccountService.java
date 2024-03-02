@@ -72,10 +72,6 @@ public class BankAccountService {
 
     @Transactional
     public BankAccountDto depositMoney(UUID bankAccountId, BigDecimal amount) {
-        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new BadRequestException("Сумма для зачисления должна быть положительным числом");
-        }
-
         UUID authenticatedUserId = getAuthenticatedUserId();
 
         BankAccountEntity bankAccount = bankAccountRepository.findById(bankAccountId)
@@ -97,6 +93,45 @@ public class BankAccountService {
                 .transactionDate(LocalDateTime.now())
                 .amount(amount)
                 .transactionType(TransactionType.DEPOSIT)
+                .bankAccount(bankAccount)
+                .build();
+
+        transaction = transactionRepository.save(transaction);
+
+        bankAccount.getTransactions().add(0, transaction);
+
+        bankAccount = bankAccountRepository.save(bankAccount);
+
+        return new BankAccountDto(bankAccount);
+    }
+
+    @Transactional
+    public BankAccountDto withdrawMoney(UUID bankAccountId, BigDecimal amount) {
+        UUID authenticatedUserId = getAuthenticatedUserId();
+
+        BankAccountEntity bankAccount = bankAccountRepository.findById(bankAccountId)
+                .orElseThrow(() -> new NotFoundException("Банковский счет с ID " + bankAccountId + " не найден"));
+
+        if (!bankAccount.getOwnerId().equals(authenticatedUserId)) {
+            throw new ForbiddenException("Пользователь с ID " + authenticatedUserId + " не является " +
+                    " владельцем банковского счета с ID " + bankAccountId);
+        }
+
+        if (Boolean.TRUE.equals(bankAccount.getIsClosed())) {
+            throw new ConflictException("Банковский счет с ID " + bankAccountId + " закрыт");
+        }
+
+        if (bankAccount.getBalance().compareTo(amount) < 0) {
+            throw new ConflictException("Недостаточно средств на счете для снятия указанной суммы");
+        }
+
+        BigDecimal newBalance = bankAccount.getBalance().subtract(amount);
+        bankAccount.setBalance(newBalance);
+
+        TransactionEntity transaction = TransactionEntity.builder()
+                .transactionDate(LocalDateTime.now())
+                .amount(amount.negate())
+                .transactionType(TransactionType.WITHDRAW)
                 .bankAccount(bankAccount)
                 .build();
 

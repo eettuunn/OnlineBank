@@ -10,7 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.hits.coreservice.dto.BankAccountDto;
 import ru.hits.coreservice.dto.CreateBankAccountDto;
-import ru.hits.coreservice.dto.DepositDto;
+import ru.hits.coreservice.dto.DepositMoneyDto;
+import ru.hits.coreservice.dto.WithdrawMoneyDto;
 import ru.hits.coreservice.security.JWTUtil;
 import ru.hits.coreservice.service.BankAccountService;
 
@@ -52,8 +53,18 @@ public class BankAccountController {
     )
     @PostMapping("/{id}/deposit")
     public ResponseEntity<BankAccountDto> depositMoney(@PathVariable("id") UUID bankAccountId,
-                                                       @RequestBody @Valid DepositDto depositDto) {
-        return new ResponseEntity<>(bankAccountService.depositMoney(bankAccountId, depositDto.getAmount()), HttpStatus.OK);
+                                                       @RequestBody @Valid DepositMoneyDto depositMoneyDto) {
+        return new ResponseEntity<>(bankAccountService.depositMoney(bankAccountId, depositMoneyDto.getAmount()), HttpStatus.OK);
+    }
+
+    @Operation(
+            summary = "Снять деньги с банковского счёта.",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @PostMapping("/{id}/withdraw")
+    public ResponseEntity<BankAccountDto> withdrawMoney(@PathVariable("id") UUID bankAccountId,
+                                                        @RequestBody @Valid WithdrawMoneyDto withdrawMoneyDto) {
+        return new ResponseEntity<>(bankAccountService.withdrawMoney(bankAccountId, withdrawMoneyDto.getAmount()), HttpStatus.OK);
     }
 
     @GetMapping("/token")

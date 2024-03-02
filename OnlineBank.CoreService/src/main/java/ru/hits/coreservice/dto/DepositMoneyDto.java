@@ -10,7 +10,9 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @Getter
 @Setter
-public class DepositDto {
+public class DepositMoneyDto {
+
     @Positive(message = "Сумма для пополнения должна быть положительным числом")
     private BigDecimal amount;
+
 }
