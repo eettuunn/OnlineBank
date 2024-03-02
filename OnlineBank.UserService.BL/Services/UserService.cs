@@ -14,13 +14,13 @@ public class UserService : IUserService
 {
     private readonly UserManager<AppUser> _userManager;
     private readonly IMapper _mapper;
-    private readonly RoleManager<IdentityRole> _roleManager;
+    private readonly ITokenService _tokenService;
 
-    public UserService(UserManager<AppUser> userManager, IMapper mapper, RoleManager<IdentityRole> roleManager)
+    public UserService(UserManager<AppUser> userManager, IMapper mapper, ITokenService tokenService)
     {
         _userManager = userManager;
         _mapper = mapper;
-        _roleManager = roleManager;
+        _tokenService = tokenService;
     }
 
     public async Task<List<UserDto>> GetUsers()

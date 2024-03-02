@@ -9,10 +9,12 @@ namespace OnlineBank.UserService.Controllers;
 public class UserController : ControllerBase
 {
     private readonly IUserService _userService;
+    private readonly ITokenService _tokenService;
 
-    public UserController(IUserService userService)
+    public UserController(IUserService userService, ITokenService tokenService)
     {
         _userService = userService;
+        _tokenService = tokenService;
     }
 
     [HttpGet]
@@ -45,5 +47,12 @@ public class UserController : ControllerBase
     public async Task UnbanUser(Guid userId)
     {
         await _userService.UnbanUser(userId);
+    }
+
+    [HttpGet]
+    [Route("{userId}/token")]
+    public async Task<string> GenerateUserToken(Guid userId)
+    {
+        return await _tokenService.CreateToken(userId);
     }
 }

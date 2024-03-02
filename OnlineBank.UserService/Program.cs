@@ -27,6 +27,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddSingleton<IAuthorizationHandler, BanPolicyHandler>();
 builder.Services.AddAutoMapper(typeof(UserServiceMapper));
 
