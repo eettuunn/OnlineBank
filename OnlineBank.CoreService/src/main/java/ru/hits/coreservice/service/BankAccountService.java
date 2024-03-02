@@ -41,6 +41,16 @@ public class BankAccountService {
                 .collect(Collectors.toList());
     }
 
+    public List<BankAccountDto> getBankAccountsByOwnerId(UUID ownerId, Sort.Direction creationDateSortDirection) {
+        Sort sortByCreationDate = Sort.by(creationDateSortDirection, "creationDate");
+
+        List<BankAccountEntity> bankAccounts = bankAccountRepository.findAllByOwnerId(ownerId, sortByCreationDate);
+
+        return bankAccounts.stream()
+                .map(BankAccountDto::new)
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public BankAccountDto createBankAccount(CreateBankAccountDto createBankAccountDto) {
         BankAccountEntity bankAccount = BankAccountEntity.builder()

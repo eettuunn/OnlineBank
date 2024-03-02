@@ -28,10 +28,11 @@ public class TransactionService {
         BankAccountEntity bankAccount = bankAccountRepository.findById(bankAccountId)
                 .orElseThrow(() -> new NotFoundException("Банковский счет с ID " + bankAccountId + " не найден"));
 
-        if (!bankAccount.getOwnerId().equals(authenticatedUserId)) {
-            throw new ForbiddenException("Пользователь с ID " + authenticatedUserId + " не является " +
-                    " владельцем банковского счета с ID " + bankAccountId);
-        }
+        //TODO: потом раскомментить, когда в токене появятся роли
+//        if (!bankAccount.getOwnerId().equals(authenticatedUserId)) {
+//            throw new ForbiddenException("Пользователь с ID " + authenticatedUserId + " не является " +
+//                    " владельцем банковского счета с ID " + bankAccountId);
+//        }
 
         return bankAccount.getTransactions().stream()
                 .map(TransactionDto::new)

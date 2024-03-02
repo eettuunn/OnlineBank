@@ -42,6 +42,16 @@ public class BankAccountController {
     }
 
     @Operation(
+            summary = "Посмотреть банковские счета клиента.",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @GetMapping("/owner/{id}")
+    public ResponseEntity<List<BankAccountDto>> getBankAccountsByOwnerId(@RequestParam(defaultValue = "ASC") SortDirection creationDateSortDirection,
+                                                                         @PathVariable("id") UUID ownerId) {
+        return new ResponseEntity<>(bankAccountService.getBankAccountsByOwnerId(ownerId, creationDateSortDirection.toSortDirection()), HttpStatus.OK);
+    }
+
+    @Operation(
             summary = "Открыть банковский счёт.",
             security = @SecurityRequirement(name = "bearerAuth")
     )
