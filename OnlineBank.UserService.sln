@@ -2,6 +2,16 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlineBank.UserService", "OnlineBank.UserService\OnlineBank.UserService.csproj", "{0B731FB9-985C-4965-ADAD-3D0F10FD7C99}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LoanService", "LoanService", "{8322FEC9-FC16-4150-8A08-9C3704FA2D1F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlineBank.LoanService", "OnlineBank.LoanService\OnlineBank.LoanService.csproj", "{70514FE9-6A2F-4FAF-8630-7B566848DE72}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlineBank.LoanService.BL", "OnlineBank.LoanService.BL\OnlineBank.LoanService.BL.csproj", "{CE6194B1-F140-48D7-983B-B56DDC19D108}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlineBank.LoanService.DAL", "OnlineBank.LoanService.DAL\OnlineBank.LoanService.DAL.csproj", "{DCCB8FF9-E8D0-4651-AE1B-C43005446C3F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlineBank.LoanService.Common", "OnlineBank.LoanService.Common\OnlineBank.LoanService.Common.csproj", "{FE4492F4-6281-4812-B8F0-29B4A17E5BD6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +22,27 @@ Global
 		{0B731FB9-985C-4965-ADAD-3D0F10FD7C99}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0B731FB9-985C-4965-ADAD-3D0F10FD7C99}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0B731FB9-985C-4965-ADAD-3D0F10FD7C99}.Release|Any CPU.Build.0 = Release|Any CPU
+		{70514FE9-6A2F-4FAF-8630-7B566848DE72}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{70514FE9-6A2F-4FAF-8630-7B566848DE72}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{70514FE9-6A2F-4FAF-8630-7B566848DE72}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{70514FE9-6A2F-4FAF-8630-7B566848DE72}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE6194B1-F140-48D7-983B-B56DDC19D108}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE6194B1-F140-48D7-983B-B56DDC19D108}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE6194B1-F140-48D7-983B-B56DDC19D108}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE6194B1-F140-48D7-983B-B56DDC19D108}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DCCB8FF9-E8D0-4651-AE1B-C43005446C3F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DCCB8FF9-E8D0-4651-AE1B-C43005446C3F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DCCB8FF9-E8D0-4651-AE1B-C43005446C3F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DCCB8FF9-E8D0-4651-AE1B-C43005446C3F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE4492F4-6281-4812-B8F0-29B4A17E5BD6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE4492F4-6281-4812-B8F0-29B4A17E5BD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE4492F4-6281-4812-B8F0-29B4A17E5BD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE4492F4-6281-4812-B8F0-29B4A17E5BD6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{70514FE9-6A2F-4FAF-8630-7B566848DE72} = {8322FEC9-FC16-4150-8A08-9C3704FA2D1F}
+		{CE6194B1-F140-48D7-983B-B56DDC19D108} = {8322FEC9-FC16-4150-8A08-9C3704FA2D1F}
+		{DCCB8FF9-E8D0-4651-AE1B-C43005446C3F} = {8322FEC9-FC16-4150-8A08-9C3704FA2D1F}
+		{FE4492F4-6281-4812-B8F0-29B4A17E5BD6} = {8322FEC9-FC16-4150-8A08-9C3704FA2D1F}
 	EndGlobalSection
 EndGlobal
