@@ -11,7 +11,6 @@ import './BaseTable.scss';
 
 interface IProps extends TableProps<Record<string, unknown>> {
     columns: (ColumnGroupType<Record<string, unknown>> | ColumnType<Record<string, unknown>>)[];
-    // sourceData: IResponseData<unknown> | undefined;
     scroll?: IScroll;
     cursorPointer?: boolean;
     rowKey?: string;
@@ -19,7 +18,7 @@ interface IProps extends TableProps<Record<string, unknown>> {
 }
 
 const BaseTable: React.FC<IProps> = (
-    // { columns, sourceData, isLoading, onRow, rowKey = 'id', scroll, cursorPointer, onChange }
+    { columns, dataSource, isLoading, onRow, rowKey = 'id', scroll, cursorPointer, onChange },
 ) =>
 // const newScroll: IScroll | undefined = useMemo(() => {
 //     if (scroll?.x !== undefined && scroll?.xMinContent !== undefined) {
@@ -32,23 +31,22 @@ const BaseTable: React.FC<IProps> = (
 // }, [ scroll ]);
 
     (
-    // <Table
-    //     bordered
-    //     columns={columns}
-    //     dataSource={(sourceData?.content as Record<string, unknown>[]) || []}
-    //     footer={() => <MainPagination currentPage={sourceData?.currentPage} pageSize={sourceData?.pageSize} total={sourceData?.total} />}
-    //     loading={isLoading}
-    //     pagination={false}
-    //     rowKey={rowKey}
-    //     scroll={newScroll ?? { y: 'calc(100vh - 310px)' }}
-    //     size="small"
-    //     sortDirections={[ 'descend', 'ascend' ]}
-    //     style={{ cursor: cursorPointer ? 'pointer' : '' }}
-    //     onChange={onChange}
-    //     onRow={onRow}
-    // />
-        <>12</>
+        <Table
+            bordered
+            columns={columns}
+            dataSource={(dataSource as Record<string, unknown>[]) || []}
+            // footer={() => <MainPagination currentPage={dataSource} pageSize={sourceData?.pageSize} total={sourceData?.total} />}
+            loading={isLoading}
+            pagination={false}
+            rowKey={rowKey}
+            // scroll={newScroll ?? { y: 'calc(100vh - 310px)' }}
+            size="small"
+            sortDirections={[ 'descend', 'ascend' ]}
+            style={{ cursor: cursorPointer ? 'pointer' : '' }}
+            onChange={onChange}
+            onRow={onRow}
+        />
     )
-    ;
+        ;
 
 export default BaseTable;

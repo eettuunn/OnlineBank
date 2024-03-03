@@ -1,0 +1,41 @@
+@use '/src/shared/scss/color';
+
+.create-record-modal {
+    &__cancel-btn {
+        color: color.$primary;
+        border: 0;
+    }
+
+    .ant-form-item-label {
+        line-height: 18px;
+    }
+
+    .ant-modal-footer {
+        padding-top: 16px;
+    }
+
+    .ant-form-item-label > label {
+        font-size: 14px;
+    }
+
+    &__view-row {
+        padding-block: 24px;
+        border-top: 1px solid color.$block;
+    }
+
+    &__view-col {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        min-width: 150px;
+    }
+
+    &__view-label {
+        color: color.$secondary;
+        line-height: 18px;
+    }
+
+    &__view-text {
+        line-height: 18px;
+    }
+}
