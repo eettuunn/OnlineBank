@@ -2,16 +2,16 @@ import React, { useEffect, useState } from 'react';
 import block from 'bem-cn';
 import { Button, Layout } from 'antd';
 import Icon from '@ant-design/icons/lib/components/Icon';
+import { useNavigate } from 'react-router-dom';
 
-import { useLayoutConfig } from '../../shared/hooks/useLayoutConfig/useLayoutConfig';
-import { Paths } from '../../shared/constants';
-import MainHeader from '../../features/MainHeader/MainHeader';
-import BaseTable from '../../features/BaseTable/BaseTable';
-import { BlockIcon } from '../../shared/img/BlockIcon';
-
-import { UsersMock } from './__mocks';
-import { Role, RoleRus, Status, columnsUser } from './constants';
-import ModalCreateUser from './components/ModalCreateUser/ModalCreateUser';
+import { useLayoutConfig } from '../../../shared/hooks/useLayoutConfig/useLayoutConfig';
+import { Paths } from '../../../shared/constants';
+import MainHeader from '../../../features/MainHeader/MainHeader';
+import BaseTable from '../../../features/BaseTable/BaseTable';
+import { UsersMock } from '../__mocks';
+import { Role, RoleRus, Status, columnsUser } from '../constants';
+import ModalCreateUser from '../components/ModalCreateUser/ModalCreateUser';
+import { BlockIcon } from '../../../shared/img/BlockIcon';
 
 import './UserList.scss';
 
@@ -20,6 +20,7 @@ const { Content } = Layout;
 
 const UserList: React.FC = () => {
     const { setConfig } = useLayoutConfig();
+    const navigate = useNavigate();
 
     const [ indexRow, setIndexRow ] = useState<undefined | number>(undefined);
     const [ visible, setVisible ] = useState(false);
@@ -78,7 +79,9 @@ const UserList: React.FC = () => {
         onMouseLeave: (event: React.MouseEvent) => {
             setIndexRow(undefined);
         },
-        onClick: (event: React.MouseEvent) => {},
+        onClick: (event: React.MouseEvent) => {
+            navigate(`${rowIndex as unknown as string}`);
+        },
     });
 
     const newCloumns = [ ...prepareTableData, ...columnsAction ];
