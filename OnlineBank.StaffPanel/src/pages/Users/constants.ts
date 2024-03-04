@@ -23,11 +23,54 @@ export const columnsUser: (ColumnGroupType<Record<string, unknown>> | ColumnType
     },
 ];
 
-export const columnsAccounts: (ColumnGroupType<Record<string, unknown>> | ColumnType<Record<string, unknown>>)[] = [
+export const columnsAccount: (ColumnGroupType<Record<string, unknown>> | ColumnType<Record<string, unknown>>)[] = [
     {
         key: 'number',
         title: '№',
         dataIndex: 'number',
+    },
+    {
+        key: 'name',
+        title: 'Имя',
+        dataIndex: 'name',
+    },
+    {
+        key: 'creationDate',
+        title: 'Дата создания',
+        dataIndex: 'creationDate',
+    },
+    {
+        key: 'isClosed',
+        title: 'Статус',
+        dataIndex: 'isClosed',
+    },
+    {
+        key: 'balance',
+        title: 'Баланс',
+        dataIndex: 'balance',
+    },
+];
+
+export const columnsTransaction: (ColumnGroupType<Record<string, unknown>> | ColumnType<Record<string, unknown>>)[] = [
+    {
+        key: 'transactionDate',
+        title: 'Дата и время',
+        dataIndex: 'transactionDate',
+    },
+    {
+        key: 'amount',
+        title: 'Сумма',
+        dataIndex: 'amount',
+    },
+    {
+        key: 'additionalInformation',
+        title: 'Сообщение',
+        dataIndex: 'additionalInformation',
+    },
+    {
+        key: 'type',
+        title: 'Тип транзакции',
+        dataIndex: 'type',
     },
 ];
 

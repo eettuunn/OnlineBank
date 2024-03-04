@@ -9,14 +9,15 @@ import BaseTable from '../../../features/BaseTable/BaseTable';
 import MainHeader from '../../../features/MainHeader/MainHeader';
 import { Paths } from '../../../shared/constants';
 import { useLayoutConfig } from '../../../shared/hooks/useLayoutConfig/useLayoutConfig';
-import { AccountMock, UsersMock } from '../__mocks';
-import { columnsAccount } from '../constants';
-import './User.scss';
+import { AccountMock, TransactionMock, UsersMock } from '../__mocks';
+import { columnsAccount, columnsTransaction } from '../constants';
+import './Account.scss';
+import AccountBlockInfo from '../components/AccountBlockInfo/AccountBlockInfo';
 
 const b = block('user-list');
 const { Content } = Layout;
 
-const User: React.FC = () => {
+const Account: React.FC = () => {
     const { setConfig } = useLayoutConfig();
     const navigate = useNavigate();
 
@@ -25,13 +26,13 @@ const User: React.FC = () => {
     // const { isLoading, data: dataEnginesWithTestsQuery, isError: isErrorEngine, refetch } = useGetEnginesWithTestsQuery({ search, ...pagination });
 
     useEffect(() => {
-        setConfig({ activeMenuKey: Paths.Users, headerTitle: 'Информация о пользователе' });
+        setConfig({ activeMenuKey: Paths.Users, headerTitle: 'Данные по счету №1233345465' });
     }, [ setConfig ]);
 
     /**
     * подготовка отображения в таблице не изменяя данных
     */
-    const prepareTableData = columnsAccount;
+    const prepareTableData = columnsTransaction;
 
     // const columnsAction = [
     //     {
@@ -51,7 +52,7 @@ const User: React.FC = () => {
             setIndexRow(undefined);
         },
         onClick: (event: React.MouseEvent) => {
-            navigate(`account/${rowIndex as unknown as string}`);
+            navigate(`/account/${rowIndex as unknown as string}`);
         },
     });
 
@@ -60,34 +61,20 @@ const User: React.FC = () => {
     return (
         <div className={b().toString()}>
             <MainHeader>
-                <UserBlockInfo user={UsersMock[0]}/>
+                <AccountBlockInfo account={AccountMock[0]}/>
             </MainHeader>
             <Content>
-                <Row gutter={10}>
-                    <Col span={12}>
-                        <Title level={3}>Счета</Title>
-                        <BaseTable
-                            cursorPointer
-                            columns={newCloumns}
-                            // isLoading={isLoadingUsers || isFetchingUsers}
-                            dataSource={AccountMock as Record<any, any>[]}
-                            onRow={onRow}
-                        />
-                    </Col>
-                    <Col span={12}>
-                        <Title level={3}>Кредиты</Title>
-                        <BaseTable
-                            cursorPointer
-                            columns={newCloumns}
-                            // isLoading={isLoadingUsers || isFetchingUsers}
-                            dataSource={UsersMock as Record<any, any>[]}
-                            onRow={onRow}
-                        />
-                    </Col>
-                </Row>
+                <Title level={3}>Операции</Title>
+                <BaseTable
+                    cursorPointer
+                    columns={newCloumns}
+                    // isLoading={isLoadingUsers || isFetchingUsers}
+                    dataSource={TransactionMock as Record<any, any>[]}
+                    onRow={onRow}
+                />
             </Content>
         </div>
     );
 };
 
-export default User;
+export default Account;
