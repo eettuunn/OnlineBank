@@ -34,4 +34,10 @@
       <ProjectReference Include="..\OnlineBank.UserService.DAL\OnlineBank.UserService.DAL.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="OnlineBank.UserService\OnlineBank.UserService\obj\OnlineBank.UserService.csproj.nuget.dgspec.json" />
+      <_ContentIncludedByDefault Remove="OnlineBank.UserService\OnlineBank.UserService\obj\project.assets.json" />
+      <_ContentIncludedByDefault Remove="OnlineBank.UserService\OnlineBank.UserService\obj\project.packagespec.json" />
+    </ItemGroup>
+
 </Project>
