@@ -3,8 +3,7 @@ import { Spin } from 'antd';
 
 import { IRoute } from '../../shared/types';
 
-import Account from './Account/Account';
-
+const Account = React.lazy(() => import('./Account/Account'));
 const UserList = React.lazy(() => import('./UserList/UserList'));
 const User = React.lazy(() => import('./User/User'));
 
