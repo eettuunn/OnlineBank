@@ -52,7 +52,6 @@ const Account: React.FC = () => {
             setIndexRow(undefined);
         },
         onClick: (event: React.MouseEvent) => {
-            navigate(`/account/${rowIndex as unknown as string}`);
         },
     });
 
