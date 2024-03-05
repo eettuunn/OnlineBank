@@ -89,5 +89,5 @@ export const RoleRus = {
  */
 export const enum Status {
     Active = 'Активный',
-    Inactive = 'Неактивный',
+    Inactive = 'Заблокирован',
 }

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import block from 'bem-cn';
 import { Col, Layout, Row } from 'antd';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Title from 'antd/lib/typography/Title';
 
 import UserBlockInfo from '../components/UserBlockInfo/UserBlockInfo';
@@ -12,6 +12,7 @@ import { useLayoutConfig } from '../../../shared/hooks/useLayoutConfig/useLayout
 import { AccountMock, UsersMock } from '../__mocks';
 import { columnsAccount } from '../constants';
 import './User.scss';
+import { useGetUserAccountsQuery } from '../api/accountsApi';
 
 const b = block('user-list');
 const { Content } = Layout;
@@ -19,10 +20,11 @@ const { Content } = Layout;
 const User: React.FC = () => {
     const { setConfig } = useLayoutConfig();
     const navigate = useNavigate();
+    const { userId } = useParams();
 
     const [ indexRow, setIndexRow ] = useState<undefined | number>(undefined);
 
-    // const { isLoading, data: dataEnginesWithTestsQuery, isError: isErrorEngine, refetch } = useGetEnginesWithTestsQuery({ search, ...pagination });
+    const { isLoading: isLoadingAccounts, data: dataAccounts } = useGetUserAccountsQuery('77141e72-da79-44c8-b057-ea1ea39bac2a');
 
     useEffect(() => {
         setConfig({ activeMenuKey: Paths.Users, headerTitle: 'Информация о пользователе' });
@@ -69,8 +71,8 @@ const User: React.FC = () => {
                         <BaseTable
                             cursorPointer
                             columns={newCloumns}
-                            // isLoading={isLoadingUsers || isFetchingUsers}
-                            dataSource={AccountMock as Record<any, any>[]}
+                            dataSource={dataAccounts as Record<any, any>[]}
+                            // isLoading={isLoadingAccounts}
                             onRow={onRow}
                         />
                     </Col>

@@ -88,12 +88,13 @@ const UserList: React.FC = () => {
         if (el.key === 'role') {
             return {
                 ...el,
+                width: '400px',
                 render: (value: any, record: Record<string, unknown>) => RoleRus[record.role as Role],
             };
         } else if (el.key === 'isLocked') {
             return {
                 ...el,
-                width: '118px',
+                width: '300px',
                 render: (value: any, record: Record<string, unknown>) =>
                     !record.isLocked ? <span style={{ color: '#5E8C4E' }}>{Status.Active}</span> : <span style={{ color: '#919191' }}>{Status.Inactive}</span>,
             };
@@ -105,7 +106,7 @@ const UserList: React.FC = () => {
             key: 'action',
             title: '',
             dataIndex: 'action',
-            width: '160px',
+            width: '50px',
             className: 'actions',
             render: (value: any, record: Record<string, unknown>, index: number) =>
                 indexRow === index ? (

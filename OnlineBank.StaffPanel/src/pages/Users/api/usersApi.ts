@@ -6,7 +6,7 @@ import { IUser } from './types';
 
 export const usersApi = createApi({
     reducerPath: 'usersApi',
-    baseQuery: axiosBaseQuery(),
+    baseQuery: axiosBaseQuery('/user-service/api'),
     tagTypes: [ 'Users' ],
     endpoints: builder => ({
         getUsers: builder.query<IUser[], undefined>({
