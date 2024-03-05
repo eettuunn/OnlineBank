@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">MobileBank</string>
+    <string name="user_icon">User icon</string>
+    <string name="arrow_right">профиль</string>
+    <string name="theme_switcher">сменить тему</string>
+    <string name="rubble">rubble</string>
+    <string name="edit_account">edit_account</string>
+    <string name="add_account">Открыть счёт</string>
+    <string name="request_money">Взять кредит</string>
 </resources>
