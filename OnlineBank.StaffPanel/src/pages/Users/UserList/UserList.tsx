@@ -12,6 +12,7 @@ import { UsersMock } from '../__mocks';
 import { Role, RoleRus, Status, columnsUser } from '../constants';
 import ModalCreateUser from '../components/ModalCreateUser/ModalCreateUser';
 import { BlockIcon } from '../../../shared/img/BlockIcon';
+import { useGetUsersQuery } from '../api/usersApi';
 
 import './UserList.scss';
 
@@ -25,7 +26,7 @@ const UserList: React.FC = () => {
     const [ indexRow, setIndexRow ] = useState<undefined | number>(undefined);
     const [ visible, setVisible ] = useState(false);
 
-    // const { isLoading, data: dataEnginesWithTestsQuery, isError: isErrorEngine, refetch } = useGetEnginesWithTestsQuery({ search, ...pagination });
+    const { isLoading, data: dataUsers } = useGetUsersQuery(undefined);
 
     useEffect(() => {
         setConfig({ activeMenuKey: Paths.Users, headerTitle: 'Пользователи' });
@@ -98,7 +99,7 @@ const UserList: React.FC = () => {
                     cursorPointer
                     columns={newCloumns}
                     // isLoading={isLoadingUsers || isFetchingUsers}
-                    dataSource={UsersMock as Record<any, any>[]}
+                    dataSource={dataUsers as Record<any, any>[]}
                     onRow={onRow}
                 />
             </Content>
