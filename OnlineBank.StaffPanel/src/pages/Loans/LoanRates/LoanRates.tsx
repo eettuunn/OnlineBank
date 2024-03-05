@@ -5,9 +5,9 @@ import { Button, Card, Layout, List } from 'antd';
 import { useLayoutConfig } from '../../../shared/hooks/useLayoutConfig/useLayoutConfig';
 import { Paths } from '../../../shared/constants';
 import MainHeader from '../../../features/MainHeader/MainHeader';
+import { LoanRatesMock } from '../__mocks';
 
 import './LoanRates.scss';
-import { LoanRatesMock } from '../__mocks';
 
 const b = block('loan-rates');
 const { Content } = Layout;
