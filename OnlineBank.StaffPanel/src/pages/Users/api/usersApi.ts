@@ -31,7 +31,7 @@ export const usersApi = createApi({
             }),
             invalidatesTags: [ 'Users' ],
         }),
-        createUser: builder.mutation<IUser, string>({
+        createUser: builder.mutation<string, IUser>({
             query: data => ({
                 url: '/users/',
                 method: 'post',

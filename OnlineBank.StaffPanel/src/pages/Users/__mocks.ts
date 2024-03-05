@@ -27,7 +27,7 @@ export const UsersMock: IUser[] = [
         id: '4',
         email: '1212@gmail.com',
         fullName: 'Иванов Иван Иванович',
-        isLocked: false,
+        isLocked: true,
         role: Role.customer,
     },
 ];

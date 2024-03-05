@@ -11,7 +11,7 @@ import './ModalCreateUser.scss';
 const b = block('create-record-modal');
 
 interface IModalProps {
-    onSave?: (values: IUser) => Promise<{ data: unknown } | { error: unknown }>;
+    onSave: (values: IUser) => Promise<{ data: unknown } | { error: unknown }>;
     modal: { visible: boolean; setVisible: React.Dispatch<React.SetStateAction<boolean>> };
     isLoading?: boolean
 }
@@ -24,8 +24,7 @@ const ModalCreateUser: React.FC<IModalProps> = ({ onSave, modal, isLoading }) =>
         try {
             const values = (await form.validateFields()) as IUser;
 
-            // const res = await onSave(values);
-            const res = {};
+            const res = await onSave(values);
             if ('error' in res) {
                 console.log('error');
                 return;

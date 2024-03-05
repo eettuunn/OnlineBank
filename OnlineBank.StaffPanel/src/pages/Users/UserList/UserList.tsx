@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import block from 'bem-cn';
 import { Button, Layout } from 'antd';
 import Icon from '@ant-design/icons/lib/components/Icon';
@@ -12,7 +12,10 @@ import { UsersMock } from '../__mocks';
 import { Role, RoleRus, Status, columnsUser } from '../constants';
 import ModalCreateUser from '../components/ModalCreateUser/ModalCreateUser';
 import { BlockIcon } from '../../../shared/img/BlockIcon';
-import { useGetUsersQuery } from '../api/usersApi';
+import { IUser } from '../api/types';
+import BlockingModal from '../components/BlockingModal/BlockingModal';
+import { FormBlockingMode } from '../types';
+import { useBlockUserMutation, useCreateUserMutation, useGetUsersQuery, useUnblockUserMutation } from '../api/usersApi';
 
 import './UserList.scss';
 
@@ -26,11 +29,57 @@ const UserList: React.FC = () => {
     const [ indexRow, setIndexRow ] = useState<undefined | number>(undefined);
     const [ visible, setVisible ] = useState(false);
 
-    const { isLoading, data: dataUsers } = useGetUsersQuery(undefined);
+    const [ initialValues, setInitialValues ] = useState<IUser | object>({});
+
+    const [ formBlockingMode, setFormBlockingMode ] = useState<FormBlockingMode>(FormBlockingMode.Blocking);
+    const [ showBlockingModal, setShowBlockingModal ] = useState(false);
+
+    const { isLoading: isLoadingUsers, isFetching: isFetchingUsers, data: dataUsers } = useGetUsersQuery(undefined);
+    const [ create, { isLoading: isLoadingCreate, data: newUserData } ] = useCreateUserMutation();
+    const [ blockUser, { isLoading: isLoadingBlock } ] = useBlockUserMutation();
+    const [ unblockUser, { isLoading: isLoadingUnblock } ] = useUnblockUserMutation();
 
     useEffect(() => {
         setConfig({ activeMenuKey: Paths.Users, headerTitle: 'Пользователи' });
     }, [ setConfig ]);
+
+    /**
+     * Метод создания пользователя
+     */
+    const onCreateUser = useCallback(
+        async (values: IUser) => {
+            const result = await create({
+                email: values.email,
+                fullName: values.fullName,
+                role: values.role,
+                isLocked: false,
+            });
+            return result;
+        },
+        [ create ],
+    );
+
+    /**
+     * Метод блокировки пользователя
+     */
+    const onBlockUser = useCallback(
+        async (values: IUser) => {
+            const result = await blockUser(Number(values.id));
+            return result;
+        },
+        [ blockUser ],
+    );
+
+    /**
+     * Метод разблокировки пользователя
+     */
+    const onUnblockUser = useCallback(
+        async (values: IUser) => {
+            const result = await unblockUser(Number(values.id));
+            return result;
+        },
+        [ unblockUser ],
+    );
 
     /**
     * подготовка отображения в таблице не изменяя данных
@@ -39,13 +88,13 @@ const UserList: React.FC = () => {
         if (el.key === 'role') {
             return {
                 ...el,
-                render: (value: any, record: Record<string, unknown>, index: number) => RoleRus[record.role as Role],
+                render: (value: any, record: Record<string, unknown>) => RoleRus[record.role as Role],
             };
         } else if (el.key === 'isLocked') {
             return {
                 ...el,
                 width: '118px',
-                render: (value: any, record: Record<string, unknown>, index: number) =>
+                render: (value: any, record: Record<string, unknown>) =>
                     !record.isLocked ? <span style={{ color: '#5E8C4E' }}>{Status.Active}</span> : <span style={{ color: '#919191' }}>{Status.Inactive}</span>,
             };
         } else return el;
@@ -67,6 +116,9 @@ const UserList: React.FC = () => {
                         type="link"
                         onClick={(event) => {
                             event.stopPropagation();
+                            setInitialValues(record);
+                            setShowBlockingModal(true);
+                            setFormBlockingMode(!record.isLocked ? FormBlockingMode.Blocking : FormBlockingMode.Unblocking);
                         }}
                     />
                 ) : null,
@@ -74,14 +126,15 @@ const UserList: React.FC = () => {
     ];
 
     const onRow = (record: Record<string, unknown>, rowIndex: number | undefined) => ({
-        onMouseEnter: (event: React.MouseEvent) => {
+        onMouseEnter: () => {
             setIndexRow(rowIndex);
         },
-        onMouseLeave: (event: React.MouseEvent) => {
+        onMouseLeave: () => {
             setIndexRow(undefined);
         },
-        onClick: (event: React.MouseEvent) => {
+        onClick: () => {
             navigate(`${rowIndex as unknown as string}`);
+            setInitialValues(record);
         },
     });
 
@@ -90,7 +143,10 @@ const UserList: React.FC = () => {
     return (
         <div className={b().toString()}>
             <MainHeader>
-                <Button type="primary" onClick={() => setVisible(true)}>
+                <Button type="primary" onClick={() => {
+                    setInitialValues({});
+                    setVisible(true);
+                }}>
                     Добавить пользователя
                 </Button>
             </MainHeader>
@@ -98,15 +154,22 @@ const UserList: React.FC = () => {
                 <BaseTable
                     cursorPointer
                     columns={newCloumns}
-                    // isLoading={isLoadingUsers || isFetchingUsers}
-                    dataSource={dataUsers as Record<any, any>[]}
+                    dataSource={dataUsers ?? UsersMock as Record<any, any>[]}
+                    isLoading={isLoadingUsers || isFetchingUsers}
                     onRow={onRow}
                 />
             </Content>
-            <ModalCreateUser isLoading={false} modal={{
+            <ModalCreateUser isLoading={isLoadingCreate} modal={{
                 visible: visible,
                 setVisible: setVisible,
-            }} />
+            }} onSave={onCreateUser}/>
+            <BlockingModal
+                formMode={formBlockingMode}
+                initialValues={initialValues}
+                isLoading={isLoadingBlock || isLoadingUnblock}
+                modal={{ visible: showBlockingModal, setVisible: setShowBlockingModal }}
+                onSave={formBlockingMode === FormBlockingMode.Blocking ? onBlockUser : onUnblockUser}
+            />
         </div>
     );
 };
