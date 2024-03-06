@@ -7,9 +7,14 @@ export const columnsUser: (ColumnGroupType<Record<string, unknown>> | ColumnType
         dataIndex: 'id',
     },
     {
-        key: 'fullName',
+        key: 'userName',
         title: 'Полное имя',
-        dataIndex: 'fullName',
+        dataIndex: 'userName',
+    },
+    {
+        key: 'email',
+        title: 'Почта',
+        dataIndex: 'email',
     },
     {
         key: 'role',
@@ -17,9 +22,9 @@ export const columnsUser: (ColumnGroupType<Record<string, unknown>> | ColumnType
         dataIndex: 'role',
     },
     {
-        key: 'isLocked',
+        key: 'ban',
         title: 'Статус',
-        dataIndex: 'isLocked',
+        dataIndex: 'ban',
     },
 ];
 
@@ -75,8 +80,8 @@ export const columnsTransaction: (ColumnGroupType<Record<string, unknown>> | Col
 ];
 
 export const enum Role {
-    staff = 'staff',
-    customer = 'customer',
+    staff = 'Staff',
+    customer = 'Customer',
 }
 
 export const RoleRus = {

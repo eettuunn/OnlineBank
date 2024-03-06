@@ -6,7 +6,7 @@ import { IAccount, ITransaction } from './types';
 
 export const accountsApi = createApi({
     reducerPath: 'accountsApi',
-    baseQuery: axiosBaseQuery('/core-service/api'),
+    baseQuery: axiosBaseQuery('/api'),
     tagTypes: [ 'Accounts', 'Transactions' ],
     endpoints: builder => ({
         getUserAccounts: builder.query<IAccount[], string>({

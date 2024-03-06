@@ -50,21 +50,21 @@ const UserList: React.FC = () => {
         async (values: IUser) => {
             const result = await create({
                 email: values.email,
-                fullName: values.fullName,
-                role: values.role,
-                isLocked: false,
+                userName: values.userName,
+                roles: [ values.roles[0] ], //todo исправить роли
+                ban: false,
             });
             return result;
         },
         [ create ],
     );
 
-    /**
+        /**
      * Метод блокировки пользователя
      */
     const onBlockUser = useCallback(
         async (values: IUser) => {
-            const result = await blockUser(Number(values.id));
+            const result = await blockUser(values.id as unknown as number);
             return result;
         },
         [ blockUser ],
@@ -75,7 +75,7 @@ const UserList: React.FC = () => {
      */
     const onUnblockUser = useCallback(
         async (values: IUser) => {
-            const result = await unblockUser(Number(values.id));
+            const result = await unblockUser(values.id as unknown as number);
             return result;
         },
         [ unblockUser ],
@@ -85,18 +85,18 @@ const UserList: React.FC = () => {
     * подготовка отображения в таблице не изменяя данных
     */
     const prepareTableData = columnsUser.map((el) => {
-        if (el.key === 'role') {
+        if (el.key === 'roles') {
             return {
                 ...el,
                 width: '400px',
-                render: (value: any, record: Record<string, unknown>) => RoleRus[record.role as Role],
+                render: (value: any, record: Record<string, unknown>) => RoleRus[record.roles as Role],
             };
-        } else if (el.key === 'isLocked') {
+        } else if (el.key === 'ban') {
             return {
                 ...el,
                 width: '300px',
                 render: (value: any, record: Record<string, unknown>) =>
-                    !record.isLocked ? <span style={{ color: '#5E8C4E' }}>{Status.Active}</span> : <span style={{ color: '#919191' }}>{Status.Inactive}</span>,
+                    !record.ban ? <span style={{ color: '#5E8C4E' }}>{Status.Active}</span> : <span style={{ color: '#919191' }}>{Status.Inactive}</span>,
             };
         } else return el;
     });
@@ -111,7 +111,7 @@ const UserList: React.FC = () => {
             render: (value: any, record: Record<string, unknown>, index: number) =>
                 indexRow === index ? (
                     <Button
-                        className={b(!record.isLocked ? 'block-btn' : 'unblock-btn').toString()}
+                        className={b(record.ban ? 'block-btn' : 'unblock-btn').toString()}
                         icon={<Icon component={BlockIcon} style={{ fontSize: 18 }} />}
                         size="small"
                         type="link"
@@ -119,7 +119,7 @@ const UserList: React.FC = () => {
                             event.stopPropagation();
                             setInitialValues(record);
                             setShowBlockingModal(true);
-                            setFormBlockingMode(!record.isLocked ? FormBlockingMode.Blocking : FormBlockingMode.Unblocking);
+                            setFormBlockingMode(!record.ban ? FormBlockingMode.Blocking : FormBlockingMode.Unblocking);
                         }}
                     />
                 ) : null,
@@ -134,7 +134,7 @@ const UserList: React.FC = () => {
             setIndexRow(undefined);
         },
         onClick: () => {
-            navigate(`${rowIndex as unknown as string}`);
+            navigate(`${record.id as string}`);
             setInitialValues(record);
         },
     });
@@ -155,7 +155,7 @@ const UserList: React.FC = () => {
                 <BaseTable
                     cursorPointer
                     columns={newCloumns}
-                    dataSource={dataUsers ?? UsersMock as Record<any, any>[]}
+                    dataSource={dataUsers as Record<any, any>[]}
                     isLoading={isLoadingUsers || isFetchingUsers}
                     onRow={onRow}
                 />
