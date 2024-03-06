@@ -2,9 +2,8 @@ package ru.hits.coreservice.dto;
 
 import lombok.*;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
-import java.math.BigDecimal;
 import java.util.UUID;
 
 @Data
@@ -12,10 +11,10 @@ import java.util.UUID;
 @NoArgsConstructor
 @Getter
 @Setter
-public class WithdrawMoneyDto {
+public class UpdateBankAccountNameDto {
 
-    @Positive(message = "Сумма для снятия должна быть положительным числом")
-    private BigDecimal amount;
+    @NotBlank(message = "Название счёта является обязательным к заполнению.")
+    private String name;
 
     @NotNull(message = "ID пользователя является обязательным для заполнения.")
     private UUID userId;
