@@ -4,12 +4,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.hits.coreservice.dto.TransactionDto;
 import ru.hits.coreservice.entity.BankAccountEntity;
+import ru.hits.coreservice.entity.TransactionEntity;
+import ru.hits.coreservice.enumeration.TransactionType;
 import ru.hits.coreservice.exception.NotFoundException;
 import ru.hits.coreservice.repository.BankAccountRepository;
 
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -17,8 +20,8 @@ public class TransactionService {
 
     private final BankAccountRepository bankAccountRepository;
 
-    public List<TransactionDto> getTransactionsByBankAccountId(UUID bankAccountId) {
-        UUID authenticatedUserId = UUID.fromString("77141e72-da79-44c8-b057-ea1ea39bac2a");
+    public List<TransactionDto> getTransactionsByBankAccountId(UUID bankAccountId, TransactionType transactionType) {
+//        UUID authenticatedUserId = UUID.fromString("77141e72-da79-44c8-b057-ea1ea39bac2a");
 
         BankAccountEntity bankAccount = bankAccountRepository.findById(bankAccountId)
                 .orElseThrow(() -> new NotFoundException("Банковский счет с ID " + bankAccountId + " не найден"));
@@ -29,7 +32,13 @@ public class TransactionService {
 //                    " владельцем банковского счета с ID " + bankAccountId);
 //        }
 
-        return bankAccount.getTransactions().stream()
+        Stream<TransactionEntity> transactionStream = bankAccount.getTransactions().stream();
+
+        if (transactionType != null) {
+            transactionStream = transactionStream.filter(transaction -> transaction.getTransactionType() == transactionType);
+        }
+
+        return transactionStream
                 .map(TransactionDto::new)
                 .collect(Collectors.toList());
     }

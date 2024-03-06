@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.hits.coreservice.dto.TransactionDto;
+import ru.hits.coreservice.enumeration.TransactionType;
 import ru.hits.coreservice.service.TransactionService;
 
 import java.util.List;
@@ -28,8 +29,9 @@ public class TransactionController {
             security = @SecurityRequirement(name = "bearerAuth")
     )
     @GetMapping("/bank-account/{id}")
-    public ResponseEntity<List<TransactionDto>> getTransactionsByBankAccountId(@PathVariable("id") UUID bankAccountId) {
-        List<TransactionDto> transactionsDtos = transactionService.getTransactionsByBankAccountId(bankAccountId);
+    public ResponseEntity<List<TransactionDto>> getTransactionsByBankAccountId(@PathVariable("id") UUID bankAccountId,
+                                                                               @RequestParam(name = "transactionType", required = false) TransactionType transactionType) {
+        List<TransactionDto> transactionsDtos = transactionService.getTransactionsByBankAccountId(bankAccountId, transactionType);
         return new ResponseEntity<>(transactionsDtos, HttpStatus.OK);
     }
 

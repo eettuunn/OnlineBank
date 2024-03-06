@@ -69,8 +69,9 @@ public class BankAccountController {
 //            security = @SecurityRequirement(name = "bearerAuth")
     )
     @PostMapping("/{id}/close")
-    public ResponseEntity<BankAccountWithoutTransactionsDto> closeBankAccount(@PathVariable("id") UUID bankAccountId) {
-        return new ResponseEntity<>(bankAccountService.closeBankAccount(bankAccountId), HttpStatus.OK);
+    public ResponseEntity<BankAccountWithoutTransactionsDto> closeBankAccount(@PathVariable("id") UUID bankAccountId,
+                                                                              @RequestBody @Valid CloseBankAccountDto closeBankAccountDto) {
+        return new ResponseEntity<>(bankAccountService.closeBankAccount(bankAccountId, closeBankAccountDto), HttpStatus.OK);
     }
 
     @Operation(
@@ -80,7 +81,7 @@ public class BankAccountController {
     @PostMapping("/{id}/deposit")
     public ResponseEntity<BankAccountDto> depositMoney(@PathVariable("id") UUID bankAccountId,
                                                        @RequestBody @Valid DepositMoneyDto depositMoneyDto) {
-        return new ResponseEntity<>(bankAccountService.depositMoney(bankAccountId, depositMoneyDto.getAmount()), HttpStatus.OK);
+        return new ResponseEntity<>(bankAccountService.depositMoney(bankAccountId, depositMoneyDto), HttpStatus.OK);
     }
 
     @Operation(
@@ -90,7 +91,7 @@ public class BankAccountController {
     @PostMapping("/{id}/withdraw")
     public ResponseEntity<BankAccountDto> withdrawMoney(@PathVariable("id") UUID bankAccountId,
                                                         @RequestBody @Valid WithdrawMoneyDto withdrawMoneyDto) {
-        return new ResponseEntity<>(bankAccountService.withdrawMoney(bankAccountId, withdrawMoneyDto.getAmount()), HttpStatus.OK);
+        return new ResponseEntity<>(bankAccountService.withdrawMoney(bankAccountId, withdrawMoneyDto), HttpStatus.OK);
     }
 
     @Operation(

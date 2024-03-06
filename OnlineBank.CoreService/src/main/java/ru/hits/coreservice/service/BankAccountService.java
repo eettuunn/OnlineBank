@@ -4,10 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.hits.coreservice.dto.BankAccountDto;
-import ru.hits.coreservice.dto.BankAccountWithoutTransactionsDto;
-import ru.hits.coreservice.dto.CreateBankAccountDto;
-import ru.hits.coreservice.dto.UpdateBankAccountNameDto;
+import ru.hits.coreservice.dto.*;
 import ru.hits.coreservice.entity.BankAccountEntity;
 import ru.hits.coreservice.entity.TransactionEntity;
 import ru.hits.coreservice.enumeration.TransactionType;
@@ -64,7 +61,7 @@ public class BankAccountService {
                 .name(createBankAccountDto.getName())
                 .number(generateAccountNumber())
                 .balance(BigDecimal.ZERO)
-                .ownerId(UUID.fromString("77141e72-da79-44c8-b057-ea1ea39bac2a"))
+                .ownerId(createBankAccountDto.getUserId())
                 .isClosed(false)
                 .creationDate(LocalDateTime.now())
                 .transactions(Collections.emptyList())
@@ -76,14 +73,12 @@ public class BankAccountService {
     }
 
     @Transactional
-    public BankAccountWithoutTransactionsDto closeBankAccount(UUID bankAccountId) {
-        UUID authenticatedUserId = UUID.fromString("77141e72-da79-44c8-b057-ea1ea39bac2a");
-
+    public BankAccountWithoutTransactionsDto closeBankAccount(UUID bankAccountId, CloseBankAccountDto closeBankAccountDto) {
         BankAccountEntity bankAccount = bankAccountRepository.findById(bankAccountId)
                 .orElseThrow(() -> new NotFoundException("Банковский счет с ID " + bankAccountId + " не найден"));
 
-        if (!bankAccount.getOwnerId().equals(authenticatedUserId)) {
-            throw new ForbiddenException("Пользователь с ID " + authenticatedUserId + " не является " +
+        if (!bankAccount.getOwnerId().equals(closeBankAccountDto.getUserId())) {
+            throw new ForbiddenException("Пользователь с ID " + closeBankAccountDto.getUserId() + " не является " +
                     " владельцем банковского счета с ID " + bankAccountId);
         }
 
@@ -99,8 +94,8 @@ public class BankAccountService {
     }
 
     @Transactional
-    public BankAccountDto depositMoney(UUID bankAccountId, BigDecimal amount) {
-        UUID authenticatedUserId = UUID.fromString("77141e72-da79-44c8-b057-ea1ea39bac2a");
+    public BankAccountDto depositMoney(UUID bankAccountId, DepositMoneyDto depositMoneyDto) {
+        UUID authenticatedUserId = depositMoneyDto.getUserId();
 
         BankAccountEntity bankAccount = bankAccountRepository.findById(bankAccountId)
                 .orElseThrow(() -> new NotFoundException("Банковский счет с ID " + bankAccountId + " не найден"));
@@ -114,12 +109,12 @@ public class BankAccountService {
             throw new ConflictException("Банковский счет с ID " + bankAccountId + " закрыт");
         }
 
-        BigDecimal newBalance = bankAccount.getBalance().add(amount);
+        BigDecimal newBalance = bankAccount.getBalance().add(depositMoneyDto.getAmount());
         bankAccount.setBalance(newBalance);
 
         TransactionEntity transaction = TransactionEntity.builder()
                 .transactionDate(LocalDateTime.now())
-                .amount(amount)
+                .amount(depositMoneyDto.getAmount())
                 .transactionType(TransactionType.DEPOSIT)
                 .bankAccount(bankAccount)
                 .build();
@@ -134,8 +129,8 @@ public class BankAccountService {
     }
 
     @Transactional
-    public BankAccountDto withdrawMoney(UUID bankAccountId, BigDecimal amount) {
-        UUID authenticatedUserId = UUID.fromString("77141e72-da79-44c8-b057-ea1ea39bac2a");
+    public BankAccountDto withdrawMoney(UUID bankAccountId, WithdrawMoneyDto withdrawMoneyDto) {
+        UUID authenticatedUserId = withdrawMoneyDto.getUserId();
 
         BankAccountEntity bankAccount = bankAccountRepository.findById(bankAccountId)
                 .orElseThrow(() -> new NotFoundException("Банковский счет с ID " + bankAccountId + " не найден"));
@@ -149,16 +144,16 @@ public class BankAccountService {
             throw new ConflictException("Банковский счет с ID " + bankAccountId + " закрыт");
         }
 
-        if (bankAccount.getBalance().compareTo(amount) < 0) {
+        if (bankAccount.getBalance().compareTo(withdrawMoneyDto.getAmount()) < 0) {
             throw new ConflictException("Недостаточно средств на счете для снятия указанной суммы");
         }
 
-        BigDecimal newBalance = bankAccount.getBalance().subtract(amount);
+        BigDecimal newBalance = bankAccount.getBalance().subtract(withdrawMoneyDto.getAmount());
         bankAccount.setBalance(newBalance);
 
         TransactionEntity transaction = TransactionEntity.builder()
                 .transactionDate(LocalDateTime.now())
-                .amount(amount.negate())
+                .amount(withdrawMoneyDto.getAmount().negate())
                 .transactionType(TransactionType.WITHDRAW)
                 .bankAccount(bankAccount)
                 .build();
@@ -174,8 +169,15 @@ public class BankAccountService {
 
     public BankAccountWithoutTransactionsDto updateBankAccountName(UUID bankAccountId,
                                                                    UpdateBankAccountNameDto updateBankAccountNameDto) {
+        UUID authenticatedUserId = updateBankAccountNameDto.getUserId();
+
         BankAccountEntity bankAccount = bankAccountRepository.findById(bankAccountId)
                 .orElseThrow(() -> new NotFoundException("Банковский счет с ID " + bankAccountId + " не найден"));
+
+        if (!bankAccount.getOwnerId().equals(authenticatedUserId)) {
+            throw new ForbiddenException("Пользователь с ID " + authenticatedUserId + " не является " +
+                    " владельцем банковского счета с ID " + bankAccountId);
+        }
 
         bankAccount.setName(updateBankAccountNameDto.getName());
         BankAccountEntity updatedBankAccount = bankAccountRepository.save(bankAccount);
