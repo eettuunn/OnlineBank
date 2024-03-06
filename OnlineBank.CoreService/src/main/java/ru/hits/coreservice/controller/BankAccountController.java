@@ -93,6 +93,18 @@ public class BankAccountController {
         return new ResponseEntity<>(bankAccountService.withdrawMoney(bankAccountId, withdrawMoneyDto.getAmount()), HttpStatus.OK);
     }
 
+    @Operation(
+            summary = "Обновить название банковского счёта."
+//            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @PutMapping("/{id}/name")
+    public ResponseEntity<BankAccountWithoutTransactionsDto> updateBankAccountName(
+            @PathVariable("id") UUID bankAccountId,
+            @RequestBody @Valid UpdateBankAccountNameDto updateBankAccountNameDto) {
+        return new ResponseEntity<>(bankAccountService.updateBankAccountName(bankAccountId, updateBankAccountNameDto), HttpStatus.OK);
+    }
+
+
 //    @GetMapping("/token")
 //    public ResponseEntity<String> getToken() {
 //        return new ResponseEntity<>(jwtUtil.generateToken(UUID.fromString("77141e72-da79-44c8-b057-ea1ea39bac2a")), HttpStatus.OK);

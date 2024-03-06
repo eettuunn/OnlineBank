@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.hits.coreservice.dto.BankAccountDto;
 import ru.hits.coreservice.dto.BankAccountWithoutTransactionsDto;
 import ru.hits.coreservice.dto.CreateBankAccountDto;
+import ru.hits.coreservice.dto.UpdateBankAccountNameDto;
 import ru.hits.coreservice.entity.BankAccountEntity;
 import ru.hits.coreservice.entity.TransactionEntity;
 import ru.hits.coreservice.enumeration.TransactionType;
@@ -169,6 +170,17 @@ public class BankAccountService {
         bankAccount = bankAccountRepository.save(bankAccount);
 
         return new BankAccountDto(bankAccount);
+    }
+
+    public BankAccountWithoutTransactionsDto updateBankAccountName(UUID bankAccountId,
+                                                                   UpdateBankAccountNameDto updateBankAccountNameDto) {
+        BankAccountEntity bankAccount = bankAccountRepository.findById(bankAccountId)
+                .orElseThrow(() -> new NotFoundException("Банковский счет с ID " + bankAccountId + " не найден"));
+
+        bankAccount.setName(updateBankAccountNameDto.getName());
+        BankAccountEntity updatedBankAccount = bankAccountRepository.save(bankAccount);
+
+        return new BankAccountWithoutTransactionsDto(updatedBankAccount);
     }
 
     private String generateAccountNumber() {
