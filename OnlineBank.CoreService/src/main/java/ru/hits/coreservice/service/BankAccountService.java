@@ -51,31 +51,37 @@ public class BankAccountService {
                 .map(BankAccountWithoutTransactionsDto::new)
                 .collect(Collectors.toList());
 
-        return new BankAccountsWithPaginationDto(
-                new PageInfoDto(pageNumber, pageSize, bankAccountDtos.size()),
-                bankAccountDtos
+        PageInfoDto pageInfo = new PageInfoDto(
+                bankAccountPage.getTotalPages(),
+                pageNumber,
+                Math.min(pageSize, bankAccountPage.getContent().size())
         );
+
+        return new BankAccountsWithPaginationDto(pageInfo, bankAccountDtos);
     }
 
     public BankAccountsWithPaginationDto getBankAccountsByOwnerId(UUID ownerId, Sort.Direction creationDateSortDirection, Boolean isClosed, int pageNumber, int pageSize) {
         checkPaginationInfoService.checkPagination(pageNumber, pageSize);
         Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(creationDateSortDirection, "creationDate"));
 
-        List<BankAccountEntity> bankAccounts;
+        Page<BankAccountEntity> bankAccountPage;
         if (isClosed != null) {
-            bankAccounts = bankAccountRepository.findAllByOwnerIdAndIsClosed(ownerId, isClosed, pageable);
+            bankAccountPage = bankAccountRepository.findAllByOwnerIdAndIsClosed(ownerId, isClosed, pageable);
         } else {
-            bankAccounts = bankAccountRepository.findAllByOwnerId(ownerId, pageable);
+            bankAccountPage = bankAccountRepository.findAllByOwnerId(ownerId, pageable);
         }
 
-        List<BankAccountWithoutTransactionsDto> bankAccountDtos = bankAccounts.stream()
+        List<BankAccountWithoutTransactionsDto> bankAccountDtos = bankAccountPage.getContent().stream()
                 .map(BankAccountWithoutTransactionsDto::new)
                 .collect(Collectors.toList());
 
-        return new BankAccountsWithPaginationDto(
-                new PageInfoDto(pageNumber, pageSize, bankAccountDtos.size()),
-                bankAccountDtos
+        PageInfoDto pageInfo = new PageInfoDto(
+                bankAccountPage.getTotalPages(),
+                pageNumber,
+                Math.min(pageSize, bankAccountPage.getContent().size())
         );
+
+        return new BankAccountsWithPaginationDto(pageInfo, bankAccountDtos);
     }
 
     public BankAccountWithoutTransactionsDto getBankAccountById(UUID bankAccountId) {

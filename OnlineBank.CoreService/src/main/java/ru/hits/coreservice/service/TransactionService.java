@@ -47,21 +47,24 @@ public class TransactionService {
         checkPaginationInfoService.checkPagination(pageNumber, pageSize);
         Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
 
-        List<TransactionEntity> transactions;
+        Page<TransactionEntity> transactionPage;
         if (transactionType != null) {
-            transactions = transactionRepository.findAllByBankAccountAndTransactionTypeOrderByTransactionDateDesc(bankAccount, transactionType, pageable);
+            transactionPage = transactionRepository.findAllByBankAccountAndTransactionTypeOrderByTransactionDateDesc(bankAccount, transactionType, pageable);
         } else {
-            transactions = transactionRepository.findAllByBankAccountOrderByTransactionDateDesc(bankAccount, pageable);
+            transactionPage = transactionRepository.findAllByBankAccountOrderByTransactionDateDesc(bankAccount, pageable);
         }
 
-        List<TransactionDto> transactionDtos = transactions.stream()
+        List<TransactionDto> transactionDtos = transactionPage.getContent().stream()
                 .map(TransactionDto::new)
                 .collect(Collectors.toList());
 
-        return new TransactionsWithPaginationDto(
-                new PageInfoDto(pageNumber, pageSize, transactionDtos.size()),
-                transactionDtos
+        PageInfoDto pageInfo = new PageInfoDto(
+                transactionPage.getTotalPages(),
+                pageNumber,
+                Math.min(pageSize, transactionPage.getContent().size())
         );
+
+        return new TransactionsWithPaginationDto(pageInfo, transactionDtos);
     }
 
 //    /**

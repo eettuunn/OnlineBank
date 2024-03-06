@@ -1,5 +1,6 @@
 package ru.hits.coreservice.repository;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -13,8 +14,8 @@ import java.util.UUID;
 @Repository
 public interface TransactionRepository extends JpaRepository<TransactionEntity, UUID> {
 
-    List<TransactionEntity> findAllByBankAccountOrderByTransactionDateDesc(BankAccountEntity bankAccount, Pageable pageable);
+    Page<TransactionEntity> findAllByBankAccountOrderByTransactionDateDesc(BankAccountEntity bankAccount, Pageable pageable);
 
-    List<TransactionEntity> findAllByBankAccountAndTransactionTypeOrderByTransactionDateDesc(BankAccountEntity bankAccount, TransactionType transactionType, Pageable pageable);
+    Page<TransactionEntity> findAllByBankAccountAndTransactionTypeOrderByTransactionDateDesc(BankAccountEntity bankAccount, TransactionType transactionType, Pageable pageable);
 
 }
