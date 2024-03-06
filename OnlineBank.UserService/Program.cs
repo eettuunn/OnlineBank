@@ -101,6 +101,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors();
+
 app.ConfigureUserServiceDAL();
 
 app.UseHttpsRedirection();
