@@ -5,10 +5,13 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.hits.coreservice.dto.TransactionDto;
+import ru.hits.coreservice.dto.TransactionsWithPaginationDto;
 import ru.hits.coreservice.enumeration.TransactionType;
 import ru.hits.coreservice.service.TransactionService;
 
@@ -29,10 +32,12 @@ public class TransactionController {
             security = @SecurityRequirement(name = "bearerAuth")
     )
     @GetMapping("/bank-account/{id}")
-    public ResponseEntity<List<TransactionDto>> getTransactionsByBankAccountId(@PathVariable("id") UUID bankAccountId,
-                                                                               @RequestParam(name = "transactionType", required = false) TransactionType transactionType) {
-        List<TransactionDto> transactionsDtos = transactionService.getTransactionsByBankAccountId(bankAccountId, transactionType);
-        return new ResponseEntity<>(transactionsDtos, HttpStatus.OK);
+    public ResponseEntity<TransactionsWithPaginationDto> getTransactionsByBankAccountId(@PathVariable("id") UUID bankAccountId,
+                                                                                        @RequestParam(name = "transactionType", required = false) TransactionType transactionType,
+                                                                                        @RequestParam(name = "pageNumber", defaultValue = "1") int pageNumber,
+                                                                                        @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+        TransactionsWithPaginationDto transactionsPage = transactionService.getTransactionsByBankAccountId(bankAccountId, transactionType, pageNumber, pageSize);
+        return new ResponseEntity<>(transactionsPage, HttpStatus.OK);
     }
 
 }

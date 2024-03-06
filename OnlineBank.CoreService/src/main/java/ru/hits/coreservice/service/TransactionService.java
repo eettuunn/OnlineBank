@@ -1,13 +1,21 @@
 package ru.hits.coreservice.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import ru.hits.coreservice.dto.PageInfoDto;
 import ru.hits.coreservice.dto.TransactionDto;
+import ru.hits.coreservice.dto.TransactionsWithPaginationDto;
 import ru.hits.coreservice.entity.BankAccountEntity;
 import ru.hits.coreservice.entity.TransactionEntity;
 import ru.hits.coreservice.enumeration.TransactionType;
 import ru.hits.coreservice.exception.NotFoundException;
+import ru.hits.coreservice.helpingservices.CheckPaginationInfoService;
 import ru.hits.coreservice.repository.BankAccountRepository;
+import ru.hits.coreservice.repository.TransactionRepository;
 
 import java.util.List;
 import java.util.UUID;
@@ -20,7 +28,11 @@ public class TransactionService {
 
     private final BankAccountRepository bankAccountRepository;
 
-    public List<TransactionDto> getTransactionsByBankAccountId(UUID bankAccountId, TransactionType transactionType) {
+    private final TransactionRepository transactionRepository;
+
+    private final CheckPaginationInfoService checkPaginationInfoService;
+
+    public TransactionsWithPaginationDto getTransactionsByBankAccountId(UUID bankAccountId, TransactionType transactionType, int pageNumber, int pageSize) {
 //        UUID authenticatedUserId = UUID.fromString("77141e72-da79-44c8-b057-ea1ea39bac2a");
 
         BankAccountEntity bankAccount = bankAccountRepository.findById(bankAccountId)
@@ -32,15 +44,24 @@ public class TransactionService {
 //                    " владельцем банковского счета с ID " + bankAccountId);
 //        }
 
-        Stream<TransactionEntity> transactionStream = bankAccount.getTransactions().stream();
+        checkPaginationInfoService.checkPagination(pageNumber, pageSize);
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
 
+        List<TransactionEntity> transactions;
         if (transactionType != null) {
-            transactionStream = transactionStream.filter(transaction -> transaction.getTransactionType() == transactionType);
+            transactions = transactionRepository.findAllByBankAccountAndTransactionTypeOrderByTransactionDateDesc(bankAccount, transactionType, pageable);
+        } else {
+            transactions = transactionRepository.findAllByBankAccountOrderByTransactionDateDesc(bankAccount, pageable);
         }
 
-        return transactionStream
+        List<TransactionDto> transactionDtos = transactions.stream()
                 .map(TransactionDto::new)
                 .collect(Collectors.toList());
+
+        return new TransactionsWithPaginationDto(
+                new PageInfoDto(pageNumber, pageSize, transactionDtos.size()),
+                transactionDtos
+        );
     }
 
 //    /**
