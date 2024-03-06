@@ -1,6 +1,9 @@
 package ru.hits.coreservice.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,6 +14,7 @@ import ru.hits.coreservice.enumeration.TransactionType;
 import ru.hits.coreservice.exception.ConflictException;
 import ru.hits.coreservice.exception.ForbiddenException;
 import ru.hits.coreservice.exception.NotFoundException;
+import ru.hits.coreservice.helpingservices.CheckPaginationInfoService;
 import ru.hits.coreservice.repository.BankAccountRepository;
 import ru.hits.coreservice.repository.TransactionRepository;
 //import ru.hits.coreservice.security.JwtUserData;
@@ -29,23 +33,49 @@ public class BankAccountService {
 
     private final BankAccountRepository bankAccountRepository;
     private final TransactionRepository transactionRepository;
+    private final CheckPaginationInfoService checkPaginationInfoService;
 
-    public List<BankAccountWithoutTransactionsDto> getAllBankAccounts(Sort.Direction creationDateSortDirection) {
-        List<BankAccountEntity> bankAccounts = bankAccountRepository.findAll(Sort.by(creationDateSortDirection, "creationDate"));
 
-        return bankAccounts.stream()
+    public BankAccountsWithPaginationDto getAllBankAccounts(Sort.Direction creationDateSortDirection, Boolean isClosed, int pageNumber, int pageSize) {
+        checkPaginationInfoService.checkPagination(pageNumber, pageSize);
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(creationDateSortDirection, "creationDate"));
+
+        Page<BankAccountEntity> bankAccountPage;
+        if (isClosed != null) {
+            bankAccountPage = bankAccountRepository.findAllByIsClosed(isClosed, pageable);
+        } else {
+            bankAccountPage = bankAccountRepository.findAll(pageable);
+        }
+
+        List<BankAccountWithoutTransactionsDto> bankAccountDtos = bankAccountPage.getContent().stream()
                 .map(BankAccountWithoutTransactionsDto::new)
                 .collect(Collectors.toList());
+
+        return new BankAccountsWithPaginationDto(
+                new PageInfoDto(pageNumber, pageSize, bankAccountDtos.size()),
+                bankAccountDtos
+        );
     }
 
-    public List<BankAccountWithoutTransactionsDto> getBankAccountsByOwnerId(UUID ownerId, Sort.Direction creationDateSortDirection) {
-        Sort sortByCreationDate = Sort.by(creationDateSortDirection, "creationDate");
+    public BankAccountsWithPaginationDto getBankAccountsByOwnerId(UUID ownerId, Sort.Direction creationDateSortDirection, Boolean isClosed, int pageNumber, int pageSize) {
+        checkPaginationInfoService.checkPagination(pageNumber, pageSize);
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(creationDateSortDirection, "creationDate"));
 
-        List<BankAccountEntity> bankAccounts = bankAccountRepository.findAllByOwnerId(ownerId, sortByCreationDate);
+        List<BankAccountEntity> bankAccounts;
+        if (isClosed != null) {
+            bankAccounts = bankAccountRepository.findAllByOwnerIdAndIsClosed(ownerId, isClosed, pageable);
+        } else {
+            bankAccounts = bankAccountRepository.findAllByOwnerId(ownerId, pageable);
+        }
 
-        return bankAccounts.stream()
+        List<BankAccountWithoutTransactionsDto> bankAccountDtos = bankAccounts.stream()
                 .map(BankAccountWithoutTransactionsDto::new)
                 .collect(Collectors.toList());
+
+        return new BankAccountsWithPaginationDto(
+                new PageInfoDto(pageNumber, pageSize, bankAccountDtos.size()),
+                bankAccountDtos
+        );
     }
 
     public BankAccountWithoutTransactionsDto getBankAccountById(UUID bankAccountId) {

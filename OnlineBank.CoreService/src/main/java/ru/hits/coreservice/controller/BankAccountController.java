@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.hits.coreservice.dto.*;
 import ru.hits.coreservice.enumeration.SortDirection;
 //import ru.hits.coreservice.security.JWTUtil;
+import ru.hits.coreservice.helpingservices.CheckPaginationInfoService;
 import ru.hits.coreservice.service.BankAccountService;
 
 import javax.validation.Valid;
@@ -32,8 +33,11 @@ public class BankAccountController {
 //            security = @SecurityRequirement(name = "bearerAuth")
     )
     @GetMapping
-    public ResponseEntity<List<BankAccountWithoutTransactionsDto>> getAllBankAccounts(@RequestParam(defaultValue = "ASC") SortDirection creationDateSortDirection) {
-        return new ResponseEntity<>(bankAccountService.getAllBankAccounts(creationDateSortDirection.toSortDirection()), HttpStatus.OK);
+    public ResponseEntity<BankAccountsWithPaginationDto> getAllBankAccounts(@RequestParam(defaultValue = "ASC") SortDirection creationDateSortDirection,
+                                                                            @RequestParam(required = false) Boolean isClosed,
+                                                                            @RequestParam(name = "pageNumber", defaultValue = "1") int pageNumber,
+                                                                            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+        return new ResponseEntity<>(bankAccountService.getAllBankAccounts(creationDateSortDirection.toSortDirection(), isClosed, pageNumber, pageSize), HttpStatus.OK);
     }
 
     @Operation(
@@ -41,9 +45,12 @@ public class BankAccountController {
 //            security = @SecurityRequirement(name = "bearerAuth")
     )
     @GetMapping("/owner/{id}")
-    public ResponseEntity<List<BankAccountWithoutTransactionsDto>> getBankAccountsByOwnerId(@RequestParam(defaultValue = "ASC") SortDirection creationDateSortDirection,
-                                                                         @PathVariable("id") UUID ownerId) {
-        return new ResponseEntity<>(bankAccountService.getBankAccountsByOwnerId(ownerId, creationDateSortDirection.toSortDirection()), HttpStatus.OK);
+    public ResponseEntity<BankAccountsWithPaginationDto> getBankAccountsByOwnerId(@PathVariable("id") UUID ownerId,
+                                                                                            @RequestParam(defaultValue = "ASC") SortDirection creationDateSortDirection,
+                                                                                            @RequestParam(required = false) Boolean isClosed,
+                                                                                            @RequestParam(name = "pageNumber", defaultValue = "1") int pageNumber,
+                                                                                            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+        return new ResponseEntity<>(bankAccountService.getBankAccountsByOwnerId(ownerId, creationDateSortDirection.toSortDirection(), isClosed, pageNumber, pageSize), HttpStatus.OK);
     }
 
     @Operation(
