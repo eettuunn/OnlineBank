@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -32,6 +33,7 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -40,6 +42,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetState
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarData
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -47,7 +53,6 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -65,7 +70,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.akimov.mobilebank.R
+import com.akimov.mobilebank.data.models.BankAccountNetwork
 import com.akimov.mobilebank.ui.theme.MobileBankTheme
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.delay
 import org.koin.compose.koinInject
 
@@ -73,28 +81,59 @@ import org.koin.compose.koinInject
 fun AccountsScreen() {
     val viewModel = koinInject<AccountsViewModel>()
     val state by viewModel.state.collectAsState()
+
+    val hostState = remember { SnackbarHostState() }
+    LaunchedEffect(key1 = true) {
+        viewModel.actions.collect { action ->
+            when (action) {
+                is ViewAction.ShowError -> hostState.showSnackbar(message = action.message)
+            }
+        }
+    }
+
     AccountsScreenStateless(
         state = state,
+        hostState = hostState,
         onChangeThemeClicked = remember(viewModel) {
             {
                 viewModel.onIntent(UIIntent.UpdateTheme)
             }
-        }
+        },
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AccountsScreenStateless(
-    state: AcountsScreenState,
+    state: AccountsScreenState,
     onChangeThemeClicked: () -> Unit,
+    hostState: SnackbarHostState? = null,
+) {
+    when (state) {
+        is AccountsScreenState.Content -> AccountsContent(
+            state = state,
+            onChangeThemeClicked = onChangeThemeClicked,
+            hostState = hostState
+        )
+
+        AccountsScreenState.Loading -> LoadingScreen()
+    }
+}
+
+@Composable
+fun LoadingScreen() {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator(color = Color(0xFF0990cb))
+    }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun AccountsContent(
+    state: AccountsScreenState.Content,
+    onChangeThemeClicked: () -> Unit,
+    hostState: SnackbarHostState?
 ) {
     val scrollState = rememberScrollState()
-    val isButtonVisible by remember {
-        derivedStateOf {
-            scrollState.value <= 0
-        }
-    }
 
     val sheetState: SheetState = rememberModalBottomSheetState()
     var showBottomSheet by remember {
@@ -110,21 +149,30 @@ private fun AccountsScreenStateless(
             )
         },
         content = { paddingValues ->
-            AccountsList(paddingValues = paddingValues, scrollState = scrollState)
+            AccountsList(
+                paddingValues = paddingValues,
+                scrollState = scrollState,
+                accountsList = state.accountsList
+            )
         },
         floatingActionButton = {
-            if (isButtonVisible) {
-                FloatingActionButton(
-                    shape = CircleShape,
-                    containerColor = Color(0xFF0990cb),
-                    onClick = {
-                        showBottomSheet = true
-                    }) {
-                    Icon(
-                        imageVector = Icons.Filled.Add,
-                        contentDescription = null,
-                        tint = Color.White
-                    )
+            FloatingActionButton(
+                shape = CircleShape,
+                containerColor = Color(0xFF0990cb),
+                onClick = {
+                    showBottomSheet = true
+                }) {
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = null,
+                    tint = Color.White
+                )
+            }
+        },
+        snackbarHost = {
+            hostState?.let {
+                SnackbarHost(hostState = it) {
+                    CommonSnackBar(it)
                 }
             }
         }
@@ -134,6 +182,13 @@ private fun AccountsScreenStateless(
         BottomSheetActions(sheetState = sheetState, onDismissRequest = {
             showBottomSheet = false
         })
+    }
+}
+
+@Composable
+private fun CommonSnackBar(it: SnackbarData) {
+    Snackbar(modifier = Modifier.padding(horizontal = 16.dp)) {
+        Text(text = it.visuals.message)
     }
 }
 
@@ -157,7 +212,7 @@ private fun BottomSheetActions(sheetState: SheetState, onDismissRequest: () -> U
 
 @Composable
 private fun SheetItem(headerIconResId: Int, messageResId: Int) {
-    Row() {
+    Row {
         Spacer(modifier = Modifier.width(16.dp))
         Icon(
             modifier = Modifier.size(32.dp),
@@ -188,16 +243,20 @@ private fun SheetItem(headerIconResId: Int, messageResId: Int) {
 }
 
 @Composable
-private fun AccountsList(paddingValues: PaddingValues, scrollState: ScrollState) {
+private fun AccountsList(
+    paddingValues: PaddingValues,
+    scrollState: ScrollState,
+    accountsList: ImmutableList<BankAccountNetwork>
+) {
     Column(
         modifier = Modifier
             .padding(top = paddingValues.calculateTopPadding())
             .verticalScroll(scrollState)
     ) {
         Spacer(modifier = Modifier.height(16.dp))
-        repeat(10) {
+        accountsList.forEach {
             AccountItem(
-                name = "Основной", balance = "100000 ₽",
+                name = it.name, balance = it.balance.toString(),
                 modifier = Modifier
                     .padding(bottom = 16.dp, start = 16.dp, end = 16.dp)
                     .fillMaxWidth()
@@ -213,8 +272,7 @@ enum class DragAnchors {
 
 @Composable
 private fun AccountItem(name: String, balance: String, modifier: Modifier = Modifier) {
-
-    Row() {
+    Row {
         InfoCard(modifier = modifier, balance = balance, name = name)
         ActionIcons(
             modifier = Modifier
@@ -270,7 +328,6 @@ private fun InfoCard(
             )
 
             TextWithDescription(balance, name)
-
         }
     }
 }
@@ -434,12 +491,14 @@ fun TopBarPreview() {
 @Composable
 fun AccountsScreenPreview() {
     MobileBankTheme {
-        AccountsScreenStateless(
-            state = AcountsScreenState(
+        AccountsContent(
+            state = AccountsScreenState.Content(
                 userName = "Максим",
                 isDarkTheme = true,
+                accountsList = persistentListOf()
             ),
             onChangeThemeClicked = {},
+            hostState = null
         )
     }
 }
@@ -448,12 +507,14 @@ fun AccountsScreenPreview() {
 @Composable
 fun AccountsScreenPreviewDark() {
     MobileBankTheme(darkTheme = true) {
-        AccountsScreenStateless(
-            state = AcountsScreenState(
+        AccountsContent(
+            state = AccountsScreenState.Content(
                 userName = "Максим",
                 isDarkTheme = true,
+                accountsList = persistentListOf()
             ),
             onChangeThemeClicked = {},
+            hostState = null
         )
     }
 }

@@ -6,4 +6,5 @@ option java_multiple_files = true;
 message UserSettings {
   string name = 1;
   bool is_dark_mode = 2;
+  string uuid = 3;
 }

@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.protobuf") version "0.9.0"
+    id("com.google.devtools.ksp") version "1.9.21-1.0.15"
 }
 
 android {
@@ -67,10 +68,29 @@ dependencies {
     implementation("io.insert-koin:koin-android:$koinVersion")
     implementation("io.insert-koin:koin-compose:1.1.2")
 
+    // DataStore
     val datastoreVersion = "1.0.0"
     implementation("androidx.datastore:datastore-preferences-core:$datastoreVersion")
     implementation("androidx.datastore:datastore-preferences:$datastoreVersion")
     implementation("com.google.protobuf:protobuf-javalite:4.0.0-rc-2")
+
+    // Room
+    val roomVersion = "2.6.1"
+    implementation("androidx.room:room-runtime:$roomVersion")
+    annotationProcessor("androidx.room:room-compiler:$roomVersion")
+    ksp("androidx.room:room-compiler:$roomVersion")
+    implementation("androidx.room:room-ktx:$roomVersion")
+
+    // Network
+    val retrofitVersion = "2.9.0"
+    val okhttpVersion = "4.12.0"
+
+    implementation("com.squareup.retrofit2:retrofit:$retrofitVersion")
+    implementation("com.squareup.retrofit2:converter-gson:$retrofitVersion")
+    implementation("com.squareup.okhttp3:okhttp:$okhttpVersion")
+    implementation("com.squareup.okhttp3:logging-interceptor:$okhttpVersion")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.7")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
