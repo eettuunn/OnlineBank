@@ -10,11 +10,9 @@ import org.springframework.web.bind.annotation.*;
 import ru.hits.coreservice.dto.*;
 import ru.hits.coreservice.enumeration.SortDirection;
 //import ru.hits.coreservice.security.JWTUtil;
-import ru.hits.coreservice.helpingservices.CheckPaginationInfoService;
 import ru.hits.coreservice.service.BankAccountService;
 
 import javax.validation.Valid;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -46,10 +44,10 @@ public class BankAccountController {
     )
     @GetMapping("/owner/{id}")
     public ResponseEntity<BankAccountsWithPaginationDto> getBankAccountsByOwnerId(@PathVariable("id") UUID ownerId,
-                                                                                            @RequestParam(defaultValue = "ASC") SortDirection creationDateSortDirection,
-                                                                                            @RequestParam(required = false) Boolean isClosed,
-                                                                                            @RequestParam(name = "pageNumber", defaultValue = "1") int pageNumber,
-                                                                                            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+                                                                                  @RequestParam(defaultValue = "ASC") SortDirection creationDateSortDirection,
+                                                                                  @RequestParam(required = false) Boolean isClosed,
+                                                                                  @RequestParam(name = "pageNumber", defaultValue = "1") int pageNumber,
+                                                                                  @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
         return new ResponseEntity<>(bankAccountService.getBankAccountsByOwnerId(ownerId, creationDateSortDirection.toSortDirection(), isClosed, pageNumber, pageSize), HttpStatus.OK);
     }
 
