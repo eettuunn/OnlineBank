@@ -13,7 +13,7 @@ import java.util.UUID;
 @Setter
 public class CloseBankAccountDto {
 
-    @NotNull(message = "ID пользователя является обязательным для заполнения.")
+    @NotNull(message = "Идентификатор пользователя не может быть пустым")
     private UUID userId;
 
 }
