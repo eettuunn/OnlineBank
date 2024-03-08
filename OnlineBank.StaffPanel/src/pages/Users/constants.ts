@@ -1,11 +1,11 @@
 import { ColumnGroupType, ColumnType } from 'antd/lib/table';
 
 export const columnsUser: (ColumnGroupType<Record<string, unknown>> | ColumnType<Record<string, unknown>>)[] = [
-    {
-        key: 'id',
-        title: '№',
-        dataIndex: 'id',
-    },
+    // {
+    //     key: 'id',
+    //     title: '№',
+    //     dataIndex: 'id',
+    // },
     {
         key: 'userName',
         title: 'Полное имя',
@@ -17,9 +17,9 @@ export const columnsUser: (ColumnGroupType<Record<string, unknown>> | ColumnType
         dataIndex: 'email',
     },
     {
-        key: 'role',
+        key: 'roles',
         title: 'Роль',
-        dataIndex: 'role',
+        dataIndex: 'roles',
     },
     {
         key: 'ban',

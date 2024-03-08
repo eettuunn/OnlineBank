@@ -1,11 +1,19 @@
 import { Role } from '../constants';
 
 export interface IUser {
-    id?: string,
+    id: string,
     email: string,
     userName: string,
     ban: boolean,
     roles: Role[]
+}
+
+export interface ICreateUser {
+    email: string,
+    userName: string,
+    phoneNumber: string,
+    roles: Role[],
+    passport: string
 }
 
 export interface IAccount {

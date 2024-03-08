@@ -2,7 +2,7 @@ import { createApi } from '@reduxjs/toolkit/query/react';
 
 import { axiosBaseQuery } from '../../../shared/api/query';
 
-import { IUser } from './types';
+import { ICreateUser, IUser } from './types';
 
 export const usersApi = createApi({
     reducerPath: 'usersApi',
@@ -15,7 +15,12 @@ export const usersApi = createApi({
                 method: 'get',
             }),
             providesTags: [ 'Users' ],
-            keepUnusedDataFor: 0,
+        }),
+        getUserInfo: builder.query<IUser, string>({
+            query: id => ({
+                url: `/user/${id}`,
+                method: 'get',
+            }),
         }),
         blockUser: builder.mutation<IUser, number>({
             query: id => ({
@@ -31,7 +36,7 @@ export const usersApi = createApi({
             }),
             invalidatesTags: [ 'Users' ],
         }),
-        createUser: builder.mutation<string, IUser>({
+        createUser: builder.mutation<string, ICreateUser>({
             query: data => ({
                 url: '/user',
                 method: 'post',
@@ -42,4 +47,4 @@ export const usersApi = createApi({
     }),
 });
 
-export const { useGetUsersQuery, useBlockUserMutation, useCreateUserMutation, useUnblockUserMutation } = usersApi;
+export const { useGetUsersQuery, useBlockUserMutation, useCreateUserMutation, useUnblockUserMutation, useGetUserInfoQuery } = usersApi;

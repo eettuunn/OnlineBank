@@ -13,6 +13,7 @@ import { AccountMock, UsersMock } from '../__mocks';
 import { columnsAccount } from '../constants';
 import './User.scss';
 import { useGetUserAccountsQuery } from '../api/accountsApi';
+import { useGetUserInfoQuery } from '../api/usersApi';
 
 const b = block('user-list');
 const { Content } = Layout;
@@ -24,26 +25,14 @@ const User: React.FC = () => {
 
     const [ indexRow, setIndexRow ] = useState<undefined | number>(undefined);
 
+    const { isLoading: isLoadingUser, data: dataUser } = useGetUserInfoQuery('77141e72-da79-44c8-b057-ea1ea39bac2a');
     const { isLoading: isLoadingAccounts, data: dataAccounts } = useGetUserAccountsQuery('77141e72-da79-44c8-b057-ea1ea39bac2a');
 
     useEffect(() => {
         setConfig({ activeMenuKey: Paths.Users, headerTitle: 'Информация о пользователе' });
     }, [ setConfig ]);
 
-    /**
-    * подготовка отображения в таблице не изменяя данных
-    */
     const prepareTableData = columnsAccount;
-
-    // const columnsAction = [
-    //     {
-    //         key: 'action',
-    //         title: '',
-    //         dataIndex: 'action',
-    //         width: '160px',
-    //         className: 'actions',
-    //     },
-    // ];
 
     const onRow = (record: Record<string, unknown>, rowIndex: number | undefined) => ({
         onMouseEnter: (event: React.MouseEvent) => {
@@ -62,7 +51,7 @@ const User: React.FC = () => {
     return (
         <div className={b().toString()}>
             <MainHeader>
-                <UserBlockInfo user={UsersMock[0]}/>
+                <UserBlockInfo user={dataUser ?? UsersMock[0]}/>
             </MainHeader>
             <Content>
                 <Row gutter={10}>
@@ -72,7 +61,7 @@ const User: React.FC = () => {
                             cursorPointer
                             columns={newCloumns}
                             dataSource={dataAccounts as Record<any, any>[]}
-                            // isLoading={isLoadingAccounts}
+                            isLoading={isLoadingAccounts}
                             onRow={onRow}
                         />
                     </Col>

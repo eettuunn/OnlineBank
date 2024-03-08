@@ -8,11 +8,10 @@ import { useLayoutConfig } from '../../../shared/hooks/useLayoutConfig/useLayout
 import { Paths } from '../../../shared/constants';
 import MainHeader from '../../../features/MainHeader/MainHeader';
 import BaseTable from '../../../features/BaseTable/BaseTable';
-import { UsersMock } from '../__mocks';
 import { Role, RoleRus, Status, columnsUser } from '../constants';
 import ModalCreateUser from '../components/ModalCreateUser/ModalCreateUser';
 import { BlockIcon } from '../../../shared/img/BlockIcon';
-import { IUser } from '../api/types';
+import { ICreateUser, IUser } from '../api/types';
 import BlockingModal from '../components/BlockingModal/BlockingModal';
 import { FormBlockingMode } from '../types';
 import { useBlockUserMutation, useCreateUserMutation, useGetUsersQuery, useUnblockUserMutation } from '../api/usersApi';
@@ -47,19 +46,20 @@ const UserList: React.FC = () => {
      * Метод создания пользователя
      */
     const onCreateUser = useCallback(
-        async (values: IUser) => {
+        async (values: ICreateUser) => {
             const result = await create({
                 email: values.email,
                 userName: values.userName,
-                roles: [ values.roles[0] ], //todo исправить роли
-                ban: false,
+                phoneNumber: values.phoneNumber,
+                roles: values.roles,
+                passport: values.passport,
             });
             return result;
         },
         [ create ],
     );
 
-        /**
+    /**
      * Метод блокировки пользователя
      */
     const onBlockUser = useCallback(
@@ -88,15 +88,17 @@ const UserList: React.FC = () => {
         if (el.key === 'roles') {
             return {
                 ...el,
-                width: '400px',
-                render: (value: any, record: Record<string, unknown>) => RoleRus[record.roles as Role],
+                width: '300px',
+                render: (value: any, record: Record<string, []>) => record.roles.map(role =>
+                    <span className={b(`role-span ${role === Role.staff ? 'staff' : ''}`).toString()} key={role}>{RoleRus[role as Role]}</span>,
+                ),
             };
         } else if (el.key === 'ban') {
             return {
                 ...el,
-                width: '300px',
+                width: '200px',
                 render: (value: any, record: Record<string, unknown>) =>
-                    !record.ban ? <span style={{ color: '#5E8C4E' }}>{Status.Active}</span> : <span style={{ color: '#919191' }}>{Status.Inactive}</span>,
+                    !record.ban ? <span style={{ color: '#5E8C4E', fontWeight: '500' }}>{Status.Active}</span> : <span style={{ color: '#EB5757', fontWeight: '500' }}>{Status.Inactive}</span>,
             };
         } else return el;
     });
