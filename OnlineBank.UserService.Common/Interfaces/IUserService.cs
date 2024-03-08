@@ -9,4 +9,6 @@ public interface IUserService
     Task CreateUser(CreateUserDto createUserDto);
     Task BanUser(Guid userId);
     Task UnbanUser(Guid userId);
+    Task<LoginResponseDto> Login(LoginCredentialsDto loginCredentialsDto);
+    Task<UserInfoDto> GetUserInfo(Guid userId);
 }

@@ -10,6 +10,7 @@ public class UserServiceMapper : Profile
     public UserServiceMapper()
     {
         CreateMap<AppUser, UserDto>();
+        CreateMap<AppUser, UserInfoDto>();
         CreateMap<CreateUserDto, AppUser>();
     }
 }

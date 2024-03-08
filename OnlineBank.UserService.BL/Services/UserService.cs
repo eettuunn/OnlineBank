@@ -37,6 +37,17 @@ public class UserService : IUserService
 
         return usersDto;
     }
+    
+    public async Task<UserInfoDto> GetUserInfo(Guid userId)
+    {
+        var userEntity = await _userManager.FindByIdAsync(userId.ToString())
+                   ?? throw new CantFindByIdException("user", userId);
+        var userInfoDto = _mapper.Map<UserInfoDto>(userEntity);
+        var userRoles = await _userManager.GetRolesAsync(userEntity);
+        userInfoDto.roles = userRoles.ToList();
+        
+        return userInfoDto;
+    }
 
     public async Task CreateUser(CreateUserDto createUserDto)
     {
@@ -64,5 +75,20 @@ public class UserService : IUserService
                     ?? throw new CantFindByIdException("User", userId);
         user.Ban = false;
         await _userManager.UpdateAsync(user);
+    }
+
+    public async Task<LoginResponseDto> Login(LoginCredentialsDto loginCredentialsDto)
+    {
+        var user = await _userManager.FindByEmailAsync(loginCredentialsDto.email)
+                   ?? throw new NotFoundException($"Can't find user with email {loginCredentialsDto.email}");
+        var token = await _tokenService.CreateToken(Guid.Parse(user.Id));
+
+        var response = new LoginResponseDto
+        {
+            id = Guid.Parse(user.Id),
+            token = token
+        };
+
+        return response;
     }
 }
