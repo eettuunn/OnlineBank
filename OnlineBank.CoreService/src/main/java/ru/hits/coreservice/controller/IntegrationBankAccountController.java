@@ -1,6 +1,7 @@
 package ru.hits.coreservice.controller;
 
 import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +23,10 @@ public class IntegrationBankAccountController {
 
     private final IntegrationBankAccountService integrationBankAccountService;
 
+    @Operation(
+            summary = "Проверить существование банковского счета."
+//            security = @SecurityRequirement(name = "bearerAuth")
+    )
     @GetMapping("/{id}/check-existence")
     public ResponseEntity<Boolean> checkBankAccountExistence(@PathVariable("id") UUID bankAccountId) {
         Boolean isExists = integrationBankAccountService.checkBankAccountExistenceById(bankAccountId);
