@@ -17,7 +17,7 @@ public class WithdrawMoneyDto {
     @Positive(message = "Сумма для снятия должна быть положительным числом")
     private BigDecimal amount;
 
-    @NotNull(message = "ID пользователя является обязательным для заполнения.")
+    @NotNull(message = "Идентификатор пользователя не может быть пустым")
     private UUID userId;
 
 }

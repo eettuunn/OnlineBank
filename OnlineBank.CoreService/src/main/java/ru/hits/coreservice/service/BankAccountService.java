@@ -149,7 +149,7 @@ public class BankAccountService {
         bankAccount.setBalance(newBalance);
 
         TransactionEntity transaction = TransactionEntity.builder()
-                .transactionDate(LocalDateTime.now())
+                    .transactionDate(LocalDateTime.now())
                 .amount(depositMoneyDto.getAmount())
                 .transactionType(TransactionType.DEPOSIT)
                 .bankAccount(bankAccount)
