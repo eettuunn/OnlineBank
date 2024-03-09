@@ -7,12 +7,7 @@
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <NoWarn>$(NoWarn);1591</NoWarn>
         <DockerDefaultTargetOS>Windows</DockerDefaultTargetOS>
-<<<<<<< HEAD
-        <GenerateDocumentationFile>true</GenerateDocumentationFile>
-        <NoWarn>$(NoWarn);1591</NoWarn>
-=======
-        <DockerDefaultTargetOS>Windows</DockerDefaultTargetOS>
->>>>>>> master
+        <UserSecretsId>5e811d9d-d028-4c22-a630-b22a5ea95e4a</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>
@@ -45,18 +40,9 @@
     </ItemGroup>
 
     <ItemGroup>
-<<<<<<< HEAD
       <_ContentIncludedByDefault Remove="OnlineBank.UserService\OnlineBank.UserService\obj\OnlineBank.UserService.csproj.nuget.dgspec.json" />
       <_ContentIncludedByDefault Remove="OnlineBank.UserService\OnlineBank.UserService\obj\project.assets.json" />
       <_ContentIncludedByDefault Remove="OnlineBank.UserService\OnlineBank.UserService\obj\project.packagespec.json" />
-=======
-      <Content Include="..\.dockerignore">
-        <Link>.dockerignore</Link>
-      </Content>
->>>>>>> master
-    </ItemGroup>
-
-    <ItemGroup>
       <Content Include="..\.dockerignore">
         <Link>.dockerignore</Link>
       </Content>
