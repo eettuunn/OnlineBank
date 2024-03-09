@@ -1,6 +1,6 @@
 package ru.hits.coreservice.enumeration;
 
-public enum LoanTransactionType {
-    REPAY_LOAN,
+public enum DepositTransactionType {
+    DEPOSIT,
     TAKE_LOAN
 }

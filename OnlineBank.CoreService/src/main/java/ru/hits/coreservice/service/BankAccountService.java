@@ -148,10 +148,18 @@ public class BankAccountService {
         BigDecimal newBalance = bankAccount.getBalance().add(depositMoneyDto.getAmount());
         bankAccount.setBalance(newBalance);
 
+        String additionalInformation = null;
+        if (TransactionType.fromDepositTransactionType(depositMoneyDto.getTransactionType()) == TransactionType.DEPOSIT) {
+            additionalInformation = "Пополнение счета";
+        } else if (TransactionType.fromDepositTransactionType(depositMoneyDto.getTransactionType()) == TransactionType.TAKE_LOAN) {
+            additionalInformation = "Взятие кредита";
+        }
+
         TransactionEntity transaction = TransactionEntity.builder()
                     .transactionDate(LocalDateTime.now())
                 .amount(depositMoneyDto.getAmount())
-                .transactionType(TransactionType.DEPOSIT)
+                .transactionType(TransactionType.fromDepositTransactionType(depositMoneyDto.getTransactionType()))
+                .additionalInformation(additionalInformation)
                 .bankAccount(bankAccount)
                 .build();
 
@@ -187,10 +195,18 @@ public class BankAccountService {
         BigDecimal newBalance = bankAccount.getBalance().subtract(withdrawMoneyDto.getAmount());
         bankAccount.setBalance(newBalance);
 
+        String additionalInformation = null;
+        if (TransactionType.fromWithdrawTransactionType(withdrawMoneyDto.getTransactionType()) == TransactionType.WITHDRAW) {
+            additionalInformation = "Снятие средств";
+        } else if (TransactionType.fromWithdrawTransactionType(withdrawMoneyDto.getTransactionType()) == TransactionType.REPAY_LOAN) {
+            additionalInformation = "Платеж по кредиту";
+        }
+
         TransactionEntity transaction = TransactionEntity.builder()
                 .transactionDate(LocalDateTime.now())
                 .amount(withdrawMoneyDto.getAmount().negate())
-                .transactionType(TransactionType.WITHDRAW)
+                .transactionType(TransactionType.fromWithdrawTransactionType(withdrawMoneyDto.getTransactionType()))
+                .additionalInformation(additionalInformation)
                 .bankAccount(bankAccount)
                 .build();
 
@@ -219,6 +235,17 @@ public class BankAccountService {
         BankAccountEntity updatedBankAccount = bankAccountRepository.save(bankAccount);
 
         return new BankAccountWithoutTransactionsDto(updatedBankAccount);
+    }
+
+    public Boolean checkBankAccountExistenceById(UUID bankAccountId) {
+        BankAccountEntity bankAccount = bankAccountRepository.findById(bankAccountId)
+                .orElse(null);
+
+        if (bankAccount == null) {
+            return false;
+        }
+
+        return !bankAccount.getIsClosed();
     }
 
     private String generateAccountNumber() {

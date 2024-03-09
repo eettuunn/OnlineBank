@@ -13,6 +13,6 @@ public class TransactionsWithPaginationDto {
 
     private PageInfoDto pageInfo;
 
-    private List<TransactionDto> transactions;
+    private List<TransactionDto> data;
 
 }

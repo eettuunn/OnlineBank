@@ -13,6 +13,6 @@ public class BankAccountsWithPaginationDto {
 
     private PageInfoDto pageInfo;
 
-    private List<BankAccountWithoutTransactionsDto> bankAccounts;
+    private List<BankAccountWithoutTransactionsDto> data;
 
 }
