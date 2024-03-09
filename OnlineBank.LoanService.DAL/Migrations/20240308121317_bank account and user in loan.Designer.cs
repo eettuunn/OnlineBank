@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OnlineBank.LoanService.DAL;
@@ -11,9 +12,11 @@ using OnlineBank.LoanService.DAL;
 namespace OnlineBank.LoanService.DAL.Migrations
 {
     [DbContext(typeof(LoanServiceDbContext))]
-    partial class LoanServiceDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240308121317_bank account and user in loan")]
+    partial class bankaccountanduserinloan
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

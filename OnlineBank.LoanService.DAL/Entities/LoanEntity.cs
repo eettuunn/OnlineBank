@@ -20,11 +20,11 @@ public class LoanEntity
     [Required]
     public decimal Debt { get; set; }
     
-    /*[Required]
+    [Required]
     public Guid UserId { get; set; }
     
     [Required]
-    public Guid BankAccountId { get; set; }*/
+    public Guid BankAccountId { get; set; }
     
     [Required]
     public LoanRateEntity LoanRate { get; set; }

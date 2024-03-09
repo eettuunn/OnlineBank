@@ -49,6 +49,13 @@ public class UserService : IUserService
         return userInfoDto;
     }
 
+    public async Task<bool> CheckIfUserExists(Guid userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+
+        return user != null;
+    }
+
     public async Task CreateUser(CreateUserDto createUserDto)
     {
         var newUser = _mapper.Map<AppUser>(createUserDto);

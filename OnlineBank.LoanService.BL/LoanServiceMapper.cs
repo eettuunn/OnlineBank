@@ -1,4 +1,5 @@
 using AutoMapper;
+using OnlineBank.LoanService.Common.Dtos.Loan;
 using OnlineBank.LoanService.Common.Dtos.LoanRate;
 using OnlineBank.LoanService.DAL.Entities;
 
@@ -10,5 +11,6 @@ public class LoanServiceMapper : Profile
     {
         CreateMap<CreateLoanRateDto, LoanRateEntity>();
         CreateMap<LoanRateEntity, LoanRateDto>();
+        CreateMap<CreateLoanDto, LoanEntity>();
     }
 }

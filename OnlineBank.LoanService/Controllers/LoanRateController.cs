@@ -16,6 +16,9 @@ public class LoanRateController : ControllerBase
         _loanRateService = loanRateService;
     }
 
+    /// <summary>
+    /// Create new loan rate
+    /// </summary>
     [HttpPost]
     public async Task<IActionResult> CreateLoanRate([FromBody] CreateLoanRateDto createLoanRateDto)
     {
@@ -28,6 +31,9 @@ public class LoanRateController : ControllerBase
         return BadRequest(ModelState);
     }
 
+    /// <summary>
+    /// Get loan rates list
+    /// </summary>
     [HttpGet]
     public async Task<List<LoanRateDto>> GetLoanRates()
     {

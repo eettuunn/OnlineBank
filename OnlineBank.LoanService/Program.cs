@@ -27,6 +27,8 @@ builder.Services.AddSwaggerGen(options =>
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 });
 
+// builder.Services.Configure<IntegrationApisUrls>(builder.Configuration.GetSection("IntegrationApisUrls"));
+
 builder.Services.AddScoped<ILoanRateService, LoanRateService>();
 builder.Services.AddScoped<ILoanService, LoanService>();
 builder.Services.AddAutoMapper(typeof(LoanServiceMapper));

@@ -94,4 +94,14 @@ public class UserController : ControllerBase
 
         return BadRequest(ModelState);
     }
+    
+    /// <summary>
+    /// Check if user exists
+    /// </summary>
+    [HttpGet]
+    [Route("{userId}/exist")]
+    public async Task<bool> CheckUser(Guid userId)
+    {
+        return await _userService.CheckIfUserExists(userId);
+    }
 }

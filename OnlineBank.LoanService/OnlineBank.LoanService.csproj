@@ -37,4 +37,8 @@
       <ProjectReference Include="..\OnlineBank.UserService.BL\OnlineBank.UserService.BL.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Configs\" />
+    </ItemGroup>
+
 </Project>

@@ -15,6 +15,9 @@ public class LoanController : ControllerBase
         _loanService = loanService;
     }
 
+    /// <summary>
+    /// Take out new loan
+    /// </summary>
     [HttpPost]
     public async Task<IActionResult> TakeOutLoan([FromBody] CreateLoanDto createLoanDto)
     {

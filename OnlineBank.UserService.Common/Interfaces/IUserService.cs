@@ -11,4 +11,5 @@ public interface IUserService
     Task UnbanUser(Guid userId);
     Task<LoginResponseDto> Login(LoginCredentialsDto loginCredentialsDto);
     Task<UserInfoDto> GetUserInfo(Guid userId);
+    Task<bool> CheckIfUserExists(Guid userId);
 }
