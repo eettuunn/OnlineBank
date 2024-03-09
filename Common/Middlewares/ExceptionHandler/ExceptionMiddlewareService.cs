@@ -21,11 +21,21 @@ public class ExceptionMiddlewareService
         catch (BadRequestException exception)
         {
             context.Response.StatusCode = StatusCodes.Status400BadRequest;
-            await context.Response.WriteAsync(exception.Message);
+            await context.Response.WriteAsJsonAsync(new {message = exception.Message});
         }
         catch (CantFindByIdException exception)
         {
             context.Response.StatusCode = StatusCodes.Status404NotFound;
+            await context.Response.WriteAsJsonAsync(new { message = exception.Message });
+        }
+        catch (NotFoundException exception)
+        {
+            context.Response.StatusCode = StatusCodes.Status404NotFound;
+            await context.Response.WriteAsJsonAsync(new { message = exception.Message });
+        }
+        catch (ConflictException exception)
+        {
+            context.Response.StatusCode = StatusCodes.Status409Conflict;
             await context.Response.WriteAsJsonAsync(new { message = exception.Message });
         }
     }

@@ -17,12 +17,29 @@ public class UserController : ControllerBase
         _tokenService = tokenService;
     }
 
+    /// <summary>
+    /// Get list of all users
+    /// </summary>
     [HttpGet]
     public async Task<List<UserDto>> GetUsers()
     {
         return await _userService.GetUsers();
     }
 
+    /// <summary>
+    /// Get user info by id
+    /// </summary>
+    [HttpGet]
+    [Route("{userId}")]
+    public async Task<UserInfoDto> GetUserInfo(Guid userId)
+    {
+        return await _userService.GetUserInfo(userId);
+    }
+    
+
+    /// <summary>
+    /// Create new user
+    /// </summary>
     [HttpPost]
     public async Task<IActionResult> CreateUser([FromBody] CreateUserDto createUserDto)
     {
@@ -35,6 +52,9 @@ public class UserController : ControllerBase
         return BadRequest(ModelState);
     }
 
+    /// <summary>
+    /// Ban user
+    /// </summary>
     [HttpPut]
     [Route("{userId}/ban")]
     public async Task BanUser(Guid userId)
@@ -42,6 +62,9 @@ public class UserController : ControllerBase
         await _userService.BanUser(userId);
     }
     
+    /// <summary>
+    /// Unban user
+    /// </summary>
     [HttpPut]
     [Route("{userId}/unban")]
     public async Task UnbanUser(Guid userId)
@@ -49,10 +72,36 @@ public class UserController : ControllerBase
         await _userService.UnbanUser(userId);
     }
 
+    /// <summary>
+    /// Generate user token by his Id
+    /// </summary>
     [HttpGet]
     [Route("{userId}/token")]
     public async Task<string> GenerateUserToken(Guid userId)
     {
         return await _tokenService.CreateToken(userId);
+    }
+
+    /// <summary>
+    /// Login with email that returns Id and generated token
+    /// </summary>
+    [HttpPost]
+    [Route("login")]
+    public async Task<ActionResult<LoginResponseDto>> Login([FromBody] LoginCredentialsDto loginCredentialsDto)
+    {
+        if(ModelState.IsValid)
+            return await _userService.Login(loginCredentialsDto);
+
+        return BadRequest(ModelState);
+    }
+    
+    /// <summary>
+    /// Check if user exists
+    /// </summary>
+    [HttpGet]
+    [Route("{userId}/exist")]
+    public async Task<bool> CheckUser(Guid userId)
+    {
+        return await _userService.CheckIfUserExists(userId);
     }
 }

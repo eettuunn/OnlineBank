@@ -7,14 +7,12 @@
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <NoWarn>$(NoWarn);1591</NoWarn>
         <DockerDefaultTargetOS>Windows</DockerDefaultTargetOS>
-        <UserSecretsId>5e811d9d-d028-4c22-a630-b22a5ea95e4a</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="AutoMapper" Version="12.0.1" />
         <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.16" />
-        <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="7.0.16" />
         <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
         <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.11" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.10" />
@@ -34,24 +32,20 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Common\Common.csproj" />
+      <ProjectReference Include="..\OnlineBank.LoanService.BL\OnlineBank.LoanService.BL.csproj" />
+      <ProjectReference Include="..\OnlineBank.LoanService.DAL\OnlineBank.LoanService.DAL.csproj" />
       <ProjectReference Include="..\OnlineBank.UserService.BL\OnlineBank.UserService.BL.csproj" />
-      <ProjectReference Include="..\OnlineBank.UserService.Common\OnlineBank.UserService.Common.csproj" />
-      <ProjectReference Include="..\OnlineBank.UserService.DAL\OnlineBank.UserService.DAL.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <_ContentIncludedByDefault Remove="OnlineBank.UserService\OnlineBank.UserService\obj\OnlineBank.UserService.csproj.nuget.dgspec.json" />
-      <_ContentIncludedByDefault Remove="OnlineBank.UserService\OnlineBank.UserService\obj\project.assets.json" />
-      <_ContentIncludedByDefault Remove="OnlineBank.UserService\OnlineBank.UserService\obj\project.packagespec.json" />
       <Content Include="..\.dockerignore">
         <Link>.dockerignore</Link>
       </Content>
     </ItemGroup>
 
     <ItemGroup>
-      <_ContentIncludedByDefault Remove="OnlineBank.UserService\OnlineBank.UserService\obj\OnlineBank.UserService.csproj.nuget.dgspec.json" />
-      <_ContentIncludedByDefault Remove="OnlineBank.UserService\OnlineBank.UserService\obj\project.assets.json" />
-      <_ContentIncludedByDefault Remove="OnlineBank.UserService\OnlineBank.UserService\obj\project.packagespec.json" />
+      <Folder Include="Configs\" />
     </ItemGroup>
 
 </Project>

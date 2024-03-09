@@ -1,22 +1,19 @@
 using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
-using Common.Policies.Ban;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using OnlineBank.Common.Middlewares.ExceptionHandler;
-using OnlineBank.UserService.BL;
-using OnlineBank.UserService.BL.Services;
+using OnlineBank.LoanService.BL;
+using OnlineBank.LoanService.BL.Services;
+using OnlineBank.LoanService.Common.Interfaces;
+using OnlineBank.LoanService.Configs;
+using OnlineBank.LoanService.Configurators;
 using OnlineBank.UserService.Common.Configs;
-using OnlineBank.UserService.Common.Interfaces;
-using OnlineBank.UserService.Configurators;
-using OnlineBank.UserService.DAL;
-using OnlineBank.UserService.DAL.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
-
 
 builder.Services.AddControllers()
     .AddJsonOptions(opts =>
@@ -31,20 +28,11 @@ builder.Services.AddSwaggerGen(options =>
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 });
 
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(builder =>
-    {
-        builder.AllowAnyMethod()
-            .AllowAnyHeader()
-            .WithOrigins("*");
-    });
-});
+builder.Services.Configure<IntegrationApisUrls>(builder.Configuration.GetSection("IntegrationApisUrls"));
 
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<ITokenService, TokenService>();
-builder.Services.AddSingleton<IAuthorizationHandler, BanPolicyHandler>();
-builder.Services.AddAutoMapper(typeof(UserServiceMapper));
+builder.Services.AddScoped<ILoanRateService, LoanRateService>();
+builder.Services.AddScoped<ILoanService, LoanService>();
+builder.Services.AddAutoMapper(typeof(LoanServiceMapper));
 
 builder.Services.AddAuthentication(opt => {
         opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -70,33 +58,10 @@ builder.Services.AddAuthorization(options =>
                 (JwtBearerDefaults.AuthenticationScheme)
             .RequireAuthenticatedUser()
             .Build();
-    options.AddPolicy(
-        "Ban",
-        policy => policy.Requirements.Add(new BanPolicy()));
 });
-builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
-    {
-        options.Password.RequiredLength = 6;
-        options.Password.RequireDigit = false;
-        options.Password.RequiredUniqueChars = 0;
-        options.Password.RequireLowercase = true;
-        options.Password.RequireUppercase = false;
-        options.Password.RequireNonAlphanumeric = false;
 
-        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-        options.Lockout.MaxFailedAccessAttempts = 5;
-        options.Lockout.AllowedForNewUsers = true; 
-        
-        options.User.AllowedUserNameCharacters =
-            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
-        options.User.RequireUniqueEmail = true;
-    })
-    .AddEntityFrameworkStores<UserServiceDbContext>()
-    .AddUserManager<UserManager<AppUser>>()
-    .AddSignInManager<SignInManager<AppUser>>()
-    .AddDefaultTokenProviders();
+builder.ConfigureLoanServiceDAL();
 
-builder.ConfigureUserServiceDAL();
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -105,9 +70,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors();
-
-app.ConfigureUserServiceDAL();
+app.ConfigureLoanServiceDAL();
 
 app.UseHttpsRedirection();
 
