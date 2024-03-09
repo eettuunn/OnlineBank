@@ -5,6 +5,7 @@ networks:
 services:
 
   postgres_image:
+    hostname: host.docker.internal
     container_name: postgres_image
     image: postgres:latest
     ports:
@@ -19,6 +20,7 @@ services:
       - user-service-dev
 
   bank_user_service:
+    hostname: host.docker.internal
     container_name: bank_user_service
     image: eebbuunn/onlinebank.userservice:latest
     build:
@@ -34,6 +36,7 @@ services:
       - "postgres_image"
         
   bank_loan_service:
+    hostname: host.docker.internal
     container_name: bank_loan_service
     image: eebbuunn/onlinebank.loanservice:latest
     build:
