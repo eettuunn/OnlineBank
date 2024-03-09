@@ -7,4 +7,7 @@
     <string name="edit_account">edit_account</string>
     <string name="add_account">Открыть счёт</string>
     <string name="request_money">Взять кредит</string>
+    <string name="account_name">Название счета</string>
+    <string name="create_account">Готово</string>
+    <string name="hidden">Скрытые счета</string>
 </resources>

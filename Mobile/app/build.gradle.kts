@@ -67,6 +67,7 @@ dependencies {
     implementation("io.insert-koin:koin-core:$koinVersion")
     implementation("io.insert-koin:koin-android:$koinVersion")
     implementation("io.insert-koin:koin-compose:1.1.2")
+    implementation ("io.insert-koin:koin-androidx-workmanager:$koinVersion")
 
     // DataStore
     val datastoreVersion = "1.0.0"
@@ -91,6 +92,9 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:$okhttpVersion")
 
     implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.7")
+
+    // WorkManager
+    implementation ("androidx.work:work-runtime-ktx:2.9.0")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

@@ -44,12 +44,15 @@ class AccountsViewModel(
                         .build()
                 }
             }
+
+            is UIIntent.OpenAccount -> repository.createAccount(intent.name)
         }
     }
 }
 
 sealed class UIIntent {
     data object UpdateTheme : UIIntent()
+    data class OpenAccount(val name: String) : UIIntent()
 }
 
 sealed class ViewAction {

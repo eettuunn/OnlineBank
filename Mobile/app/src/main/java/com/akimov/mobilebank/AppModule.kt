@@ -4,15 +4,18 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.dataStore
 import androidx.room.Room
+import androidx.work.WorkManager
 import com.akimov.mobilebank.bankAccounts.AccountsViewModel
 import com.akimov.mobilebank.data.database.RoomDb
 import com.akimov.mobilebank.data.datastore.UserPreferencesSerializer
 import com.akimov.mobilebank.data.network.CoreService
 import com.akimov.mobilebank.data.repository.AccountsRepository
+import com.akimov.mobilebank.data.workers.CreateAccountWorker
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.androidx.workmanager.dsl.worker
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -60,9 +63,20 @@ val appModule = module {
         AccountsRepository(
             api = get(),
             dao = get<RoomDb>().accountsDao(),
-            dataStore = get()
+            dataStore = get(),
+            workManager = get()
         )
     }
+
+    worker<CreateAccountWorker> {
+        CreateAccountWorker(
+            context = androidContext(),
+            params = get(),
+            api = get()
+        )
+    }
+
+    single<WorkManager> { WorkManager.getInstance(androidContext()) }
 
     viewModel { AccountsViewModel(dataStore = get(), repository = get()) }
 }
