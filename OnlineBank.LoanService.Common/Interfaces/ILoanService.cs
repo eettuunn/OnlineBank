@@ -7,4 +7,5 @@ public interface ILoanService
 {
     Task TakeOutLoan(CreateLoanDto createLoanDto);
     Task MakeLoanPayment(Guid loanId, PaymentDto paymentDto);
+    Task<List<LoanDto>> GetUserLoans(Guid userId);
 }

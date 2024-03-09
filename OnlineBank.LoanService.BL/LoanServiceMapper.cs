@@ -12,5 +12,6 @@ public class LoanServiceMapper : Profile
         CreateMap<CreateLoanRateDto, LoanRateEntity>();
         CreateMap<LoanRateEntity, LoanRateDto>();
         CreateMap<CreateLoanDto, LoanEntity>();
+        CreateMap<LoanEntity, LoanDto>();
     }
 }

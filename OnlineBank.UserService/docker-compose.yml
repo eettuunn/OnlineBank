@@ -32,6 +32,23 @@ services:
       - user-service-dev
     depends_on:
       - "postgres_image"
+        
+  bank_loan_service:
+    container_name: bank_loan_service
+    image: eebbuunn/onlinebank.loanservice:latest
+    build:
+      context: .
+    ports:
+      - "8877:80"
+    environment:
+      ConnectionStrings__PostgresLoanService: "host=postgres_image;port=5432;database=bank_loan_db;username=postgres;password=root"
+      IntegrationApisUrls__UserServiceUrl: "http://localhost:7788"
+      IntegrationApisUrls__CoreServiceUrl: "http://localhost:8080"
+    restart: on-failure
+    networks:
+      - user-service-dev
+    depends_on:
+      - "postgres_image"
 
 volumes:
   user_service_volume:

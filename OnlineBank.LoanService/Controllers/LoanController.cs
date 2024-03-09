@@ -45,4 +45,14 @@ public class LoanController : ControllerBase
 
         return BadRequest(ModelState);
     }
+    
+    /// <summary>
+    /// Get user's loans list
+    /// </summary>
+    [HttpGet]
+    [Route("{userId}")]
+    public async Task<List<LoanDto>> GetUserLoans(Guid userId)
+    {
+        return await _loanService.GetUserLoans(userId);
+    }
 }

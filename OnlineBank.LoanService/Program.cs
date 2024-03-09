@@ -9,6 +9,7 @@ using OnlineBank.Common.Middlewares.ExceptionHandler;
 using OnlineBank.LoanService.BL;
 using OnlineBank.LoanService.BL.Services;
 using OnlineBank.LoanService.Common.Interfaces;
+using OnlineBank.LoanService.Configs;
 using OnlineBank.LoanService.Configurators;
 using OnlineBank.UserService.Common.Configs;
 
@@ -27,7 +28,7 @@ builder.Services.AddSwaggerGen(options =>
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 });
 
-// builder.Services.Configure<IntegrationApisUrls>(builder.Configuration.GetSection("IntegrationApisUrls"));
+builder.Services.Configure<IntegrationApisUrls>(builder.Configuration.GetSection("IntegrationApisUrls"));
 
 builder.Services.AddScoped<ILoanRateService, LoanRateService>();
 builder.Services.AddScoped<ILoanService, LoanService>();

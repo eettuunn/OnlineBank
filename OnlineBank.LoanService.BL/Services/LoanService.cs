@@ -1,11 +1,14 @@
-using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using AutoMapper;
 using Common.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using OnlineBank.LoanService.Common.Dtos.Integrations;
 using OnlineBank.LoanService.Common.Dtos.Loan;
 using OnlineBank.LoanService.Common.Interfaces;
+using Common;
+using OnlineBank.LoanService.Configs;
 using OnlineBank.LoanService.DAL;
 using OnlineBank.LoanService.DAL.Entities;
 
@@ -14,10 +17,14 @@ namespace OnlineBank.LoanService.BL.Services;
 public class LoanService : ILoanService
 {
     private readonly LoanServiceDbContext _context;
+    private readonly IMapper _mapper;
+    private readonly IntegrationApisUrls _integrationApisUrls;
 
-    public LoanService(LoanServiceDbContext context)
+    public LoanService(LoanServiceDbContext context, IMapper mapper, IOptions<IntegrationApisUrls> options)
     {
         _context = context;
+        _mapper = mapper;
+        _integrationApisUrls = options.Value;
     }
 
     public async Task TakeOutLoan(CreateLoanDto createLoanDto)
@@ -79,12 +86,34 @@ public class LoanService : ILoanService
         await _context.SaveChangesAsync();
     }
 
+    public async Task<List<LoanDto>> GetUserLoans(Guid userId)
+    {
+        await IsUserExists(userId);
+        
+        var loans = await _context
+            .Loans
+            .Include(l => l.LoanRate)
+            .Where(l => l.UserId == userId)
+            .ToListAsync();
+
+        var loansDtos = _mapper.Map<List<LoanDto>>(loans);
+
+        foreach (var loanDto in loansDtos)
+        {
+            var loanEntity = loans.FirstOrDefault(l => l.Id == loanDto.id);
+            loanDto.interestRate = loanEntity.LoanRate.InterestRate;
+            loanDto.loanRateName = loanEntity.LoanRate.Name;
+        }
+
+        return loansDtos;
+    }
+
 
     private async Task IsBankAccountExists(Guid baId)
     {
         using (var client = new HttpClient())
         {
-            var url = "http://localhost:8080/api/bank-accounts/" + baId + "/check-existence";
+            var url = _integrationApisUrls.CoreServiceUrl + "/api/bank-accounts/" + baId + "/check-existence";
             var response = await client.GetAsync(url);
 
             if (response.IsSuccessStatusCode)
@@ -105,7 +134,7 @@ public class LoanService : ILoanService
     {
         using (var client = new HttpClient())
         {
-            var url = "http://localhost:5259/user_api/user/" + userId + "/exist";
+            var url = _integrationApisUrls.UserServiceUrl + "/user_api/user/" + userId + "/exist";
             var response = await client.GetAsync(url);
 
             if (response.IsSuccessStatusCode)
@@ -126,7 +155,7 @@ public class LoanService : ILoanService
     {
         using (var client = new HttpClient())
         {
-            var url = "http://localhost:8080/api/bank-accounts/" + baId;
+            var url = _integrationApisUrls.CoreServiceUrl + "/api/bank-accounts/" + baId;
             if (transactionType == "TAKE_LOAN" || transactionType == "DEPOSIT")
             {
                 url += "/deposit";
