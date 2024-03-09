@@ -110,6 +110,15 @@ public class BankAccountController {
         return new ResponseEntity<>(bankAccountService.updateBankAccountName(bankAccountId, updateBankAccountNameDto), HttpStatus.OK);
     }
 
+    @Operation(
+            summary = "Проверить существование банковского счета."
+//            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @GetMapping("/{id}/check-existence")
+    public ResponseEntity<Boolean> checkBankAccountExistence(@PathVariable("id") UUID bankAccountId) {
+        Boolean isExists = bankAccountService.checkBankAccountExistenceById(bankAccountId);
+        return new ResponseEntity<>(isExists, HttpStatus.OK);
+    }
 
 //    @GetMapping("/token")
 //    public ResponseEntity<String> getToken() {
