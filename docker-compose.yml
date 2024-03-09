@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+
+  postgres_image:
+    container_name: postgres_image
+    image: postgres:latest
+    ports:
+      - "5432"
+    restart: always
+    volumes:
+      - user_service_volume:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "root"
+
+  bank-user-service:
+    container_name: bank-user-service
+    image: eebbuunn/onlinebank.userservice:latest
+    build:
+      context: ./OnlineBank.UserService
+    ports:
+      - "7788:80"
+    environment:
+      ConnectionStrings__PostgresUserService: "host=postgres_image;port=5432;database=bank_users_db;username=postgres;password=root"
+    restart: on-failure
+    depends_on:
+      - "postgres_image"
+
+  bank-core-service:
+    build:
+      context: ./OnlineBank.CoreService
+    container_name: bank-core-service
+    ports:
+      - '8080:8080'
+    depends_on:
+      - postgres
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/core-service-db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+
+  postgres:
+    container_name: core-service-db
+    image: 'postgres:13.1-alpine'
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRES_DB=core-service-db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+
+volumes:
+  user_service_volume:

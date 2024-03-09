@@ -34,6 +34,7 @@ public class BankAccountService {
     private final BankAccountRepository bankAccountRepository;
     private final TransactionRepository transactionRepository;
     private final CheckPaginationInfoService checkPaginationInfoService;
+    private final IntegrationRequestsService integrationRequestsService;
 
 
     public BankAccountsWithPaginationDto getAllBankAccounts(Sort.Direction creationDateSortDirection, Boolean isClosed, int pageNumber, int pageSize) {
@@ -93,6 +94,10 @@ public class BankAccountService {
 
     @Transactional
     public BankAccountWithoutTransactionsDto createBankAccount(CreateBankAccountDto createBankAccountDto) {
+        if (!integrationRequestsService.checkUserExistence(createBankAccountDto.getUserId())) {
+            throw new NotFoundException("Пользователя с ID " + createBankAccountDto.getUserId() + " не существует");
+        }
+
         BankAccountEntity bankAccount = BankAccountEntity.builder()
                 .name(createBankAccountDto.getName())
                 .number(generateAccountNumber())
@@ -110,6 +115,10 @@ public class BankAccountService {
 
     @Transactional
     public BankAccountWithoutTransactionsDto closeBankAccount(UUID bankAccountId, CloseBankAccountDto closeBankAccountDto) {
+        if (!integrationRequestsService.checkUserExistence(closeBankAccountDto.getUserId())) {
+            throw new NotFoundException("Пользователя с ID " + closeBankAccountDto.getUserId() + " не существует");
+        }
+
         BankAccountEntity bankAccount = bankAccountRepository.findById(bankAccountId)
                 .orElseThrow(() -> new NotFoundException("Банковский счет с ID " + bankAccountId + " не найден"));
 
@@ -131,6 +140,10 @@ public class BankAccountService {
 
     @Transactional
     public BankAccountDto depositMoney(UUID bankAccountId, DepositMoneyDto depositMoneyDto) {
+        if (!integrationRequestsService.checkUserExistence(depositMoneyDto.getUserId())) {
+            throw new NotFoundException("Пользователя с ID " + depositMoneyDto.getUserId() + " не существует");
+        }
+
         UUID authenticatedUserId = depositMoneyDto.getUserId();
 
         BankAccountEntity bankAccount = bankAccountRepository.findById(bankAccountId)
@@ -174,6 +187,10 @@ public class BankAccountService {
 
     @Transactional
     public BankAccountDto withdrawMoney(UUID bankAccountId, WithdrawMoneyDto withdrawMoneyDto) {
+        if (!integrationRequestsService.checkUserExistence(withdrawMoneyDto.getUserId())) {
+            throw new NotFoundException("Пользователя с ID " + withdrawMoneyDto.getUserId() + " не существует");
+        }
+
         UUID authenticatedUserId = withdrawMoneyDto.getUserId();
 
         BankAccountEntity bankAccount = bankAccountRepository.findById(bankAccountId)
@@ -221,6 +238,10 @@ public class BankAccountService {
 
     public BankAccountWithoutTransactionsDto updateBankAccountName(UUID bankAccountId,
                                                                    UpdateBankAccountNameDto updateBankAccountNameDto) {
+        if (!integrationRequestsService.checkUserExistence(updateBankAccountNameDto.getUserId())) {
+            throw new NotFoundException("Пользователя с ID " + updateBankAccountNameDto.getUserId() + " не существует");
+        }
+
         UUID authenticatedUserId = updateBankAccountNameDto.getUserId();
 
         BankAccountEntity bankAccount = bankAccountRepository.findById(bankAccountId)

@@ -21,3 +21,7 @@ app:
     integrations:
       root-path: /integration
       api-key: ac816388c1c44ac2b2ae431f89c82e7e345d25a0e6474e75a78f9a5ce496060c
+
+integration:
+  request:
+    check-user-existence: http://host.docker.internal:7788/user_api/user/{userId}/exist
