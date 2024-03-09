@@ -1,6 +1,9 @@
+using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
 using Common.Exceptions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
+using OnlineBank.LoanService.Common.Dtos.Integrations;
 using OnlineBank.LoanService.Common.Dtos.Loan;
 using OnlineBank.LoanService.Common.Interfaces;
 using OnlineBank.LoanService.DAL;
@@ -31,6 +34,9 @@ public class LoanService : ILoanService
             .LoanRates
             .FirstOrDefaultAsync(lr => lr.Id == createLoanDto.loanRateId)
                 ?? throw new CantFindByIdException("loan rate", createLoanDto.loanRateId);
+        
+        await MakeTransaction(createLoanDto.bankAccountId, createLoanDto.userId, createLoanDto.loanAmount, "TAKE_LOAN");
+        
         var loanEntity = new LoanEntity
         {   
             StartDate = DateTime.UtcNow,
@@ -44,17 +50,41 @@ public class LoanService : ILoanService
         
         await _context.Loans.AddAsync(loanEntity);
         await _context.SaveChangesAsync();
-        
-        //todo: create transaction
     }
 
+    public async Task MakeLoanPayment(Guid loanId, PaymentDto paymentDto)
+    {
+        var loan = await _context.Loans
+                       .Include(l => l.LoanRate)
+                       .FirstOrDefaultAsync(l => l.Id == loanId)
+                   ?? throw new CantFindByIdException("loan", loanId);
+        if (loan.UserId != paymentDto.userId) throw new ConflictException("This is not your bank account"); 
+        if (loan.Debt <= 0) throw new ConflictException("The loan has already closed");
+       
+        await IsUserExists(paymentDto.userId);
+        await IsBankAccountExists(paymentDto.bankAccountId);
+        
+        var payment = paymentDto.paymentAmount ?? loan.MonthlyPayment;
+        if (payment > loan.Debt)
+        {
+            payment = loan.Debt;
+        }
+        var percents = CountCurrentPercents(loan);
+        var paymentWithPercents = (double)payment + percents;
+
+        await MakeTransaction(paymentDto.bankAccountId, paymentDto.userId, (decimal)paymentWithPercents, "REPAY_LOAN");
+
+        loan.Debt -= payment;
+
+        await _context.SaveChangesAsync();
+    }
 
 
     private async Task IsBankAccountExists(Guid baId)
     {
         using (var client = new HttpClient())
         {
-            var url = "http://localhost:8080/integration/bank-accounts/" + baId + "/check-existence";
+            var url = "http://localhost:8080/api/bank-accounts/" + baId + "/check-existence";
             var response = await client.GetAsync(url);
 
             if (response.IsSuccessStatusCode)
@@ -67,7 +97,7 @@ public class LoanService : ILoanService
                 return;
             }
 
-            throw new Exception(response.StatusCode.ToString());
+            throw new Exception(await response.Content.ReadAsStringAsync());
         }
     }
     
@@ -90,5 +120,48 @@ public class LoanService : ILoanService
 
             throw new Exception(response.StatusCode.ToString());
         }
+    }
+
+    private async Task MakeTransaction(Guid baId, Guid userId, decimal amount, string transactionType)
+    {
+        using (var client = new HttpClient())
+        {
+            var url = "http://localhost:8080/api/bank-accounts/" + baId;
+            if (transactionType == "TAKE_LOAN" || transactionType == "DEPOSIT")
+            {
+                url += "/deposit";
+            }
+            else
+            {
+                url += "/withdraw";
+            }
+            var body = new CreateTransactionDto
+            {   
+                amount = amount,
+                transactionType = transactionType,
+                userId = userId
+            };
+            var strBody = JsonSerializer.Serialize(body);
+            var content = new StringContent(strBody, Encoding.UTF8, "application/json");
+            var response = await client.PostAsync(url, content);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception(await response.Content.ReadAsStringAsync());
+            }
+        }
+    }
+
+    private double CountCurrentPercents(LoanEntity loan)
+    {
+        double daysInYear = DateTime.IsLeapYear(DateTime.UtcNow.Year) ? 366 : 365;
+        double debt = (double)loan.Debt;
+        // double daysInMonth = DateTime.DaysInMonth(DateTime.UtcNow.Year, DateTime.UtcNow.Month);
+        double daysInMonth = 1;
+        double interestRate = loan.LoanRate.InterestRate / 100;
+        
+        var percents = debt * daysInMonth * interestRate / daysInYear;
+
+        return percents;
     }
 }

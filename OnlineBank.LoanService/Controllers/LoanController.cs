@@ -29,4 +29,20 @@ public class LoanController : ControllerBase
 
         return BadRequest(ModelState);
     }
+    
+    /// <summary>
+    /// Make loan payment
+    /// </summary>
+    [HttpPost]
+    [Route("{loanId}")]
+    public async Task<IActionResult> MakeLoanPayment([FromBody] PaymentDto paymentDto, Guid loanId)
+    {
+        if (ModelState.IsValid)
+        {
+            await _loanService.MakeLoanPayment(loanId, paymentDto);
+            return Ok();
+        }
+
+        return BadRequest(ModelState);
+    }
 }
