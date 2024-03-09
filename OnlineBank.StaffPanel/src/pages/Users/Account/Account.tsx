@@ -12,7 +12,7 @@ import { AccountMock } from '../__mocks';
 import { columnsTransaction } from '../constants';
 import './Account.scss';
 import AccountBlockInfo from '../components/AccountBlockInfo/AccountBlockInfo';
-import { useGetAccountTransactionQuery } from '../api/accountsApi';
+import { useGetAccountInfoQuery, useGetAccountTransactionQuery } from '../api/accountsApi';
 
 const b = block('user-list');
 const { Content } = Layout;
@@ -23,26 +23,14 @@ const Account: React.FC = () => {
 
     const [ indexRow, setIndexRow ] = useState<undefined | number>(undefined);
 
-    const { isLoading: isLoadingTransactions, data: dataTransactions } = useGetAccountTransactionQuery('1fa581fa-b0ea-4409-b799-dfad1abf02f5');
+    const { isLoading: isLoadingAccount, data: dataAccount } = useGetAccountInfoQuery('77141e72-da79-44c8-b057-ea1ea39bac2a');
+    const { isLoading: isLoadingTransactions, data: dataTransactions } = useGetAccountTransactionQuery('77141e72-da79-44c8-b057-ea1ea39bac2a');
 
     useEffect(() => {
         setConfig({ activeMenuKey: Paths.Users, headerTitle: 'Данные по счету №1233345465' });
     }, [ setConfig ]);
 
-    /**
-    * подготовка отображения в таблице не изменяя данных
-    */
     const prepareTableData = columnsTransaction;
-
-    // const columnsAction = [
-    //     {
-    //         key: 'action',
-    //         title: '',
-    //         dataIndex: 'action',
-    //         width: '160px',
-    //         className: 'actions',
-    //     },
-    // ];
 
     const onRow = (record: Record<string, unknown>, rowIndex: number | undefined) => ({
         onMouseEnter: (event: React.MouseEvent) => {
@@ -60,7 +48,7 @@ const Account: React.FC = () => {
     return (
         <div className={b().toString()}>
             <MainHeader>
-                <AccountBlockInfo account={AccountMock[0]}/>
+                <AccountBlockInfo account={dataAccount}/>
             </MainHeader>
             <Content>
                 <Title level={3}>Операции</Title>

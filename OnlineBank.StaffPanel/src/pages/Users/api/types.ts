@@ -1,3 +1,4 @@
+import { IResponseLists } from '../../../shared/types';
 import { Role } from '../constants';
 
 export interface IUser {
@@ -24,6 +25,8 @@ export interface IAccount {
     isClosed: boolean,
     balance: number
 }
+
+export type IAccountsResponse = IResponseLists<IAccount[]>;
 
 export enum TransactionType {
     WITHDRAW,

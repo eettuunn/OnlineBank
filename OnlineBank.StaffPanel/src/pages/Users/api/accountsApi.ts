@@ -2,14 +2,14 @@ import { createApi } from '@reduxjs/toolkit/query/react';
 
 import { axiosBaseQuery } from '../../../shared/api/query';
 
-import { IAccount, ITransaction } from './types';
+import { IAccount, IAccountsResponse, ITransaction } from './types';
 
 export const accountsApi = createApi({
     reducerPath: 'accountsApi',
     baseQuery: axiosBaseQuery('/api'),
-    tagTypes: [ 'Accounts', 'Transactions' ],
+    tagTypes: [ 'Accounts', 'Transactions', 'Transaction' ],
     endpoints: builder => ({
-        getUserAccounts: builder.query<IAccount[], string>({
+        getUserAccounts: builder.query<IAccountsResponse, string>({
             query: id => ({
                 url: `/bank-accounts/owner/${id}/`,
                 method: 'get',
@@ -25,7 +25,14 @@ export const accountsApi = createApi({
             providesTags: [ 'Transactions' ],
             keepUnusedDataFor: 0,
         }),
+        getAccountInfo: builder.query<IAccount, string>({
+            query: id => ({
+                url: `/transactions/bank-account/${id}`,
+                method: 'get',
+            }),
+            providesTags: [ 'Transaction' ],
+        }),
     }),
 });
 
-export const { useGetUserAccountsQuery, useGetAccountTransactionQuery } = accountsApi;
+export const { useGetUserAccountsQuery, useGetAccountTransactionQuery, useGetAccountInfoQuery } = accountsApi;

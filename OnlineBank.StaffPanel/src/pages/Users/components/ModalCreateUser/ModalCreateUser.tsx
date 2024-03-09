@@ -99,9 +99,10 @@ const ModalCreateUser: React.FC<IModalProps> = ({ onSave, modal, isLoading }) =>
                             </Form.Item>
                         </Col>
                     </Row>
-                    <Row gutter={12}>
+                    {/* <Row gutter={12}>
                         <Col span={12}>
-                            <Form.Item dependencies={[ 'repeat-password' ]} label="Пароль" name="passport" rules={[ { required: true, message: 'Пожалуйста, введите значение' } ]}>
+                            <Form.Item dependencies={[ 'repeat-password' ]} label="Пароль" name="passport"
+                            rules={[ { required: true, message: 'Пожалуйста, введите значение' } ]}>
                                 <Input placeholder="Пароль" type="password"/>
                             </Form.Item>
                         </Col>
@@ -118,7 +119,10 @@ const ModalCreateUser: React.FC<IModalProps> = ({ onSave, modal, isLoading }) =>
                                 <Input placeholder="Повторите пароль" type="password" />
                             </Form.Item>
                         </Col>
-                    </Row>
+                    </Row> */}
+                    <Form.Item dependencies={[ 'repeat-password' ]} label="Паспорт" name="passport" rules={[ { required: true, message: 'Пожалуйста, введите значение' } ]}>
+                        <Input placeholder="Паспорт"/>
+                    </Form.Item>
                 </Form>
             </Spin>
         </Modal>

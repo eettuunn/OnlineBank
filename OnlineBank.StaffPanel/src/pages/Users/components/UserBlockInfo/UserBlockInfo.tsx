@@ -19,16 +19,16 @@ const UserBlockInfo: React.FC<IProps> = ({ user }) => (
     >
         <Row className={b('inner').toString()}>
             <Col span={6}>
-                <UserBlockInfoText label="Полное имя" value={user?.fullName} />
+                <UserBlockInfoText label="Полное имя" value={user?.userName} />
             </Col>
             <Col span={6}>
                 <UserBlockInfoText label="Email" value={user?.email} />
             </Col>
             <Col span={6}>
-                <UserBlockInfoText label="Роль" value={user?.role} />
+                <UserBlockInfoText label="Роль" value={user?.roles[0]} />
             </Col>
             <Col span={6}>
-                <UserBlockInfoText label="Статус" value={user?.isLocked ? 'Заблокирован' : 'Активный'} />
+                <UserBlockInfoText label="Статус" value={user?.ban ? 'Заблокирован' : 'Активный'} />
             </Col>
         </Row>
     </div>
