@@ -11,7 +11,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Getter
 @Setter
-public class CreateBankAccountDto {
+public class UpdateBankAccountNameDto {
 
     @NotBlank(message = "Название счёта является обязательным к заполнению")
     private String name;

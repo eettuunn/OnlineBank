@@ -13,7 +13,6 @@ import ru.hits.coreservice.enumeration.SortDirection;
 import ru.hits.coreservice.service.BankAccountService;
 
 import javax.validation.Valid;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -32,8 +31,11 @@ public class BankAccountController {
 //            security = @SecurityRequirement(name = "bearerAuth")
     )
     @GetMapping
-    public ResponseEntity<List<BankAccountWithoutTransactionsDto>> getAllBankAccounts(@RequestParam(defaultValue = "ASC") SortDirection creationDateSortDirection) {
-        return new ResponseEntity<>(bankAccountService.getAllBankAccounts(creationDateSortDirection.toSortDirection()), HttpStatus.OK);
+    public ResponseEntity<BankAccountsWithPaginationDto> getAllBankAccounts(@RequestParam(defaultValue = "ASC") SortDirection creationDateSortDirection,
+                                                                            @RequestParam(required = false) Boolean isClosed,
+                                                                            @RequestParam(name = "pageNumber", defaultValue = "1") int pageNumber,
+                                                                            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+        return new ResponseEntity<>(bankAccountService.getAllBankAccounts(creationDateSortDirection.toSortDirection(), isClosed, pageNumber, pageSize), HttpStatus.OK);
     }
 
     @Operation(
@@ -41,9 +43,12 @@ public class BankAccountController {
 //            security = @SecurityRequirement(name = "bearerAuth")
     )
     @GetMapping("/owner/{id}")
-    public ResponseEntity<List<BankAccountWithoutTransactionsDto>> getBankAccountsByOwnerId(@RequestParam(defaultValue = "ASC") SortDirection creationDateSortDirection,
-                                                                         @PathVariable("id") UUID ownerId) {
-        return new ResponseEntity<>(bankAccountService.getBankAccountsByOwnerId(ownerId, creationDateSortDirection.toSortDirection()), HttpStatus.OK);
+    public ResponseEntity<BankAccountsWithPaginationDto> getBankAccountsByOwnerId(@PathVariable("id") UUID ownerId,
+                                                                                  @RequestParam(defaultValue = "ASC") SortDirection creationDateSortDirection,
+                                                                                  @RequestParam(required = false) Boolean isClosed,
+                                                                                  @RequestParam(name = "pageNumber", defaultValue = "1") int pageNumber,
+                                                                                  @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+        return new ResponseEntity<>(bankAccountService.getBankAccountsByOwnerId(ownerId, creationDateSortDirection.toSortDirection(), isClosed, pageNumber, pageSize), HttpStatus.OK);
     }
 
     @Operation(
@@ -69,8 +74,9 @@ public class BankAccountController {
 //            security = @SecurityRequirement(name = "bearerAuth")
     )
     @PostMapping("/{id}/close")
-    public ResponseEntity<BankAccountWithoutTransactionsDto> closeBankAccount(@PathVariable("id") UUID bankAccountId) {
-        return new ResponseEntity<>(bankAccountService.closeBankAccount(bankAccountId), HttpStatus.OK);
+    public ResponseEntity<BankAccountWithoutTransactionsDto> closeBankAccount(@PathVariable("id") UUID bankAccountId,
+                                                                              @RequestBody @Valid CloseBankAccountDto closeBankAccountDto) {
+        return new ResponseEntity<>(bankAccountService.closeBankAccount(bankAccountId, closeBankAccountDto), HttpStatus.OK);
     }
 
     @Operation(
@@ -80,7 +86,7 @@ public class BankAccountController {
     @PostMapping("/{id}/deposit")
     public ResponseEntity<BankAccountDto> depositMoney(@PathVariable("id") UUID bankAccountId,
                                                        @RequestBody @Valid DepositMoneyDto depositMoneyDto) {
-        return new ResponseEntity<>(bankAccountService.depositMoney(bankAccountId, depositMoneyDto.getAmount()), HttpStatus.OK);
+        return new ResponseEntity<>(bankAccountService.depositMoney(bankAccountId, depositMoneyDto), HttpStatus.OK);
     }
 
     @Operation(
@@ -90,7 +96,28 @@ public class BankAccountController {
     @PostMapping("/{id}/withdraw")
     public ResponseEntity<BankAccountDto> withdrawMoney(@PathVariable("id") UUID bankAccountId,
                                                         @RequestBody @Valid WithdrawMoneyDto withdrawMoneyDto) {
-        return new ResponseEntity<>(bankAccountService.withdrawMoney(bankAccountId, withdrawMoneyDto.getAmount()), HttpStatus.OK);
+        return new ResponseEntity<>(bankAccountService.withdrawMoney(bankAccountId, withdrawMoneyDto), HttpStatus.OK);
+    }
+
+    @Operation(
+            summary = "Обновить название банковского счёта."
+//            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @PutMapping("/{id}/name")
+    public ResponseEntity<BankAccountWithoutTransactionsDto> updateBankAccountName(
+            @PathVariable("id") UUID bankAccountId,
+            @RequestBody @Valid UpdateBankAccountNameDto updateBankAccountNameDto) {
+        return new ResponseEntity<>(bankAccountService.updateBankAccountName(bankAccountId, updateBankAccountNameDto), HttpStatus.OK);
+    }
+
+    @Operation(
+            summary = "Проверить существование банковского счета."
+//            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @GetMapping("/{id}/check-existence")
+    public ResponseEntity<Boolean> checkBankAccountExistence(@PathVariable("id") UUID bankAccountId) {
+        Boolean isExists = bankAccountService.checkBankAccountExistenceById(bankAccountId);
+        return new ResponseEntity<>(isExists, HttpStatus.OK);
     }
 
 //    @GetMapping("/token")

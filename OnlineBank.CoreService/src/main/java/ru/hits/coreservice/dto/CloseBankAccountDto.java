@@ -11,10 +11,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Getter
 @Setter
-public class CreateBankAccountDto {
-
-    @NotBlank(message = "Название счёта является обязательным к заполнению")
-    private String name;
+public class CloseBankAccountDto {
 
     @NotNull(message = "Идентификатор пользователя не может быть пустым")
     private UUID userId;
