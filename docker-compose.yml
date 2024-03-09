@@ -14,6 +14,21 @@ services:
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "root"
 
+  bank_loan_service:
+    container_name: bank_loan_service
+    image: eebbuunn/onlinebank.loanservice:latest
+    build:
+      context: .
+    ports:
+      - "8877:80"
+    environment:
+      ConnectionStrings__PostgresLoanService: "host=postgres_image;port=5432;database=bank_loan_db;username=postgres;password=root"
+      IntegrationApisUrls__UserServiceUrl: "http://host.docker.internal:7788"
+      IntegrationApisUrls__CoreServiceUrl: "http://host.docker.internal:8080"
+    restart: on-failure
+    depends_on:
+      - "postgres_image"
+
   bank-user-service:
     container_name: bank-user-service
     image: eebbuunn/onlinebank.userservice:latest
