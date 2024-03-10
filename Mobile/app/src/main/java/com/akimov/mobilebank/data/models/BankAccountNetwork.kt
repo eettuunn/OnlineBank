@@ -4,6 +4,10 @@ import com.akimov.mobilebank.data.database.entity.BankAccountEntity
 import java.math.BigDecimal
 import java.util.UUID
 
+data class BankAccountListNetwork(
+    val data: List<BankAccountNetwork>
+)
+
 data class BankAccountNetwork(
     val id: UUID,
     val name: String,

@@ -5,12 +5,15 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.dataStore
 import androidx.room.Room
 import androidx.work.WorkManager
-import com.akimov.mobilebank.bankAccounts.AccountsViewModel
 import com.akimov.mobilebank.data.database.RoomDb
 import com.akimov.mobilebank.data.datastore.UserPreferencesSerializer
 import com.akimov.mobilebank.data.network.CoreService
+import com.akimov.mobilebank.data.network.UserService
 import com.akimov.mobilebank.data.repository.AccountsRepository
+import com.akimov.mobilebank.data.workers.ChangeBalanceWorker
 import com.akimov.mobilebank.data.workers.CreateAccountWorker
+import com.akimov.mobilebank.data.workers.RenameAccountWorker
+import com.akimov.mobilebank.ui.AccountsViewModel
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
@@ -49,7 +52,7 @@ val appModule = module {
 
     single<Retrofit> {
         Retrofit.Builder()
-            .baseUrl("http://192.168.0.12:8080/")
+            .baseUrl("http://192.168.0.12:443/")
             .client(get<OkHttpClient>())
             .addConverterFactory(GsonConverterFactory.create())
             .build()
@@ -58,6 +61,8 @@ val appModule = module {
     factory<CoreService> {
         get<Retrofit>().create(CoreService::class.java)
     }
+
+    factory<UserService> { get<Retrofit>().create(UserService::class.java) }
 
     factory {
         AccountsRepository(
@@ -70,6 +75,24 @@ val appModule = module {
 
     worker<CreateAccountWorker> {
         CreateAccountWorker(
+            context = androidContext(),
+            params = get(),
+            api = get(),
+            dataStore = get()
+        )
+    }
+
+    worker<RenameAccountWorker> {
+        RenameAccountWorker(
+            context = androidContext(),
+            params = get(),
+            api = get(),
+            dataStore = get()
+        )
+    }
+
+    worker {
+        ChangeBalanceWorker(
             context = androidContext(),
             params = get(),
             api = get()

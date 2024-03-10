@@ -10,4 +10,6 @@
     <string name="account_name">Название счета</string>
     <string name="create_account">Готово</string>
     <string name="hidden">Скрытые счета</string>
+    <string name="change_balance">Сумма пополнения/списания</string>
+    <string name="email">Адрес электронной почты</string>
 </resources>

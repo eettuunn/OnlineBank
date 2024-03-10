@@ -1,4 +1,4 @@
-package com.akimov.mobilebank.bankAccounts
+package com.akimov.mobilebank.ui
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
@@ -55,7 +55,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SheetState
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarData
 import androidx.compose.material3.SnackbarHost
@@ -65,7 +64,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -89,13 +87,13 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.akimov.mobilebank.R
 import com.akimov.mobilebank.data.models.BankAccountNetwork
 import com.akimov.mobilebank.ui.theme.MobileBankTheme
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.delay
 import org.koin.compose.koinInject
 
@@ -165,8 +163,11 @@ private fun AccountsContent(
 ) {
     val scrollState = rememberScrollState()
 
-    val sheetState: SheetState = rememberModalBottomSheetState()
-    var showBottomSheet by remember {
+    var showActionsBottomSheet by remember {
+        mutableStateOf(false)
+    }
+
+    var showAccountOperationsBottomSheet by remember {
         mutableStateOf(false)
     }
 
@@ -180,11 +181,14 @@ private fun AccountsContent(
         AccountsList(
             paddingValues = paddingValues,
             scrollState = scrollState,
-            accountsList = state.accountsList
+            accountsList = state.accountsList,
+            selectAccount = {
+                reduce(UIIntent.SelectAccount(it))
+            }
         )
     }, floatingActionButton = {
         FloatingActionButton(shape = CircleShape, containerColor = Color(0xFF0990cb), onClick = {
-            showBottomSheet = true
+            showActionsBottomSheet = true
         }) {
             Icon(
                 imageVector = Icons.Filled.Add,
@@ -200,13 +204,51 @@ private fun AccountsContent(
         }
     })
 
-    if (showBottomSheet) {
+    if (showActionsBottomSheet) {
         BottomSheetActions(
-            sheetState = sheetState,
             onDismissRequest = {
-                showBottomSheet = false
+                showActionsBottomSheet = false
             },
             reduce = reduce
+        )
+    }
+
+    if (showAccountOperationsBottomSheet) {
+        AccountOperationsBottomSheet(
+            onDismissRequest = {
+                showAccountOperationsBottomSheet = false
+            },
+            onCompleteClick = {
+                reduce
+            }
+        )
+    }
+
+    if (state.selectedAccount != null) {
+        EditBottomSheet(
+            onDismissRequest = {
+                reduce(UIIntent.UnselectAccount)
+            },
+            reduce = reduce,
+            accountName = state.selectedAccount.name
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditBottomSheet(
+    onDismissRequest: () -> Unit,
+    reduce: (UIIntent) -> Unit,
+    accountName: String
+) {
+    ModalBottomSheet(onDismissRequest = onDismissRequest) {
+        InputDataContent(
+            onCompleteClick = {
+                reduce(UIIntent.RenameAccount(it))
+            },
+            labelText = "",
+            preferredText = accountName
         )
     }
 }
@@ -221,12 +263,11 @@ private fun CommonSnackBar(it: SnackbarData) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun BottomSheetActions(
-    sheetState: SheetState,
     onDismissRequest: () -> Unit,
     contentSheetState: ContentSheetState = ContentSheetState.ACTIONS,
     reduce: (UIIntent) -> Unit
 ) {
-    ModalBottomSheet(sheetState = sheetState, onDismissRequest = onDismissRequest) {
+    ModalBottomSheet(onDismissRequest = onDismissRequest) {
         var currentState by remember(contentSheetState) {
             mutableStateOf(contentSheetState)
         }
@@ -235,21 +276,44 @@ private fun BottomSheetActions(
                 currentState = ContentSheetState.CREATE_ACCOUNT
             })
 
-            ContentSheetState.CREATE_ACCOUNT -> CreateAccountContent(reduce = {
+            ContentSheetState.CREATE_ACCOUNT -> InputDataContent(onCompleteClick = {
                 onDismissRequest()
-                reduce(it)
+                reduce(UIIntent.OpenAccount(it))
             })
 
-            ContentSheetState.CHANGE_BALANCE -> TODO()
             ContentSheetState.GET_LOAN -> TODO()
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun CreateAccountContent(reduce: (UIIntent) -> Unit) {
+private fun AccountOperationsBottomSheet(
+    onDismissRequest: () -> Unit,
+    onCompleteClick: (String) -> Unit
+) {
+    ModalBottomSheet(onDismissRequest = onDismissRequest) {
+        InputDataContent(
+            onCompleteClick = {
+                onDismissRequest()
+                onCompleteClick(it)
+            },
+            labelText = stringResource(id = R.string.change_balance),
+            keyboardType = KeyboardType.Number
+        )
+    }
+}
+
+// Создать счет, переименовать счет, изменить баланс, взять кредит
+@Composable
+private fun InputDataContent(
+    onCompleteClick: (String) -> Unit,
+    labelText: String = stringResource(id = R.string.account_name),
+    keyboardType: KeyboardType = KeyboardType.Text,
+    preferredText: String = ""
+) {
     var text by remember {
-        mutableStateOf("")
+        mutableStateOf(preferredText)
     }
     Spacer(modifier = Modifier.height(16.dp))
 
@@ -288,17 +352,20 @@ private fun CreateAccountContent(reduce: (UIIntent) -> Unit) {
             }
         },
         placeholder = {
-            Text(text = stringResource(R.string.account_name))
+            Text(text = labelText)
         },
         singleLine = true,
-        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+        keyboardOptions = KeyboardOptions(
+            capitalization = KeyboardCapitalization.Sentences,
+            keyboardType = keyboardType
+        ),
     )
     Spacer(modifier = Modifier.height(16.dp))
     Button(
         modifier = Modifier
             .padding(horizontal = 16.dp)
             .fillMaxWidth(),
-        onClick = { reduce.invoke(UIIntent.OpenAccount(text)) },
+        onClick = { onCompleteClick(text) },
         shape = RoundedCornerShape(16.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = Color(0xFF0990cb),
@@ -319,13 +386,13 @@ private fun CreateAccountContent(reduce: (UIIntent) -> Unit) {
 private fun CreateAccountContentPreview() {
     MobileBankTheme {
         Column {
-            CreateAccountContent(reduce = {})
+            InputDataContent(onCompleteClick = {})
         }
     }
 }
 
 enum class ContentSheetState {
-    ACTIONS, CREATE_ACCOUNT, CHANGE_BALANCE, GET_LOAN
+    ACTIONS, CREATE_ACCOUNT, GET_LOAN
 }
 
 @Composable
@@ -383,7 +450,8 @@ private fun SheetItem(headerIconResId: Int, messageResId: Int, onClick: () -> Un
 private fun AccountsList(
     paddingValues: PaddingValues,
     scrollState: ScrollState,
-    accountsList: ImmutableList<BankAccountNetwork>
+    accountsList: ImmutableList<BankAccountNetwork>,
+    selectAccount: (BankAccountNetwork) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -393,11 +461,11 @@ private fun AccountsList(
         Spacer(modifier = Modifier.height(16.dp))
         accountsList.forEach {
             AccountInfoCard(
-                name = it.name,
-                balance = it.balance.toString(),
                 modifier = Modifier
                     .padding(bottom = 16.dp, start = 16.dp, end = 16.dp)
-                    .fillMaxWidth()
+                    .fillMaxWidth(),
+                account = it,
+                selectAccount = selectAccount
             )
             Spacer(modifier = Modifier.height(8.dp))
         }
@@ -438,12 +506,11 @@ fun HiddenAccounts(
             animationSpec = tween(expandTime),
         )
     }
-    val transitionState =
-        remember {
-            MutableTransitionState(visible).apply {
-                targetState = !visible
-            }
+    val transitionState = remember {
+        MutableTransitionState(visible).apply {
+            targetState = !visible
         }
+    }
 
     val transition = updateTransition(transitionState, label = "")
     val arrowRotationDegree by transition.animateFloat({
@@ -487,17 +554,17 @@ fun HiddenAccounts(
             exit = exitTransition,
         ) {
             Column {
-                hiddenAccounts.forEach {
-                    AccountInfoCard(
-                        name = it.name,
-                        balance = it.balance.toString(),
-                        modifier = Modifier
-                            .padding(bottom = 16.dp, start = 16.dp, end = 16.dp)
-                            .fillMaxWidth(),
-                        isHidden = true
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
+//                hiddenAccounts.forEach {
+//                    AccountInfoCard(
+//                        modifier = Modifier
+//                            .padding(bottom = 16.dp, start = 16.dp, end = 16.dp)
+//                            .fillMaxWidth(),
+//                        balance = it.balance.toString(),
+//                        name = it.name,
+//                        isHidden = true,
+//                    )
+//                    Spacer(modifier = Modifier.height(8.dp))
+//                }
             }
         }
     }
@@ -511,12 +578,17 @@ enum class DragAnchors {
 @OptIn(ExperimentalFoundationApi::class)
 private fun AccountInfoCard(
     modifier: Modifier = Modifier,
-    balance: String,
-    name: String,
-    isHidden: Boolean = false
+    account: BankAccountNetwork,
+    isHidden: Boolean = false,
+    selectAccount: (BankAccountNetwork) -> Unit
 ) {
     val density = LocalDensity.current
-    val dragState: AnchoredDraggableState<DragAnchors> = remember {
+
+    var anchorsUpdate by remember {
+        mutableStateOf(false)
+    }
+
+    val dragState: AnchoredDraggableState<DragAnchors> = remember(anchorsUpdate) {
         AnchoredDraggableState(
             initialValue = DragAnchors.Start,
             positionalThreshold = { distanceBetweenAnchors: Float -> distanceBetweenAnchors * 0.5f },
@@ -563,7 +635,7 @@ private fun AccountInfoCard(
                     isHidden = isHidden
                 )
 
-                TextWithDescription(balance, name)
+                TextWithDescription(account.balance.toString(), account.name)
             }
         }
         AnimatedVisibility(
@@ -575,7 +647,14 @@ private fun AccountInfoCard(
                 .align(Alignment.TopEnd),
             visible = actionsVisibility
         ) {
-            ActionIcons(isHidden = isHidden)
+            ActionIcons(
+                isHidden = isHidden,
+                selectAccount = selectAccount,
+                currentAccount = account,
+                updateAnchors = {
+                    anchorsUpdate = !anchorsUpdate
+                }
+            )
         }
     }
 }
@@ -606,12 +685,36 @@ fun CommonIcon(
 }
 
 @Composable
-private fun ActionIcons(modifier: Modifier = Modifier, isHidden: Boolean = false) {
-    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
-        CommonIcon(imageVector = Icons.Filled.Edit, modifier = Modifier.size(24.dp))
+private fun ActionIcons(
+    modifier: Modifier = Modifier,
+    isHidden: Boolean = false,
+    selectAccount: (BankAccountNetwork) -> Unit,
+    currentAccount: BankAccountNetwork,
+    updateAnchors: () -> Unit
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        CommonIcon(
+            imageVector = Icons.Filled.Edit,
+            modifier = Modifier
+                .size(24.dp)
+                .clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }
+                ) {
+                    updateAnchors()
+                    selectAccount(currentAccount)
+                }
+        )
         CommonIcon(
             imageVector = ImageVector.vectorResource(
-                id = if (!isHidden) R.drawable.baseline_visibility_off_24 else R.drawable.baseline_visibility_24
+                id = if (!isHidden) {
+                    R.drawable.baseline_visibility_off_24
+                } else {
+                    R.drawable.baseline_visibility_24
+                }
             ),
             modifier = Modifier
                 .padding(start = 16.dp)
@@ -643,16 +746,16 @@ private fun TextWithDescription(balance: String, name: String) {
     }
 }
 
-@Preview(showBackground = true, device = "id:pixel")
-@Composable
-fun AccountItemPreview() {
-    MobileBankTheme {
-        AccountInfoCard(
-            name = "Основной",
-            balance = "100000 ₽",
-        )
-    }
-}
+// @Preview(showBackground = true, device = "id:pixel")
+// @Composable
+// fun AccountItemPreview() {
+//    MobileBankTheme {
+//        AccountInfoCard(
+//            balance = "100000 ₽",
+//            name = "Основной", ,
+//        )
+//    }
+// }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -747,36 +850,22 @@ fun TopBarPreview() {
     }
 }
 
-@Preview(showBackground = true, device = "id:pixel")
-@Composable
-fun AccountsScreenPreview() {
-    MobileBankTheme {
-        AccountsContent(
-            state = AccountsScreenState.Content(
-                userName = "Максим",
-                isDarkTheme = true,
-                accountsList = persistentListOf()
-            ),
-            onChangeThemeClicked = {},
-            hostState = null,
-            reduce = {}
-        )
-    }
-}
+// @Preview(showBackground = true, device = "id:pixel")
+// @Composable
+// fun AccountsScreenPreview() {
+//    MobileBankTheme {
+//        AccountsContent(state = AccountsScreenState.Content(
+//            userName = "Максим", isDarkTheme = true, accountsList = persistentListOf()
+//        ), onChangeThemeClicked = {}, hostState = null, reduce = {})
+//    }
+// }
 
-@Preview(showBackground = true, device = "id:pixel")
-@Composable
-fun AccountsScreenPreviewDark() {
-    MobileBankTheme(darkTheme = true) {
-        AccountsContent(
-            state = AccountsScreenState.Content(
-                userName = "Максим",
-                isDarkTheme = true,
-                accountsList = persistentListOf()
-            ),
-            onChangeThemeClicked = {},
-            hostState = null,
-            reduce = {}
-        )
-    }
-}
+// @Preview(showBackground = true, device = "id:pixel")
+// @Composable
+// fun AccountsScreenPreviewDark() {
+//    MobileBankTheme(darkTheme = true) {
+//        AccountsContent(state = AccountsScreenState.Content(
+//            userName = "Максим", isDarkTheme = true, accountsList = persistentListOf()
+//        ), onChangeThemeClicked = {}, hostState = null, reduce = {})
+//    }
+// }

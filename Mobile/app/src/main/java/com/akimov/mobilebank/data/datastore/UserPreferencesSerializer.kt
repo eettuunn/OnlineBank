@@ -13,7 +13,6 @@ object UserPreferencesSerializer : Serializer<UserSettings> {
         .toBuilder()
         .setName("Максим")
         .setIsDarkMode(false)
-        .setUuid("77141e72-da79-44c8-b057-ea1ea39bac2a")
         .build()
 
     override suspend fun readFrom(input: InputStream): UserSettings {
