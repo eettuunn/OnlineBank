@@ -3,30 +3,30 @@ const app = express();
 const { createProxyMiddleware } = require("http-proxy-middleware");
 const port = 3000;
 
-// http://127.0.0.1:3000/ => http://127.0.0.1:8080/
+const host = 'http://92.255.79.135';
 
 app.use(
   "/api/bank-accounts",
   createProxyMiddleware({
-    target: "http://127.0.0.1:8080",
+    target: `${host}:8080`,
   })
 );
 app.use(
   "/api/transactions",
   createProxyMiddleware({
-    target: "http://127.0.0.1:8080",
+    target: `${host}:8080`,
   })
 );
 app.use(
   "/user_api",
   createProxyMiddleware({
-    target: "http://127.0.0.1:7788",
+    target: `${host}:7788`,
   })
 );
 app.use(
   "/loan_api",
   createProxyMiddleware({
-    target: "http://127.0.0.1:8877",
+    target: `${host}:8877`,
   })
 );
 
