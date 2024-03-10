@@ -14,11 +14,22 @@ services:
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "root"
 
+  bank_loan_service:
+    container_name: bank_loan_service
+    image: eebbuunn/onlinebank.loanservice:latest
+    ports:
+      - "8877:80"
+    environment:
+      ConnectionStrings__PostgresLoanService: "host=postgres_image;port=5432;database=bank_loan_db;username=postgres;password=root"
+      IntegrationApisUrls__UserServiceUrl: "http://92.255.79.135:7788"
+      IntegrationApisUrls__CoreServiceUrl: "http://92.255.79.135:8080"
+    restart: on-failure
+    depends_on:
+      - "postgres_image"
+
   bank-user-service:
     container_name: bank-user-service
     image: eebbuunn/onlinebank.userservice:latest
-    build:
-      context: ./OnlineBank.UserService
     ports:
       - "7788:80"
     environment:
@@ -28,9 +39,8 @@ services:
       - "postgres_image"
 
   bank-core-service:
-    build:
-      context: ./OnlineBank.CoreService
     container_name: bank-core-service
+    image: iseeyouwatching/onlinebankcoreservice-app:latest
     ports:
       - '8080:8080'
     depends_on:
