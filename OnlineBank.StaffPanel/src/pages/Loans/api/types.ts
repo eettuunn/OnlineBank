@@ -14,3 +14,8 @@ export interface ILoan {
     interestRate: number,
     loanRateName: string,
 }
+
+export interface ICreateLoanRate {
+    name: string,
+    interestRate: number
+}

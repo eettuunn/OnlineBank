@@ -96,13 +96,13 @@ const User: React.FC = () => {
             </MainHeader>
             <Content>
 
-                <Collapse bordered={true} className={b('collapse-loans').toString()} defaultActiveKey={[ 'loans' ]}>
+                <Collapse bordered={true} className={b('collapse-loans').toString()} defaultActiveKey={[ '' ]}>
                     <Panel header={<Divider orientation="left">Кредиты</Divider>} key="loans">
                         <BaseTable
                             cursorPointer
                             columns={newColumnsLoans}
                             // isLoading={isLoadingUsers || isFetchingUsers}
-                            dataSource={UsersMock as Record<any, any>[]}
+                            dataSource={dataLoans as unknown as Record<string, unknown>[]}
                             // onRow={onRow}
                         />,
                     </Panel>
