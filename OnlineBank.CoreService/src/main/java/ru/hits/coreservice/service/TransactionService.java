@@ -59,7 +59,7 @@ public class TransactionService {
                 .collect(Collectors.toList());
 
         PageInfoDto pageInfo = new PageInfoDto(
-                transactionPage.getTotalPages(),
+                (int) transactionPage.getTotalElements(),
                 pageNumber,
                 Math.min(pageSize, transactionPage.getContent().size())
         );
