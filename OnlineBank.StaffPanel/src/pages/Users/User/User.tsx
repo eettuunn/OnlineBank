@@ -1,15 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import block from 'bem-cn';
-import { Col, Collapse, Divider, Layout, Row } from 'antd';
+import { Collapse, Divider, Layout } from 'antd';
 import { useNavigate, useParams } from 'react-router-dom';
-import Title from 'antd/lib/typography/Title';
 
 import UserBlockInfo from '../components/UserBlockInfo/UserBlockInfo';
 import BaseTable from '../../../features/BaseTable/BaseTable';
 import MainHeader from '../../../features/MainHeader/MainHeader';
 import { Paths } from '../../../shared/constants';
 import { useLayoutConfig } from '../../../shared/hooks/useLayoutConfig/useLayoutConfig';
-import { AccountMock, UsersMock } from '../__mocks';
 import { Status, columnLoans, columnsAccount } from '../constants';
 import './User.scss';
 import { useGetUserAccountsQuery } from '../api/accountsApi';
@@ -27,11 +25,9 @@ const User: React.FC = () => {
     const navigate = useNavigate();
     const { userId } = useParams();
 
-    const [ indexRow, setIndexRow ] = useState<undefined | number>(undefined);
-
     const pagination = useAppSelector(store => store.pagination[location.pathname] ?? store.pagination.empty);
 
-    const { isLoading: isLoadingUser, data: dataUser } = useGetUserInfoQuery(userId as string, { pollingInterval: 20000 });
+    const { data: dataUser } = useGetUserInfoQuery(userId as string, { pollingInterval: 20000 });
     const { isLoading: isLoadingAccounts, data: dataAccounts } = useGetUserAccountsQuery({ id: userId as string, params: pagination },
         { pollingInterval: 5000 });
 
@@ -46,7 +42,7 @@ const User: React.FC = () => {
             return {
                 ...el,
                 width: '200px',
-                render: (value: any, record: Record<string, string>) => <span>{dateParse(record.creationDate)}</span>,
+                render: (value: any, record: Record<string, unknown>) => <span>{dateParse(record.creationDate as string)}</span>,
             };
         } else if (el.key === 'isClosed') {
             return {
@@ -63,13 +59,13 @@ const User: React.FC = () => {
             return {
                 ...el,
                 width: '200px',
-                render: (value: any, record: Record<string, string>) => <span>{dateParse(record.startDate)}</span>,
+                render: (value: any, record: Record<string, unknown>) => <span>{dateParse(record.startDate as string)}</span>,
             };
         } else if (el.key === 'endDate') {
             return {
                 ...el,
                 width: '200px',
-                render: (value: any, record: Record<string, string>) => <span>{dateParse(record.endDate)}</span>,
+                render: (value: any, record: Record<string, unknown>) => <span>{dateParse(record.endDate as string)}</span>,
             };
         } else return el;
     },
@@ -77,10 +73,8 @@ const User: React.FC = () => {
 
     const onRow = (record: Record<string, unknown>, rowIndex: number | undefined) => ({
         onMouseEnter: (event: React.MouseEvent) => {
-            setIndexRow(rowIndex);
         },
         onMouseLeave: (event: React.MouseEvent) => {
-            setIndexRow(undefined);
         },
         onClick: (event: React.MouseEvent) => {
             navigate(`account/${record.id as string}`);

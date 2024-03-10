@@ -5,12 +5,11 @@ import { Button, Card, Layout, List } from 'antd';
 import { useLayoutConfig } from '../../../shared/hooks/useLayoutConfig/useLayoutConfig';
 import { Paths } from '../../../shared/constants';
 import MainHeader from '../../../features/MainHeader/MainHeader';
-import { LoanRatesMock } from '../__mocks';
 import { useCreateLoanRateMutation, useGetLoanRatesQuery } from '../api/loansApi';
 import ModalCreateRate from '../components/ModalCreateRate/ModalCreateRate';
+import { ICreateLoanRate } from '../api/types';
 
 import './LoanRates.scss';
-import { ICreateLoanRate } from '../api/types';
 
 const b = block('loan-rates');
 const { Content } = Layout;
@@ -20,7 +19,7 @@ const LoanRates: React.FC = () => {
     const [ visible, setVisible ] = useState(false);
 
     const { isLoading: isLoadingRates, data: dataRates } = useGetLoanRatesQuery(undefined);
-    const [ create, { isLoading: isLoadingCreate, data: newLoanRateData } ] = useCreateLoanRateMutation();
+    const [ create, { isLoading: isLoadingCreate } ] = useCreateLoanRateMutation();
 
     useEffect(() => {
         setConfig({ activeMenuKey: Paths.Loans, headerTitle: 'Кредитные тарифы' });
@@ -46,6 +45,7 @@ const LoanRates: React.FC = () => {
                 <List
                     dataSource={dataRates}
                     grid={{ gutter: 16, column: 4 }}
+                    loading={isLoadingRates}
                     renderItem={item => (
                         <List.Item>
                             <Card title={item.name}>Процентная ставка: {item.interestRate}</Card>

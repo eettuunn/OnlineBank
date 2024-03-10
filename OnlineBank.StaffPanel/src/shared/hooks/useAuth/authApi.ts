@@ -2,7 +2,7 @@ import { createApi } from '@reduxjs/toolkit/query/react';
 
 import { axiosBaseQuery } from '../../api/query';
 
-import { ICredentials, IGetCurrentUser } from './types';
+import { ICredentials } from './types';
 
 /**
  * Api для авторизации
@@ -20,9 +20,6 @@ export const authApi = createApi({
             }),
             invalidatesTags: [ 'Auth' ],
         }),
-        // logout: builder.mutation({
-        //     query: ({ url, refresh }: { url: string; refresh: string }) => ({ url, method: 'post', data: `refresh=${refresh}` }),
-        // }),
     }),
 });
 

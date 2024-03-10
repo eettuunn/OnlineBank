@@ -45,28 +45,4 @@
         display: flex;
         gap: 10px;
     }
-
-    &__play-video-button {
-        display: flex;
-        align-items: center;
-    }
-
-    &__progress-block {
-        display: flex;
-        flex-flow: column;
-        gap: 6px;
-        align-items: flex-end;
-        width: 200px;
-    }
-
-    &__progress-title {
-        color: color.$secondary;
-        font-size: 15px;
-    }
-
-    &__progress-time {
-        color: color.$primary;
-        font-size: 15px;
-        line-height: 20px;
-    }
 }

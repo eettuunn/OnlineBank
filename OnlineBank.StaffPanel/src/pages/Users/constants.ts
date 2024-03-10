@@ -125,3 +125,17 @@ export const enum Status {
     Active = 'Активный',
     Inactive = 'Заблокирован',
 }
+
+export enum TransactionType {
+    WITHDRAW,
+    DEPOSIT,
+    REPAY_LOAN,
+    TAKE_LOAN,
+}
+
+export const TransactionTypeRus = {
+    [TransactionType.WITHDRAW]: 'СНЯТИЕ',
+    [TransactionType.DEPOSIT]: 'ПОПОЛНЕНИЕ',
+    [TransactionType.REPAY_LOAN]: 'ВЫПЛАТА ПО КРЕДИТУ',
+    [TransactionType.TAKE_LOAN]: 'ВЗЯТИЕ КРЕДИТА',
+};

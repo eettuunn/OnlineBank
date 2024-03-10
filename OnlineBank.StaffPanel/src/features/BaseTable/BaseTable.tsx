@@ -1,17 +1,13 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Table } from 'antd';
 import { ColumnGroupType, ColumnType, TableProps } from 'antd/lib/table';
 
-// import { IResponseData } from '../../shared/types';
-
 import MainPagination from './components/MainPagination/MainPagination';
-import { IScroll } from './types';
 
 import './BaseTable.scss';
 
 interface IProps extends TableProps<Record<string, unknown>> {
-    columns: (ColumnGroupType<Record<string, unknown>> | ColumnType<Record<string, unknown>>)[];
-    scroll?: IScroll;
+    columns: (ColumnGroupType<Record<string, any>> | ColumnType<Record<string, any>>)[];
     cursorPointer?: boolean;
     rowKey?: string;
     isLoading?: boolean;

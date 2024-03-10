@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { block } from 'bem-cn';
 import Icon from '@ant-design/icons';
-import { Alert, Button, Form, Input, Layout, Typography } from 'antd';
+import { Button, Form, Input, Layout, Typography } from 'antd';
 
 import './Login.scss';
 import { useAuth } from '../../shared/hooks/useAuth/useAuth';
@@ -12,7 +12,6 @@ const { Text } = Typography;
 const b = block('login');
 
 const Login: React.FC = () => {
-    const navigate = useNavigate();
     const { isAuth, login, isLoginFetching } = useAuth();
 
     const [ form ] = Form.useForm();

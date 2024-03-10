@@ -11,7 +11,7 @@ import { BaseQueryFn } from '@reduxjs/toolkit/query';
 
 import { apiBaseUrl, apiPrefix } from '../constants';
 import eventEmitter from '../helpers/eventEmmiter';
-import { getStorageValue, setStorageValue } from '../hooks/useLocalStorage/useLocalStorage';
+import { getStorageValue } from '../hooks/useLocalStorage/useLocalStorage';
 
 export interface IAxiosParams {
     method: AxiosRequestConfig['method'];
@@ -57,56 +57,8 @@ const requestInterceptors = (req: InternalAxiosRequestConfig) => {
  */
 const successInterceptors = (response: AxiosResponse) => response;
 
-/**
- * Интерцептор на ошибку сервера
- */
-
-const errorInterceptors = async (error: AxiosError) => {
-    const storedValueForRefresh = getStorageValue<string>('refresh');
-
-    const originalConfig = error.config;
-
-    // if (originalConfig?.url !== `${apiPrefix}/login/` && error.response) {
-    //     if (error.response.status === 403) {
-    //         window.localStorage.clear();
-    //     }
-    //     if (
-    //         error.response.status === 401 &&
-    //         !error?.config?.headers['X-no-retry'] &&
-    //         originalConfig?.url !== `${apiPrefix}/refresh_token/` &&
-    //         storedValueForRefresh
-    //     ) {
-    //         // Access Token was expired
-    //         originalConfig?.headers.set('X-no-retry', 'no-retry');
-    //         try {
-    //             const rs: { data: { access: string; refresh: string } } = await instance
-    //                 .post(`${apiPrefix}/refresh_token/`, {
-    //                     refresh: storedValueForRefresh,
-    //                 })
-    //                 .catch((_error) => {
-    //                     eventEmitter.emit('authError');
-    //                     window.localStorage.clear();
-    //                     return Promise.reject(_error);
-    //                 });
-
-    //             const { access, refresh } = rs.data;
-    //             setStorageValue('access', access);
-    //             setStorageValue('refresh', refresh);
-
-    //             originalConfig?.headers.set('Authorization', `Bearer ${access}`);
-
-    //             return await instance(originalConfig as AxiosRequestConfig);
-    //         } catch (_error) {
-    //             return Promise.reject(_error);
-    //         }
-    //     }
-    // }
-
-    return Promise.reject(error);
-};
-
 instance.interceptors.request.use(requestInterceptors);
-instance.interceptors.response.use(successInterceptors, errorInterceptors);
+instance.interceptors.response.use(successInterceptors);
 
 const emitError = (error: AxiosError) => {
     switch (error.response?.status) {

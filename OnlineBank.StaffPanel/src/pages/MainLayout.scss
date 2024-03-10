@@ -41,32 +41,6 @@
     }
 }
 
-.logo {
-    display: flex;
-    justify-content: space-between;
-
-    &_collapsed {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    &__button {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 40px;
-    }
-
-    &__icon {
-        padding: 0;
-
-        &_collapsed {
-            display: none;
-        }
-    }
-}
-
 .h100 {
     height: 100%;
     padding: 24px 15px;

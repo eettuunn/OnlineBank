@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
-import { message, notification } from 'antd';
-import { duration } from 'moment';
+import { notification } from 'antd';
 
 import eventEmitter from '../../helpers/eventEmmiter';
 

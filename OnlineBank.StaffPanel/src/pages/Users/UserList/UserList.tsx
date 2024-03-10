@@ -15,9 +15,9 @@ import { ICreateUser, IUser } from '../api/types';
 import BlockingModal from '../components/BlockingModal/BlockingModal';
 import { FormBlockingMode } from '../types';
 import { useBlockUserMutation, useCreateUserMutation, useGetUsersQuery, useUnblockUserMutation } from '../api/usersApi';
+import { useAppSelector } from '../../../redux/hooks';
 
 import './UserList.scss';
-import { useAppSelector } from '../../../redux/hooks';
 
 const b = block('user-list');
 const { Content } = Layout;

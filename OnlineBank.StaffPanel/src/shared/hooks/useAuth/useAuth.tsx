@@ -1,14 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 
-import { instance } from '../../api/query';
 import useLocalStorage from '../useLocalStorage/useLocalStorage';
-import { useAppSelector } from '../../../redux/hooks';
 import { Role } from '../../../pages/Users/constants';
 
 import { ICredentials, IGetCurrentUser } from './types';
-import { authApi, useLoginMutation } from './authApi';
+import { useLoginMutation } from './authApi';
 import { tokenDecode } from './tokenDecode';
 
 /**
@@ -94,7 +91,6 @@ const useProvideAuth = (): IAuth => {
      */
 
     const login = ({ email }: ICredentials) => {
-        console.log(email);
         loginQuery({ email })
             .unwrap()
             .then((res: { token: string; id: string }) => {

@@ -1,7 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
 
 import { usersApi } from '../pages/Users/api/usersApi';
-import authSlice from '../shared/hooks/useAuth/reducer';
 import { accountsApi } from '../pages/Users/api/accountsApi';
 import { loansApi } from '../pages/Loans/api/loansApi';
 import { authApi } from '../shared/hooks/useAuth/authApi';
@@ -16,7 +15,6 @@ export const store = configureStore({
         [loansApi.reducerPath]: loansApi.reducer,
         [authApi.reducerPath]: authApi.reducer,
         pagination: paginationSlice,
-        auth: authSlice,
     },
     middleware: getDefaultMiddleware => getDefaultMiddleware({ serializableCheck: false }).concat(mw),
 });

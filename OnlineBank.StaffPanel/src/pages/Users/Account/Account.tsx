@@ -9,15 +9,11 @@ import BaseTable from '../../../features/BaseTable/BaseTable';
 import MainHeader from '../../../features/MainHeader/MainHeader';
 import { Paths } from '../../../shared/constants';
 import { useLayoutConfig } from '../../../shared/hooks/useLayoutConfig/useLayoutConfig';
-import { AccountMock } from '../__mocks';
-import { columnsTransaction } from '../constants';
-import './Account.scss';
+import { TransactionType, TransactionTypeRus, columnsTransaction } from '../constants';
 import AccountBlockInfo from '../components/AccountBlockInfo/AccountBlockInfo';
 import { useGetAccountInfoQuery, useGetAccountTransactionQuery } from '../api/accountsApi';
 import { useAppSelector } from '../../../redux/hooks';
 import { dateParse } from '../../../shared/helpers/dateParse';
-import { useGetUsersLoansQuery } from '../../Loans/api/loansApi';
-import { TransactionType } from '../api/types';
 
 const b = block('account');
 const { Content } = Layout;
@@ -27,7 +23,6 @@ const Account: React.FC = () => {
     const navigate = useNavigate();
     const { accountId, userId } = useParams();
 
-    const [ indexRow, setIndexRow ] = useState<undefined | number>(undefined);
     const pagination = useAppSelector(store => store.pagination[location.pathname] ?? store.pagination.empty);
 
     const { data: dataAccount } = useGetAccountInfoQuery(accountId as string, { pollingInterval: 20000 });
@@ -57,13 +52,13 @@ const Account: React.FC = () => {
             return {
                 ...el,
                 width: '300px',
-                render: (value: any, record: Record<string, string>) => <span>{dateParse(record.transactionDate)}</span>,
+                render: (value: any, record: Record<string, unknown>) => <span>{dateParse(record.transactionDate as string)}</span>,
             };
         } else if (el.key === 'transactionType') {
             return {
                 ...el,
-                width: '200px',
-                render: (value: any, record: Record<string, unknown>) => <span style={{ fontWeight: '500' }}>{TransactionType[record.transactionType]}</span>,
+                width: '400px',
+                render: (value: any, record: Record<string, unknown>) => <span style={{ fontWeight: '500' }}>{TransactionTypeRus[TransactionType[record.transactionType]]}</span>,
             };
         } else if (el.key === 'amount') {
             return {
@@ -74,19 +69,8 @@ const Account: React.FC = () => {
         } else return el;
     });
 
-    const onRow = (record: Record<string, unknown>, rowIndex: number | undefined) => ({
-        onMouseEnter: (event: React.MouseEvent) => {
-            setIndexRow(rowIndex);
-        },
-        onMouseLeave: (event: React.MouseEvent) => {
-            setIndexRow(undefined);
-        },
-        onClick: (event: React.MouseEvent) => {
-        },
-    });
-
     const newCloumns = [ ...prepareTableData ];
-    console.log(dataTransactions?.pageInfo);
+
     return (
         <div className={b().toString()}>
             <MainHeader>
@@ -99,7 +83,6 @@ const Account: React.FC = () => {
                     dataSource={dataTransactions?.data as Record<any, any>[]}
                     isLoading={isLoadingTransactions}
                     pageInfo={dataTransactions?.pageInfo}
-                    onRow={onRow}
                 />
             </Content>
         </div>

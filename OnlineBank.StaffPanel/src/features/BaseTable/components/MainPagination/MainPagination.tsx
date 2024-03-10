@@ -1,11 +1,9 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { Button, Pagination, Row, Select, Typography } from 'antd';
+import React, { useCallback, useState } from 'react';
+import { Pagination, Row, Select, Typography } from 'antd';
 
 import { changePagination } from '../../../../redux/reducers/pagination.slice';
 import { useAppDispatch, useAppSelector } from '../../../../redux/hooks';
 import { IComponentPaginationProps } from '../../types';
-
-import type { PaginationProps } from 'antd';
 
 import '../../BaseTable.scss';
 
@@ -79,7 +77,6 @@ const MainPagination: React.FC<IComponentPaginationProps> = ({ total = 1, pageNu
                         label: '50',
                     },
                 ]}
-                // suffixIcon={<Icon component={ArrowIcon} style={{ rotate: '-90deg', pointerEvents: 'none' }} />}
                 onChange={onChangePageSize}
             />
         </Row>

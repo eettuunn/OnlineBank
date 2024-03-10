@@ -1,6 +1,5 @@
-import React, { useCallback, useState } from 'react';
-import { Button, Col, Form, Input, Modal, Row, Select, Spin } from 'antd';
-import PhoneInput from 'antd-phone-input';
+import React, { useCallback } from 'react';
+import { Button, Form, Input, Modal, Spin } from 'antd';
 import block from 'bem-cn';
 
 import { ICreateLoanRate } from '../../api/types';
@@ -71,8 +70,8 @@ const ModalCreateRate: React.FC<IModalProps> = ({ onSave, modal, isLoading }) =>
                     <Form.Item label="Название" name="name" rules={[ { required: true, message: 'Пожалуйста, введите значение' } ]}>
                         <Input placeholder="Название" />
                     </Form.Item>
-                    <Form.Item label="Процентная ставка" name="interestRate" rules={[ { required: true, message: 'Пожалуйста, введите значение' } ]}>
-                        <Input placeholder="1 %" />
+                    <Form.Item label="Процентная ставка, %" name="interestRate" rules={[ { required: true, message: 'Пожалуйста, введите значение' } ]}>
+                        <Input placeholder="1" />
                     </Form.Item>
                 </Form>
             </Spin>

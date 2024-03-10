@@ -1,5 +1,5 @@
 import { IResponseLists } from '../../../shared/types';
-import { Role } from '../constants';
+import { Role, TransactionType } from '../constants';
 
 export interface IUser {
     id: string,
@@ -37,13 +37,6 @@ export interface IAccount {
 }
 
 export type IAccountsResponse = IResponseLists<IAccount[]>;
-
-export enum TransactionType {
-    WITHDRAW = 'СНЯТИЕ',
-    DEPOSIT = 'ПОПОЛНЕНИЕ',
-    REPAY_LOAN = 'ВЫПЛАТА ПО КРЕДИТУ',
-    TAKE_LOAN = 'ВЗЯТИЕ КРЕДИТА',
-}
 
 export interface ITransaction {
     id: string,
