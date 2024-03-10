@@ -28,6 +28,16 @@ builder.Services.AddSwaggerGen(options =>
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(builder =>
+    {
+        builder.AllowAnyMethod()
+            .AllowAnyHeader()
+            .WithOrigins("*");
+    });
+});
+
 builder.Services.Configure<IntegrationApisUrls>(builder.Configuration.GetSection("IntegrationApisUrls"));
 
 builder.Services.AddScoped<ILoanRateService, LoanRateService>();
@@ -69,6 +79,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors();
 
 app.ConfigureLoanServiceDAL();
 
