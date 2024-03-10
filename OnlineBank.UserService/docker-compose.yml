@@ -1,0 +1,57 @@
+networks:
+  user-service-dev:
+    driver: bridge
+
+services:
+
+  postgres_image:
+    hostname: host.docker.internal
+    container_name: postgres_image
+    image: postgres:latest
+    ports:
+      - "5432"
+    restart: always
+    volumes:
+      - user_service_volume:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "root"
+    networks:
+      - user-service-dev
+
+  bank_user_service:
+    hostname: host.docker.internal
+    container_name: bank_user_service
+    image: eebbuunn/onlinebank.userservice:latest
+    build:
+      context: .
+    ports:
+      - "7788:80"
+    environment:
+      ConnectionStrings__PostgresUserService: "host=postgres_image;port=5432;database=bank_users_db;username=postgres;password=root"
+    restart: on-failure
+    networks:
+      - user-service-dev
+    depends_on:
+      - "postgres_image"
+        
+  bank_loan_service:
+    hostname: host.docker.internal
+    container_name: bank_loan_service
+    image: eebbuunn/onlinebank.loanservice:latest
+    build:
+      context: .
+    ports:
+      - "8877:80"
+    environment:
+      ConnectionStrings__PostgresLoanService: "host=postgres_image;port=5432;database=bank_loan_db;username=postgres;password=root"
+      IntegrationApisUrls__UserServiceUrl: "http://localhost:7788"
+      IntegrationApisUrls__CoreServiceUrl: "http://localhost:8080"
+    restart: on-failure
+    networks:
+      - user-service-dev
+    depends_on:
+      - "postgres_image"
+
+volumes:
+  user_service_volume:
