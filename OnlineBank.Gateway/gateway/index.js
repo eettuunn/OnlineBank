@@ -23,6 +23,12 @@ app.use(
     target: "http://127.0.0.1:7788",
   })
 );
+app.use(
+  "/loan_api",
+  createProxyMiddleware({
+    target: "http://127.0.0.1:8877",
+  })
+);
 
 
 app.listen(port, () => {
