@@ -16,7 +16,7 @@ interface IProps extends TableProps<Record<string, unknown>> {
     rowKey?: string;
     isLoading?: boolean;
     pageInfo?: {
-        pagesCount: number,
+        total: number,
         pageNumber: number,
         pageSize: number
     }
@@ -32,7 +32,7 @@ const BaseTable: React.FC<IProps> = (
             columns={columns}
             dataSource={(dataSource as Record<string, unknown>[]) || []}
             footer={() => pageInfo ?
-                <MainPagination pageNumber={pageInfo?.pageNumber} pageSize={pageInfo?.pageSize} pagesCount={pageInfo?.pagesCount} /> : null}
+                <MainPagination pageNumber={pageInfo?.pageNumber} pageSize={pageInfo?.pageSize} total={pageInfo?.total} /> : null}
             loading={isLoading}
             pagination={false}
             rowKey={rowKey}

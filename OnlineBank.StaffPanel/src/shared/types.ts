@@ -15,7 +15,7 @@ export interface INamedPath extends IRoute {
 
 export interface IResponseLists<T> {
     pageInfo: {
-        pagesCount: number,
+        total: number,
         pageNumber: number,
         pageSize: number,
     }

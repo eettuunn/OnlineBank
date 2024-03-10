@@ -11,10 +11,9 @@ import '../../BaseTable.scss';
 
 const { Text } = Typography;
 
-const MainPagination: React.FC<IComponentPaginationProps> = ({ pagesCount = 1, pageNumber = 1, pageSize = 10 }) => {
+const MainPagination: React.FC<IComponentPaginationProps> = ({ total = 1, pageNumber = 1, pageSize = 10 }) => {
     const pagination = useAppSelector(state => state.pagination);
     const { pathname } = location;
-    const [ total, setTotal ] = useState<number>(pagesCount);
 
     const [ newPageSize, setPageSize ] = useState<number>(pagination[pathname]?.pageSize ?? pageSize);
     const [ newCurrentPage, setCurrentPage ] = useState<number>(pagination[pathname]?.pageNumber ?? pageNumber);
@@ -28,21 +27,17 @@ const MainPagination: React.FC<IComponentPaginationProps> = ({ pagesCount = 1, p
         dispatch(changePagination({ path: pathname, paginationData: { pageSize: pageSize, pageNumber: page } }));
     };
 
-    useEffect(() => {
-        setTotal(pagesCount * pageSize);
-    }, [ pageSize, pagesCount ]);
-
     const onChangePageSize = useCallback(
         (value: number) => {
-            if (pagesCount && newCurrentPage > Math.ceil(pagesCount)) {
-                setCurrentPage(Math.ceil(pagesCount));
-                dispatch(changePagination({ path: pathname, paginationData: { pageSize: value, pageNumber: Math.ceil(pagesCount) } }));
+            if (total && newCurrentPage > Math.ceil(total / value)) {
+                setCurrentPage(Math.ceil(total / value));
+                dispatch(changePagination({ path: pathname, paginationData: { pageSize: value, pageNumber: Math.ceil(total / value) } }));
             } else {
                 dispatch(changePagination({ path: pathname, paginationData: { pageSize: value, pageNumber: newCurrentPage } }));
             }
             setPageSize(value);
         },
-        [ dispatch, newCurrentPage, pathname, pagesCount ],
+        [ dispatch, newCurrentPage, pathname, total ],
     );
 
     return (
