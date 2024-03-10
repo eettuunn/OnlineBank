@@ -53,7 +53,7 @@ public class BankAccountService {
                 .collect(Collectors.toList());
 
         PageInfoDto pageInfo = new PageInfoDto(
-                bankAccountPage.getTotalPages(),
+                (int) bankAccountPage.getTotalElements(),
                 pageNumber,
                 Math.min(pageSize, bankAccountPage.getContent().size())
         );
@@ -77,7 +77,7 @@ public class BankAccountService {
                 .collect(Collectors.toList());
 
         PageInfoDto pageInfo = new PageInfoDto(
-                bankAccountPage.getTotalPages(),
+                (int) bankAccountPage.getTotalElements(),
                 pageNumber,
                 Math.min(pageSize, bankAccountPage.getContent().size())
         );
