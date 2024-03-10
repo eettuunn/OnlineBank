@@ -39,10 +39,10 @@ export interface IAccount {
 export type IAccountsResponse = IResponseLists<IAccount[]>;
 
 export enum TransactionType {
-    WITHDRAW,
-    DEPOSIT,
-    REPAY_LOAN,
-    TAKE_LOAN,
+    WITHDRAW = 'СНЯТИЕ',
+    DEPOSIT = 'ПОПОЛНЕНИЕ',
+    REPAY_LOAN = 'ВЫПЛАТА ПО КРЕДИТУ',
+    TAKE_LOAN = 'ВЗЯТИЕ КРЕДИТА',
 }
 
 export interface ITransaction {

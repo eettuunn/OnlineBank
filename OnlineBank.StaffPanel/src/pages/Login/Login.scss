@@ -1,0 +1,104 @@
+@use '/src/shared/scss/color';
+
+.login, .password-recovery, .password-entry {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100vw;
+    height: 100vh;
+    background-color: color.$placeholder;
+
+    &__form.ant-form {
+        width: 432px;
+        background-color: #FFF;
+        border-radius: 16px;
+        padding-inline: 56px;
+        padding-block: 32px;
+    }
+
+    &__form-input.ant-input-affix-wrapper {
+        height: 56px;
+        padding: 0 15px 0 16px;
+        border-radius: 16px;
+
+        .ant-input, .ant-input:focus {
+            font-weight: 400;
+            font-size: 16px;
+            line-height: 16px;
+            letter-spacing: 0.16px;
+            box-shadow: inset 0 0 0 50px white !important;
+        }
+    }
+
+    &__form-item {
+        margin-bottom: 32px;
+    }
+
+
+    &__form-text-header {
+        display: flex;
+        justify-content: center;
+        height: 44px;
+        color: color.$text;
+        font-size: 17px;
+        line-height: 130%;
+        letter-spacing: 0.02em;
+        text-align: center;
+    }
+
+    &__paragraph {
+        margin-block: 14px;
+    }
+
+    &__form-text {
+        font-size: 22px;
+    }
+
+    &__form-button {
+        padding: 0;
+        color: color.$primary;
+     }
+
+    &__form-login-button {
+        width: 320px;
+        background-color: #0B1F36;
+    }
+
+    &__form-login-button.ant-btn:disabled {
+        color: color.$secondary;
+        background: color.$light-gray;
+        border: 1px solid color.$light-gray;
+        box-shadow: 0 1px 1px 0 rgb(0 0 0 / 25%);
+    }
+
+    &__back-button {
+        position: absolute;
+        top: 26px;
+        left: 30px;
+        display: flex;
+        align-items: center;
+        height: 20px;
+        padding: 0;
+        color: #FFF;
+        font-size: 13px;
+        line-height: 18px;
+        letter-spacing: 0.02em;
+    }
+}
+
+.ant-form-item-label > label {
+    color: color.$secondary;
+    font-size: 15px;
+    line-height: 20px;
+    letter-spacing: 0.02em;
+}
+
+.ant-input-suffix {
+    margin-left: 8px;
+    font-size: 24px;
+}
+
+.ant-input-prefix {
+    margin-right: 10px;
+}

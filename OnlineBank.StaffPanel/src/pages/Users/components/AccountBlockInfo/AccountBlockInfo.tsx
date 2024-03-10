@@ -21,7 +21,7 @@ const AccountBlockInfo: React.FC<IProps> = ({ account }) => (
     >
         <Row className={b('inner').toString()}>
             <Col span={6}>
-                <UserBlockInfoText label="" value={account?.name} />
+                <UserBlockInfoText label="Наименование" value={account?.name} />
             </Col>
             <Col span={6}>
                 <UserBlockInfoText label="Дата создания" value={dateParse(account?.creationDate as unknown as string)} />

@@ -31,10 +31,11 @@ const User: React.FC = () => {
 
     const pagination = useAppSelector(store => store.pagination[location.pathname] ?? store.pagination.empty);
 
-    const { isLoading: isLoadingUser, data: dataUser } = useGetUserInfoQuery(userId as string);
-    const { isLoading: isLoadingAccounts, data: dataAccounts } = useGetUserAccountsQuery({ id: userId as string, params: pagination });
+    const { isLoading: isLoadingUser, data: dataUser } = useGetUserInfoQuery(userId as string, { pollingInterval: 20000 });
+    const { isLoading: isLoadingAccounts, data: dataAccounts } = useGetUserAccountsQuery({ id: userId as string, params: pagination },
+        { pollingInterval: 5000 });
 
-    const { isLoading: isLoadingLoans, data: dataLoans } = useGetUsersLoansQuery(userId as string);
+    const { isLoading: isLoadingLoans, data: dataLoans } = useGetUsersLoansQuery(userId as string, { pollingInterval: 5000 });
 
     useEffect(() => {
         setConfig({ activeMenuKey: Paths.Users, headerTitle: 'Информация о пользователе' });
@@ -57,22 +58,21 @@ const User: React.FC = () => {
         } else return el;
     });
 
-    const prepareTableDataLoans = columnLoans.map(el =>
-        // if (el.key === 'creationDate') {
-        //     return {
-        //         ...el,
-        //         width: '200px',
-        //         render: (value: any, record: Record<string, string>) => <span>{dateParse(record.creationDate)}</span>,
-        //     };
-        // } else if (el.key === 'isClosed') {
-        //     return {
-        //         ...el,
-        //         width: '100px',
-        //         render: (value: any, record: Record<string, unknown>) =>
-        //             !record.isClosed ? <span style={{ color: '#5E8C4E', fontWeight: '500' }}>{Status.Active}</span> : <span style={{ color: '#EB5757', fontWeight: '500' }}>{Status.Inactive}</span>,
-        //     };
-        // } else
-        el,
+    const prepareTableDataLoans = columnLoans.map((el) =>{
+        if (el.key === 'startDate') {
+            return {
+                ...el,
+                width: '200px',
+                render: (value: any, record: Record<string, string>) => <span>{dateParse(record.startDate)}</span>,
+            };
+        } else if (el.key === 'endDate') {
+            return {
+                ...el,
+                width: '200px',
+                render: (value: any, record: Record<string, string>) => <span>{dateParse(record.endDate)}</span>,
+            };
+        } else return el;
+    },
     );
 
     const onRow = (record: Record<string, unknown>, rowIndex: number | undefined) => ({
@@ -99,17 +99,13 @@ const User: React.FC = () => {
                 <Collapse bordered={true} className={b('collapse-loans').toString()} defaultActiveKey={[ '' ]}>
                     <Panel header={<Divider orientation="left">Кредиты</Divider>} key="loans">
                         <BaseTable
-                            cursorPointer
                             columns={newColumnsLoans}
-                            // isLoading={isLoadingUsers || isFetchingUsers}
                             dataSource={dataLoans as unknown as Record<string, unknown>[]}
-                            // onRow={onRow}
-                        />,
+                            isLoading={isLoadingLoans}
+                        />
                     </Panel>
                 </Collapse>
 
-                {/* <Collapse bordered={false} defaultActiveKey={[ 'accounts' ]}>
-                    <Panel header={<Divider orientation="left">Счета</Divider>} key="accounts"> */}
                 <BaseTable
                     cursorPointer
                     columns={newCloumnsAccounts}
@@ -118,8 +114,6 @@ const User: React.FC = () => {
                     pageInfo={dataAccounts?.pageInfo}
                     onRow={onRow}
                 />
-                {/* </Panel>
-                </Collapse> */}
 
             </Content>
         </div>

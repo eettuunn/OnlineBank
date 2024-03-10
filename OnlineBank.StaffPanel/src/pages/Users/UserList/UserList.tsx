@@ -36,8 +36,8 @@ const UserList: React.FC = () => {
     const [ formBlockingMode, setFormBlockingMode ] = useState<FormBlockingMode>(FormBlockingMode.Blocking);
     const [ showBlockingModal, setShowBlockingModal ] = useState(false);
 
-    const { isLoading: isLoadingUsers, isFetching: isFetchingUsers, data: dataUsers } = useGetUsersQuery(pagination);
-    const [ create, { isLoading: isLoadingCreate, data: newUserData } ] = useCreateUserMutation();
+    const { isLoading: isLoadingUsers, isFetching: isFetchingUsers, data: dataUsers } = useGetUsersQuery(pagination, { pollingInterval: 20000 });
+    const [ create, { isLoading: isLoadingCreate } ] = useCreateUserMutation();
     const [ blockUser, { isLoading: isLoadingBlock } ] = useBlockUserMutation();
     const [ unblockUser, { isLoading: isLoadingUnblock } ] = useUnblockUserMutation();
 

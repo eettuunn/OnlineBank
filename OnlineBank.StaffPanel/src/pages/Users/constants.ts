@@ -1,11 +1,7 @@
 import { ColumnGroupType, ColumnType } from 'antd/lib/table';
 
 export const columnsUser: (ColumnGroupType<Record<string, unknown>> | ColumnType<Record<string, unknown>>)[] = [
-    // {
-    //     key: 'id',
-    //     title: '№',
-    //     dataIndex: 'id',
-    // },
+
     {
         key: 'userName',
         title: 'Полное имя',
@@ -51,7 +47,7 @@ export const columnsAccount: (ColumnGroupType<Record<string, unknown>> | ColumnT
     },
     {
         key: 'balance',
-        title: 'Баланс',
+        title: 'Баланс, ₽',
         dataIndex: 'balance',
     },
 ];
@@ -69,17 +65,17 @@ export const columnLoans: (ColumnGroupType<Record<string, unknown>> | ColumnType
     },
     {
         key: 'debt',
-        title: 'Долг',
+        title: 'Долг, ₽',
         dataIndex: 'debt',
     },
     {
         key: 'monthlyPayment',
-        title: 'Ежемесячный платеж',
+        title: 'Ежемесячный платеж, ₽',
         dataIndex: 'monthlyPayment',
     },
     {
         key: 'interestRate',
-        title: 'Процентная ставка',
+        title: 'Процентная ставка, %',
         dataIndex: 'interestRate',
     },
     {
@@ -97,7 +93,7 @@ export const columnsTransaction: (ColumnGroupType<Record<string, unknown>> | Col
     },
     {
         key: 'amount',
-        title: 'Сумма',
+        title: 'Сумма, ₽',
         dataIndex: 'amount',
     },
     {

@@ -10,6 +10,7 @@ import { store } from './redux/store';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { ProvideLayoutConfig } from './shared/hooks/useLayoutConfig/useLayoutConfig';
+import { ProvideAuth } from './shared/hooks/useAuth/useAuth';
 
 import './index.less';
 
@@ -17,11 +18,13 @@ const rootComponent = (
     <React.StrictMode>
         <Provider store={store}>
             <BrowserRouter>
-                <ProvideLayoutConfig>
-                    <ConfigProvider locale={ruRU}>
-                        <App />
-                    </ConfigProvider>
-                </ProvideLayoutConfig>
+                <ProvideAuth>
+                    <ProvideLayoutConfig>
+                        <ConfigProvider locale={ruRU}>
+                            <App />
+                        </ConfigProvider>
+                    </ProvideLayoutConfig>
+                </ProvideAuth>
             </BrowserRouter>
         </Provider>
     </React.StrictMode>

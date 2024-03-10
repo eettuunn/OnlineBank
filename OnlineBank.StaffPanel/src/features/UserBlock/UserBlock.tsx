@@ -28,6 +28,10 @@ const UserBlock: React.FC<IProps> = ({ collapsed }) => (
             className={b('button', { collapsed }).toString()}
             icon={<Icon component={LogoutIcon} style={{ fontSize: 20 }} />}
             type="text"
+            onClick={() => {
+                localStorage.removeItem('access');
+                location.reload();
+            }}
         />
     </div>
 );

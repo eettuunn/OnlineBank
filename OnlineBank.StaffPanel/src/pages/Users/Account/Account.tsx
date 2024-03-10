@@ -17,8 +17,9 @@ import { useGetAccountInfoQuery, useGetAccountTransactionQuery } from '../api/ac
 import { useAppSelector } from '../../../redux/hooks';
 import { dateParse } from '../../../shared/helpers/dateParse';
 import { useGetUsersLoansQuery } from '../../Loans/api/loansApi';
+import { TransactionType } from '../api/types';
 
-const b = block('user-list');
+const b = block('account');
 const { Content } = Layout;
 
 const Account: React.FC = () => {
@@ -29,8 +30,9 @@ const Account: React.FC = () => {
     const [ indexRow, setIndexRow ] = useState<undefined | number>(undefined);
     const pagination = useAppSelector(store => store.pagination[location.pathname] ?? store.pagination.empty);
 
-    const { isLoading: isLoadingAccount, data: dataAccount } = useGetAccountInfoQuery(accountId as string);
-    const { isLoading: isLoadingTransactions, data: dataTransactions } = useGetAccountTransactionQuery({ id: accountId as string, params: pagination });
+    const { data: dataAccount } = useGetAccountInfoQuery(accountId as string, { pollingInterval: 20000 });
+    const { isLoading: isLoadingTransactions, data: dataTransactions } = useGetAccountTransactionQuery({ id: accountId as string, params: pagination },
+        { pollingInterval: 5000 });
 
     useEffect(() => {
         setConfig({ activeMenuKey: Paths.Users, headerTitle: `Счет №${dataAccount?.number as string}`,
@@ -61,7 +63,7 @@ const Account: React.FC = () => {
             return {
                 ...el,
                 width: '200px',
-                render: (value: any, record: Record<string, unknown>) => <span style={{ fontWeight: '500' }}>{record.transactionType}</span>,
+                render: (value: any, record: Record<string, unknown>) => <span style={{ fontWeight: '500' }}>{TransactionType[record.transactionType]}</span>,
             };
         } else if (el.key === 'amount') {
             return {
@@ -93,7 +95,6 @@ const Account: React.FC = () => {
             <Content>
                 <Title level={3}>Операции</Title>
                 <BaseTable
-                    cursorPointer
                     columns={newCloumns}
                     dataSource={dataTransactions?.data as Record<any, any>[]}
                     isLoading={isLoadingTransactions}

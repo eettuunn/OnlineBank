@@ -15,22 +15,4 @@ export const LoanRoutes: IRoute[] = [
         ),
         title: '',
     },
-    {
-        path: 'rates/:rateId',
-        element: (
-            <Suspense fallback={<Spin className="main-loader" />}>
-                <div>Тариф</div>
-            </Suspense>
-        ),
-        title: '',
-    },
-    {
-        path: ':userId/:loanId',
-        element: (
-            <Suspense fallback={<Spin className="main-loader" />}>
-                <div>кредит пользователя</div>
-            </Suspense>
-        ),
-        title: '',
-    },
 ];

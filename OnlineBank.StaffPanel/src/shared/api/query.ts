@@ -66,41 +66,41 @@ const errorInterceptors = async (error: AxiosError) => {
 
     const originalConfig = error.config;
 
-    if (originalConfig?.url !== `${apiPrefix}/login/` && error.response) {
-        if (error.response.status === 403) {
-            window.localStorage.clear();
-        }
-        if (
-            error.response.status === 401 &&
-            !error?.config?.headers['X-no-retry'] &&
-            originalConfig?.url !== `${apiPrefix}/refresh_token/` &&
-            storedValueForRefresh
-        ) {
-            // Access Token was expired
-            originalConfig?.headers.set('X-no-retry', 'no-retry');
-            try {
-                const rs: { data: { access: string; refresh: string } } = await instance
-                    .post(`${apiPrefix}/refresh_token/`, {
-                        refresh: storedValueForRefresh,
-                    })
-                    .catch((_error) => {
-                        eventEmitter.emit('authError');
-                        window.localStorage.clear();
-                        return Promise.reject(_error);
-                    });
+    // if (originalConfig?.url !== `${apiPrefix}/login/` && error.response) {
+    //     if (error.response.status === 403) {
+    //         window.localStorage.clear();
+    //     }
+    //     if (
+    //         error.response.status === 401 &&
+    //         !error?.config?.headers['X-no-retry'] &&
+    //         originalConfig?.url !== `${apiPrefix}/refresh_token/` &&
+    //         storedValueForRefresh
+    //     ) {
+    //         // Access Token was expired
+    //         originalConfig?.headers.set('X-no-retry', 'no-retry');
+    //         try {
+    //             const rs: { data: { access: string; refresh: string } } = await instance
+    //                 .post(`${apiPrefix}/refresh_token/`, {
+    //                     refresh: storedValueForRefresh,
+    //                 })
+    //                 .catch((_error) => {
+    //                     eventEmitter.emit('authError');
+    //                     window.localStorage.clear();
+    //                     return Promise.reject(_error);
+    //                 });
 
-                const { access, refresh } = rs.data;
-                setStorageValue('access', access);
-                setStorageValue('refresh', refresh);
+    //             const { access, refresh } = rs.data;
+    //             setStorageValue('access', access);
+    //             setStorageValue('refresh', refresh);
 
-                originalConfig?.headers.set('Authorization', `Bearer ${access}`);
+    //             originalConfig?.headers.set('Authorization', `Bearer ${access}`);
 
-                return await instance(originalConfig as AxiosRequestConfig);
-            } catch (_error) {
-                return Promise.reject(_error);
-            }
-        }
-    }
+    //             return await instance(originalConfig as AxiosRequestConfig);
+    //         } catch (_error) {
+    //             return Promise.reject(_error);
+    //         }
+    //     }
+    // }
 
     return Promise.reject(error);
 };
