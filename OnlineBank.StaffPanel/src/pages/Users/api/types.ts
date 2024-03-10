@@ -6,7 +6,17 @@ export interface IUser {
     email: string,
     userName: string,
     ban: boolean,
-    roles: Role[]
+    roles: Role[],
+}
+
+export interface IUserInfo {
+    id: string,
+    email: string,
+    userName: string,
+    ban: boolean,
+    roles: Role[],
+    phoneNumber: string,
+    passport: string,
 }
 
 export interface ICreateUser {

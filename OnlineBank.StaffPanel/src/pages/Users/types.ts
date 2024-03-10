@@ -23,3 +23,7 @@ export interface IModalProps<T, K> {
     formMode: K;
     modal: { visible: boolean; setVisible: React.Dispatch<React.SetStateAction<boolean>> };
 }
+
+export const enum TransactionType {
+    WITHDRAW, DEPOSIT, REPAY_LOAN, TAKE_LOAN,
+}

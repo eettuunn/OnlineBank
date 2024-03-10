@@ -31,7 +31,8 @@ const BaseTable: React.FC<IProps> = (
             bordered
             columns={columns}
             dataSource={(dataSource as Record<string, unknown>[]) || []}
-            footer={() => pageInfo ? <MainPagination currentPage={pageInfo?.pageNumber} pageSize={pageInfo?.pageSize} total={pageInfo?.pagesCount} /> : null}
+            footer={() => pageInfo ?
+                <MainPagination pageNumber={pageInfo?.pageNumber} pageSize={pageInfo?.pageSize} pagesCount={pageInfo?.pagesCount} /> : null}
             loading={isLoading}
             pagination={false}
             rowKey={rowKey}

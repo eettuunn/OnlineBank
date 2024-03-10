@@ -17,6 +17,7 @@ import { FormBlockingMode } from '../types';
 import { useBlockUserMutation, useCreateUserMutation, useGetUsersQuery, useUnblockUserMutation } from '../api/usersApi';
 
 import './UserList.scss';
+import { useAppSelector } from '../../../redux/hooks';
 
 const b = block('user-list');
 const { Content } = Layout;
@@ -30,10 +31,12 @@ const UserList: React.FC = () => {
 
     const [ initialValues, setInitialValues ] = useState<IUser | object>({});
 
+    const pagination = useAppSelector(store => store.pagination[location.pathname] ?? store.pagination.empty);
+
     const [ formBlockingMode, setFormBlockingMode ] = useState<FormBlockingMode>(FormBlockingMode.Blocking);
     const [ showBlockingModal, setShowBlockingModal ] = useState(false);
 
-    const { isLoading: isLoadingUsers, isFetching: isFetchingUsers, data: dataUsers } = useGetUsersQuery(undefined);
+    const { isLoading: isLoadingUsers, isFetching: isFetchingUsers, data: dataUsers } = useGetUsersQuery(pagination);
     const [ create, { isLoading: isLoadingCreate, data: newUserData } ] = useCreateUserMutation();
     const [ blockUser, { isLoading: isLoadingBlock } ] = useBlockUserMutation();
     const [ unblockUser, { isLoading: isLoadingUnblock } ] = useUnblockUserMutation();

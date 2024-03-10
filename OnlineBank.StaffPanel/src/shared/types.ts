@@ -19,5 +19,10 @@ export interface IResponseLists<T> {
         pageNumber: number,
         pageSize: number,
     }
-    bankAccounts: T
+    data: T
+}
+
+export interface IRequestParams {
+    pageNumber: number,
+    pageSize: number,
 }

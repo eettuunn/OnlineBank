@@ -7,6 +7,7 @@ import block from 'bem-cn';
 import MainMenu from '../features/MainMenu/MainMenu';
 import { rootRoutes } from '../Routes';
 import UserBlock from '../features/UserBlock/UserBlock';
+import { SiderIcon } from '../shared/img/menuicons/SiderIcon';
 
 import './MainLayout.scss';
 
@@ -35,6 +36,7 @@ const MainLayout: React.FC = () => {
                         <Icon className={l('icon', { collapsed }).toString()}/>
                         <Button
                             className={l('button').toString()}
+                            icon={<Icon component={SiderIcon} style={{ fontSize: 40 }} />}
                             type="text"
                             onClick={() => setCollapsed(!collapsed)}
                         />

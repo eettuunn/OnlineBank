@@ -56,6 +56,39 @@ export const columnsAccount: (ColumnGroupType<Record<string, unknown>> | ColumnT
     },
 ];
 
+export const columnLoans: (ColumnGroupType<Record<string, unknown>> | ColumnType<Record<string, unknown>>)[] = [
+    {
+        key: 'startDate',
+        title: 'Дата начала',
+        dataIndex: 'startDate',
+    },
+    {
+        key: 'endDate',
+        title: 'Дата окончания',
+        dataIndex: 'endDate',
+    },
+    {
+        key: 'debt',
+        title: 'Долг',
+        dataIndex: 'debt',
+    },
+    {
+        key: 'monthlyPayment',
+        title: 'Ежемесячный платеж',
+        dataIndex: 'monthlyPayment',
+    },
+    {
+        key: 'interestRate',
+        title: 'Процентная ставка',
+        dataIndex: 'interestRate',
+    },
+    {
+        key: 'loanRateName',
+        title: 'Тариф',
+        dataIndex: 'loanRateName',
+    },
+];
+
 export const columnsTransaction: (ColumnGroupType<Record<string, unknown>> | ColumnType<Record<string, unknown>>)[] = [
     {
         key: 'transactionDate',
@@ -73,9 +106,9 @@ export const columnsTransaction: (ColumnGroupType<Record<string, unknown>> | Col
         dataIndex: 'additionalInformation',
     },
     {
-        key: 'type',
+        key: 'transactionType',
         title: 'Тип транзакции',
-        dataIndex: 'type',
+        dataIndex: 'transactionType',
     },
 ];
 

@@ -16,7 +16,7 @@ export type IScroll = {
 };
 
 export interface IComponentPaginationProps {
-    total?: number;
-    currentPage?: number;
+    pagesCount?: number;
+    pageNumber?: number;
     pageSize?: number;
 }
