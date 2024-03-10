@@ -9,7 +9,7 @@ import lombok.*;
 @Setter
 public class PageInfoDto {
 
-    private Integer pagesCount;
+    private Integer total;
 
     private Integer pageNumber;
 
