@@ -34,6 +34,7 @@ public class BankAccountService {
     private final BankAccountRepository bankAccountRepository;
     private final TransactionRepository transactionRepository;
     private final CheckPaginationInfoService checkPaginationInfoService;
+    private final IntegrationRequestsService integrationRequestsService;
 
 
     public BankAccountsWithPaginationDto getAllBankAccounts(Sort.Direction creationDateSortDirection, Boolean isClosed, int pageNumber, int pageSize) {
@@ -93,6 +94,10 @@ public class BankAccountService {
 
     @Transactional
     public BankAccountWithoutTransactionsDto createBankAccount(CreateBankAccountDto createBankAccountDto) {
+        if (!integrationRequestsService.checkUserExistence(createBankAccountDto.getUserId())) {
+            throw new NotFoundException("Пользователя с ID " + createBankAccountDto.getUserId() + " не существует");
+        }
+
         BankAccountEntity bankAccount = BankAccountEntity.builder()
                 .name(createBankAccountDto.getName())
                 .number(generateAccountNumber())
@@ -110,6 +115,10 @@ public class BankAccountService {
 
     @Transactional
     public BankAccountWithoutTransactionsDto closeBankAccount(UUID bankAccountId, CloseBankAccountDto closeBankAccountDto) {
+        if (!integrationRequestsService.checkUserExistence(closeBankAccountDto.getUserId())) {
+            throw new NotFoundException("Пользователя с ID " + closeBankAccountDto.getUserId() + " не существует");
+        }
+
         BankAccountEntity bankAccount = bankAccountRepository.findById(bankAccountId)
                 .orElseThrow(() -> new NotFoundException("Банковский счет с ID " + bankAccountId + " не найден"));
 
@@ -131,6 +140,10 @@ public class BankAccountService {
 
     @Transactional
     public BankAccountDto depositMoney(UUID bankAccountId, DepositMoneyDto depositMoneyDto) {
+        if (!integrationRequestsService.checkUserExistence(depositMoneyDto.getUserId())) {
+            throw new NotFoundException("Пользователя с ID " + depositMoneyDto.getUserId() + " не существует");
+        }
+
         UUID authenticatedUserId = depositMoneyDto.getUserId();
 
         BankAccountEntity bankAccount = bankAccountRepository.findById(bankAccountId)
@@ -148,10 +161,18 @@ public class BankAccountService {
         BigDecimal newBalance = bankAccount.getBalance().add(depositMoneyDto.getAmount());
         bankAccount.setBalance(newBalance);
 
+        String additionalInformation = null;
+        if (TransactionType.fromDepositTransactionType(depositMoneyDto.getTransactionType()) == TransactionType.DEPOSIT) {
+            additionalInformation = "Пополнение счета";
+        } else if (TransactionType.fromDepositTransactionType(depositMoneyDto.getTransactionType()) == TransactionType.TAKE_LOAN) {
+            additionalInformation = "Взятие кредита";
+        }
+
         TransactionEntity transaction = TransactionEntity.builder()
                     .transactionDate(LocalDateTime.now())
                 .amount(depositMoneyDto.getAmount())
-                .transactionType(TransactionType.DEPOSIT)
+                .transactionType(TransactionType.fromDepositTransactionType(depositMoneyDto.getTransactionType()))
+                .additionalInformation(additionalInformation)
                 .bankAccount(bankAccount)
                 .build();
 
@@ -166,6 +187,10 @@ public class BankAccountService {
 
     @Transactional
     public BankAccountDto withdrawMoney(UUID bankAccountId, WithdrawMoneyDto withdrawMoneyDto) {
+        if (!integrationRequestsService.checkUserExistence(withdrawMoneyDto.getUserId())) {
+            throw new NotFoundException("Пользователя с ID " + withdrawMoneyDto.getUserId() + " не существует");
+        }
+
         UUID authenticatedUserId = withdrawMoneyDto.getUserId();
 
         BankAccountEntity bankAccount = bankAccountRepository.findById(bankAccountId)
@@ -187,10 +212,18 @@ public class BankAccountService {
         BigDecimal newBalance = bankAccount.getBalance().subtract(withdrawMoneyDto.getAmount());
         bankAccount.setBalance(newBalance);
 
+        String additionalInformation = null;
+        if (TransactionType.fromWithdrawTransactionType(withdrawMoneyDto.getTransactionType()) == TransactionType.WITHDRAW) {
+            additionalInformation = "Снятие средств";
+        } else if (TransactionType.fromWithdrawTransactionType(withdrawMoneyDto.getTransactionType()) == TransactionType.REPAY_LOAN) {
+            additionalInformation = "Платеж по кредиту";
+        }
+
         TransactionEntity transaction = TransactionEntity.builder()
                 .transactionDate(LocalDateTime.now())
                 .amount(withdrawMoneyDto.getAmount().negate())
-                .transactionType(TransactionType.WITHDRAW)
+                .transactionType(TransactionType.fromWithdrawTransactionType(withdrawMoneyDto.getTransactionType()))
+                .additionalInformation(additionalInformation)
                 .bankAccount(bankAccount)
                 .build();
 
@@ -205,6 +238,10 @@ public class BankAccountService {
 
     public BankAccountWithoutTransactionsDto updateBankAccountName(UUID bankAccountId,
                                                                    UpdateBankAccountNameDto updateBankAccountNameDto) {
+        if (!integrationRequestsService.checkUserExistence(updateBankAccountNameDto.getUserId())) {
+            throw new NotFoundException("Пользователя с ID " + updateBankAccountNameDto.getUserId() + " не существует");
+        }
+
         UUID authenticatedUserId = updateBankAccountNameDto.getUserId();
 
         BankAccountEntity bankAccount = bankAccountRepository.findById(bankAccountId)
@@ -219,6 +256,17 @@ public class BankAccountService {
         BankAccountEntity updatedBankAccount = bankAccountRepository.save(bankAccount);
 
         return new BankAccountWithoutTransactionsDto(updatedBankAccount);
+    }
+
+    public Boolean checkBankAccountExistenceById(UUID bankAccountId) {
+        BankAccountEntity bankAccount = bankAccountRepository.findById(bankAccountId)
+                .orElse(null);
+
+        if (bankAccount == null) {
+            return false;
+        }
+
+        return !bankAccount.getIsClosed();
     }
 
     private String generateAccountNumber() {
