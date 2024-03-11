@@ -1,0 +1,85 @@
+@use '/src/shared/scss/color';
+
+.menu {
+    .ant-menu-item {
+        display: flex;
+        align-items: center;
+        min-width: 14px;
+        min-height: 66px;
+        max-height: 66px;
+        padding-top: 12px;
+        padding-bottom: 12px;
+        font-size: 12px;
+        border-radius: 8px;
+
+        a {
+            &:hover {
+                color: color.$text;
+            }
+        }
+
+        .anticon {
+            color: color.$secondary;
+            line-height: 0 !important;
+        }
+    }
+
+    &__item {
+        border-right: 0;
+    }
+}
+
+.ant-menu-title-content {
+    font-size: 15px;
+    white-space: pre-line;
+}
+
+.ant-menu:not(.ant-menu-horizontal) .ant-menu-item-selected {
+    background: color.$primary;
+
+    a {
+        color: #fff;
+    }
+
+    .anticon {
+        color: #fff;
+    }
+}
+
+.ant-menu-inline .ant-menu-item::after {
+    border-right: 0;
+}
+
+.ant-menu-inline>.ant-menu-item,
+.ant-menu-inline>.ant-menu-submenu>.ant-menu-submenu-title {
+    height: auto;
+    min-height: 66px;
+    line-height: 20px;
+    letter-spacing: 0.02em;
+}
+
+.ant-menu-inline>.ant-menu-item:hover,
+.ant-menu-inline>.ant-menu-submenu .ant-menu-submenu-title:hover {
+    background-color: color.$hover-button;
+}
+
+.ant-menu-item:hover.ant-menu-item-selected {
+    background: color.$primary;
+}
+
+.ant-menu.ant-menu-inline-collapsed>.ant-menu-item {
+    padding: 0 calc(50% - 12px);
+}
+
+.ant-menu-item .anticon+span,
+.ant-menu-item .ant-menu-item-icon+span {
+    margin-left: 20px;
+}
+
+.ant-tooltip-inner {
+    border-radius: 8px;
+}
+
+.ant-tooltip-placement-right {
+    max-width: max-content;
+}

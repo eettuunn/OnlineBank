@@ -1,0 +1,121 @@
+@import '~antd/es/style/themes/default.less';
+@import '~antd/dist/antd.less';
+
+@import './theme.less';
+
+
+@font-face {
+  font-family: 'Rubik';
+  src: url('../src/shared/fonts/Rubik-Light.woff2');
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Rubik';
+  src: url('../src/shared/fonts/Rubik-Regular.woff2');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Rubik';
+  src: url('../src/shared/fonts/Rubik-Medium.woff2');
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Rubik';
+  src: url('../src/shared/fonts/Rubik-Bold.woff2');
+  font-weight: 700;
+  font-style: normal;
+}
+
+body {
+    margin: 0;
+    font-family: 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+        Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+        sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+        monospace;
+}
+
+.main-loader {
+    margin-left: 50%;
+    margin-top: 25%;
+}
+
+.ant-picker-clear {
+    opacity: 1;
+}
+
+// в dev режиме убирает падение с ошибкой ResizeObserver
+iframe#webpack-dev-server-client-overlay {
+    display:none!important
+}
+
+.ant-btn {
+    line-height: 15px;
+    font-size: 15px;
+    letter-spacing: 0.01em;
+}
+
+.ant-btn > .anticon {
+    line-height: 0px;
+}
+
+.ant-btn-lg {
+    line-height: 17px;
+    font-size: 17px;
+    letter-spacing: 0.01em;
+}
+
+.ant-btn-sm {
+    border-radius: 8px;
+    padding: 0 12px 0 10px;
+    font-size: 14px;
+    line-height: 14px;
+    letter-spacing: 0.01em;
+}
+
+.ant-btn-icon-only.ant-btn-sm {
+    border-radius: 8px;
+    padding: 0 6px;
+}
+
+.ant-form-item-label {
+    letter-spacing: 0.02em;
+}
+
+.ant-input {
+    line-height: 14px;
+    letter-spacing: 0.01em;
+}
+
+.ant-picker-input {
+    line-height: 14px;
+    letter-spacing: 0.01em;
+}
+
+.ant-select {
+    line-height: 14px;
+    letter-spacing: 0.01em;
+}
+
+.ant-select-dropdown {
+    letter-spacing: 0.01em;
+}
+
+.ant-modal-title {
+    letter-spacing: 0.02em;
+}
+
+.ant-modal-header {
+        padding: 40px 40px 24px 40px;
+}

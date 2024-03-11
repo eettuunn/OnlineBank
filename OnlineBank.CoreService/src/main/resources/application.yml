@@ -24,4 +24,4 @@ app:
 
 integration:
   request:
-    check-user-existence: http://host.docker.internal:7788/user_api/user/{userId}/exist
+    check-user-existence: http://92.118.114.182:7788/user_api/user/{userId}/exist
