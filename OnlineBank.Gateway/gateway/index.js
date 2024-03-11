@@ -3,7 +3,8 @@ const app = express();
 const { createProxyMiddleware } = require("http-proxy-middleware");
 const port = 3000;
 
-const host = 'http://92.255.79.135';
+// const host = 'http://92.255.79.135';
+const host = 'http://92.118.114.182';
 
 app.use(
   "/api/bank-accounts",
