@@ -7,4 +7,5 @@ message UserSettings {
   string name = 1;
   bool is_dark_mode = 2;
   string uuid = 3;
+  string selected_screen = 4;
 }

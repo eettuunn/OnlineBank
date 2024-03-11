@@ -5,8 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.akimov.mobilebank.UserSettings
 import com.akimov.mobilebank.data.models.BankAccountNetwork
+import com.akimov.mobilebank.data.models.CreditUi
+import com.akimov.mobilebank.data.models.LoanRate
 import com.akimov.mobilebank.data.models.OperationType
-import com.akimov.mobilebank.data.repository.AccountsRepository
+import com.akimov.mobilebank.data.models.SelectedScreen
+import com.akimov.mobilebank.data.repository.Repository
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.delay
@@ -19,30 +22,65 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 class AccountsViewModel(
     private val dataStore: DataStore<UserSettings>,
-    private val repository: AccountsRepository,
+    private val repository: Repository,
 ) : ViewModel() {
     private val _actions = MutableSharedFlow<ViewAction>()
     val actions = _actions.shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000L))
 
     private val selectedAccount: MutableStateFlow<BankAccountNetwork?> = MutableStateFlow(null)
+    private var loanRates: List<LoanRate> = listOf(LoanRate(UUID.randomUUID().toString(), 0.0))
+    private val isRefreshing: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
     val state = combine(
         dataStore.data,
-        repository.getAccounts(),
-        selectedAccount
-    ) { settings, accounts, selectedAccount ->
-        AccountsScreenState.Content(
-            userName = settings.name,
-            isDarkTheme = settings.isDarkMode,
-            accountsList = accounts.toImmutableList(),
-            selectedAccount = selectedAccount,
+        repository.accounts,
+        selectedAccount,
+        repository.credits,
+        isRefreshing
+    ) { settings, accounts, selectedAccount, credits, isNowRefreshing ->
+        AccountsScreenState(
+            loanRates = loanRates.toImmutableList(),
+            isRefreshing = isNowRefreshing,
+            accountsState = AccountsState.Content(
+                userName = settings.name,
+                isDarkTheme = settings.isDarkMode,
+                accountsList = accounts.toImmutableList(),
+                selectedAccount = selectedAccount,
+                creditsList = credits.toImmutableList(),
+            )
         )
     }
         .catch { _actions.emit(ViewAction.ShowError(it.message ?: "Unknown error")) }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000L), AccountsScreenState.Loading)
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000L),
+            AccountsScreenState(
+                loanRates = loanRates.toImmutableList(),
+                isRefreshing = false,
+                accountsState = AccountsState.Loading
+            )
+        )
+
+    init {
+        updateData()
+    }
+
+    private fun updateData() {
+        viewModelScope.launch {
+            repository.updateAccounts()
+        }
+        viewModelScope.launch {
+            repository.updateCredits()
+        }
+
+        viewModelScope.launch {
+            loanRates = repository.getLoanRates()
+        }
+    }
 
     fun onIntent(intent: UIIntent) {
         when (intent) {
@@ -76,6 +114,53 @@ class AccountsViewModel(
                 )
                 selectedAccount.update { null }
             }
+
+            UIIntent.UpdateDataFromRemote -> {
+                isRefreshing.update { true }
+
+                val job1 = viewModelScope.launch {
+                    repository.updateAccounts()
+                }
+                val job2 = viewModelScope.launch {
+                    repository.updateCredits()
+                }
+
+                val job3 = viewModelScope.launch {
+                    loanRates = repository.getLoanRates()
+                }
+
+                viewModelScope.launch {
+                    job1.join()
+                    job2.join()
+                    job3.join()
+                    isRefreshing.update { false }
+                }
+            }
+
+            UIIntent.NavigateToGetLoan -> {
+                viewModelScope.launch {
+                    dataStore.updateData {
+                        it.toBuilder()
+                            .setSelectedScreen(SelectedScreen.ADD_CREDIT.name)
+                            .build()
+                    }
+                }
+            }
+
+            is UIIntent.DeleteAccount -> {
+                repository.closeAccount(intent.it)
+            }
+
+            UIIntent.NavigateToOperations -> {
+                viewModelScope.launch {
+                    dataStore.updateData {
+                        it.toBuilder()
+                            .setSelectedScreen(SelectedScreen.OPERATIONS.name)
+                            .build()
+                    }
+                }
+
+            }
         }
     }
 }
@@ -88,28 +173,34 @@ sealed class UIIntent {
         val accountId: String,
     ) : UIIntent()
 
-    data class RenameAccount(val it: String) : UIIntent() {
+    data class RenameAccount(val it: String) : UIIntent()
 
-    }
-
-    data class SelectAccount(val it: BankAccountNetwork) : UIIntent() {
-
-    }
+    data class SelectAccount(val it: BankAccountNetwork) : UIIntent()
+    data class DeleteAccount(val it: String) : UIIntent()
 
     data object UnselectAccount : UIIntent()
-
+    data object UpdateDataFromRemote : UIIntent()
+    data object NavigateToGetLoan : UIIntent()
+    data object NavigateToOperations : UIIntent()
 }
 
 sealed class ViewAction {
     data class ShowError(val message: String) : ViewAction()
 }
 
-sealed class AccountsScreenState {
-    data object Loading : AccountsScreenState()
+data class AccountsScreenState(
+    val loanRates: ImmutableList<LoanRate>,
+    val isRefreshing: Boolean,
+    val accountsState: AccountsState
+)
+
+sealed class AccountsState {
+    data object Loading : AccountsState()
     data class Content(
         val userName: String,
         val isDarkTheme: Boolean,
         val accountsList: ImmutableList<BankAccountNetwork>,
         val selectedAccount: BankAccountNetwork?,
-    ) : AccountsScreenState()
+        val creditsList: ImmutableList<CreditUi>,
+    ) : AccountsState()
 }

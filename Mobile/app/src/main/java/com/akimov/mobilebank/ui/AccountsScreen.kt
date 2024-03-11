@@ -36,6 +36,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
@@ -64,6 +65,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -92,7 +94,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.akimov.mobilebank.R
 import com.akimov.mobilebank.data.models.BankAccountNetwork
+import com.akimov.mobilebank.data.models.CreditUi
+import com.akimov.mobilebank.data.models.LoanRate
 import com.akimov.mobilebank.ui.theme.MobileBankTheme
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.delay
 import org.koin.compose.koinInject
@@ -134,15 +140,21 @@ private fun AccountsScreenStateless(
     hostState: SnackbarHostState? = null,
     reduce: (UIIntent) -> Unit,
 ) {
-    when (state) {
-        is AccountsScreenState.Content -> AccountsContent(
-            state = state,
+    when (state.accountsState) {
+        is AccountsState.Content -> AccountsContent(
+            accountsState = state.accountsState,
             onChangeThemeClicked = onChangeThemeClicked,
             hostState = hostState,
-            reduce = reduce
+            reduce = reduce,
+            getRates = {
+                state.loanRates
+            },
+            getIsRefreshing = {
+                state.isRefreshing
+            }
         )
 
-        AccountsScreenState.Loading -> LoadingScreen()
+        AccountsState.Loading -> LoadingScreen()
     }
 }
 
@@ -156,12 +168,14 @@ fun LoadingScreen() {
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 private fun AccountsContent(
-    state: AccountsScreenState.Content,
+    accountsState: AccountsState.Content,
     onChangeThemeClicked: () -> Unit,
     hostState: SnackbarHostState?,
     reduce: (UIIntent) -> Unit,
+    getRates: () -> ImmutableList<LoanRate>,
+    getIsRefreshing: () -> Boolean,
 ) {
-    val scrollState = rememberScrollState()
+    val accountsListScrollState = rememberScrollState()
 
     var showActionsBottomSheet by remember {
         mutableStateOf(false)
@@ -171,45 +185,67 @@ private fun AccountsContent(
         mutableStateOf(false)
     }
 
-    Scaffold(topBar = {
-        TopBar(
-            userName = state.userName,
-            isDarkTheme = state.isDarkTheme,
-            onChangeThemeClicked = onChangeThemeClicked,
-        )
-    }, content = { paddingValues ->
-        AccountsList(
-            paddingValues = paddingValues,
-            scrollState = scrollState,
-            accountsList = state.accountsList,
-            selectAccount = {
-                reduce(UIIntent.SelectAccount(it))
+    SwipeRefresh(state = rememberSwipeRefreshState(isRefreshing = getIsRefreshing()), onRefresh = {
+        reduce.invoke(UIIntent.UpdateDataFromRemote)
+    }) {
+        Scaffold(
+            topBar = {
+                TopBar(
+                    userName = accountsState.userName,
+                    isDarkTheme = accountsState.isDarkTheme,
+                    onChangeThemeClicked = onChangeThemeClicked,
+                )
+            },
+            content = { paddingValues ->
+                AccountsList(
+                    paddingValues = paddingValues,
+                    scrollState = accountsListScrollState,
+                    getAccountsList = { accountsState.accountsList },
+                    selectAccount = {
+                        reduce(UIIntent.SelectAccount(it))
+                    },
+                    getCreditsList = { accountsState.creditsList },
+                    deleteAccount = {
+                        reduce(UIIntent.DeleteAccount(it))
+                    },
+                    navigateToOperations = {
+                        reduce(UIIntent.NavigateToOperations)
+                    }
+                )
+            },
+            floatingActionButton = {
+                FloatingActionButton(
+                    shape = CircleShape,
+                    containerColor = Color(0xFF0990cb),
+                    onClick = {
+                        showActionsBottomSheet = true
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = null,
+                        tint = Color.White
+                    )
+                }
+            },
+            snackbarHost = {
+                hostState?.let {
+                    SnackbarHost(hostState = it) {
+                        CommonSnackBar(it)
+                    }
+                }
             }
         )
-    }, floatingActionButton = {
-        FloatingActionButton(shape = CircleShape, containerColor = Color(0xFF0990cb), onClick = {
-            showActionsBottomSheet = true
-        }) {
-            Icon(
-                imageVector = Icons.Filled.Add,
-                contentDescription = null,
-                tint = Color.White
-            )
-        }
-    }, snackbarHost = {
-        hostState?.let {
-            SnackbarHost(hostState = it) {
-                CommonSnackBar(it)
-            }
-        }
-    })
+    }
 
     if (showActionsBottomSheet) {
         BottomSheetActions(
+            getAccounts = { accountsState.accountsList },
             onDismissRequest = {
                 showActionsBottomSheet = false
             },
-            reduce = reduce
+            reduce = reduce,
+            getRates = getRates
         )
     }
 
@@ -224,13 +260,13 @@ private fun AccountsContent(
         )
     }
 
-    if (state.selectedAccount != null) {
+    if (accountsState.selectedAccount != null) {
         EditBottomSheet(
             onDismissRequest = {
                 reduce(UIIntent.UnselectAccount)
             },
             reduce = reduce,
-            accountName = state.selectedAccount.name
+            accountName = accountsState.selectedAccount.name
         )
     }
 }
@@ -263,25 +299,49 @@ private fun CommonSnackBar(it: SnackbarData) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun BottomSheetActions(
+    getAccounts: () -> ImmutableList<BankAccountNetwork>,
     onDismissRequest: () -> Unit,
     contentSheetState: ContentSheetState = ContentSheetState.ACTIONS,
-    reduce: (UIIntent) -> Unit
+    reduce: (UIIntent) -> Unit,
+    getRates: () -> ImmutableList<LoanRate>
 ) {
-    ModalBottomSheet(onDismissRequest = onDismissRequest) {
+    val sheetState = rememberModalBottomSheetState()
+    var shouldExpand by remember {
+        mutableStateOf(false)
+    }
+
+    LaunchedEffect(key1 = shouldExpand) {
+        if (shouldExpand) {
+            sheetState.expand()
+        }
+    }
+
+    ModalBottomSheet(
+        modifier = Modifier,
+        sheetState = sheetState,
+        onDismissRequest = onDismissRequest,
+    ) {
         var currentState by remember(contentSheetState) {
             mutableStateOf(contentSheetState)
         }
         when (currentState) {
-            ContentSheetState.ACTIONS -> ActionsContent(onAddAccountClicked = {
-                currentState = ContentSheetState.CREATE_ACCOUNT
-            })
+            ContentSheetState.ACTIONS -> ActionsContent(
+                onAddAccountClicked = {
+                    currentState = ContentSheetState.CREATE_ACCOUNT
+                },
+                onAddLoanClicked = {
+                    currentState = ContentSheetState.GET_LOAN
+                }
+            )
 
             ContentSheetState.CREATE_ACCOUNT -> InputDataContent(onCompleteClick = {
                 onDismissRequest()
                 reduce(UIIntent.OpenAccount(it))
             })
 
-            ContentSheetState.GET_LOAN -> TODO()
+            ContentSheetState.GET_LOAN -> {
+                reduce(UIIntent.NavigateToGetLoan)
+            }
         }
     }
 }
@@ -306,7 +366,7 @@ private fun AccountOperationsBottomSheet(
 
 // Создать счет, переименовать счет, изменить баланс, взять кредит
 @Composable
-private fun InputDataContent(
+fun InputDataContent(
     onCompleteClick: (String) -> Unit,
     labelText: String = stringResource(id = R.string.account_name),
     keyboardType: KeyboardType = KeyboardType.Text,
@@ -319,8 +379,17 @@ private fun InputDataContent(
 
     val focusRequester = remember { FocusRequester() }
 
+    var focusRequestEnabled by remember { mutableStateOf(false) }
+
     LaunchedEffect(key1 = true) {
-        focusRequester.requestFocus()
+        delay(300L)
+        focusRequestEnabled = true
+    }
+
+    LaunchedEffect(key1 = focusRequestEnabled) {
+        if (focusRequestEnabled) {
+            focusRequester.requestFocus()
+        }
     }
 
     TextField(
@@ -339,6 +408,10 @@ private fun InputDataContent(
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
             cursorColor = Color(0xFF0990cb),
+            selectionColors = TextSelectionColors(
+                handleColor = Color(0xFF0990cb),
+                backgroundColor = Color(0xFF0990cb)
+            )
         ),
         trailingIcon = {
             if (text.isNotEmpty()) {
@@ -392,45 +465,56 @@ private fun CreateAccountContentPreview() {
 }
 
 enum class ContentSheetState {
-    ACTIONS, CREATE_ACCOUNT, GET_LOAN
+    ACTIONS,
+    CREATE_ACCOUNT,
+    GET_LOAN
 }
 
 @Composable
 private fun ActionsContent(
     onAddAccountClicked: () -> Unit,
+    onAddLoanClicked: () -> Unit
 ) {
     SheetItem(
         headerIconResId = R.drawable.baseline_account_balance_24,
         messageResId = R.string.add_account,
         onClick = onAddAccountClicked
     )
-    Divider(modifier = Modifier.padding(top = 8.dp, start = 56.dp))
-    Spacer(modifier = Modifier.height(8.dp))
+    Divider(modifier = Modifier.padding(start = 56.dp))
     SheetItem(
         headerIconResId = R.drawable.baseline_attach_money_24,
         messageResId = R.string.request_money,
-        onClick = {}
+        onClick = onAddLoanClicked
     )
-    Spacer(modifier = Modifier.height(16.dp))
 }
 
 @Composable
-private fun SheetItem(headerIconResId: Int, messageResId: Int, onClick: () -> Unit) {
-    Row(modifier = Modifier.clickable { onClick() }) {
+private fun SheetItem(
+    modifier: Modifier = Modifier,
+    headerIconResId: Int,
+    messageResId: Int,
+    onClick: () -> Unit
+) {
+    Row(modifier = modifier.then(Modifier.clickable { onClick() })) {
         Spacer(modifier = Modifier.width(16.dp))
         Icon(
-            modifier = Modifier.size(32.dp),
+            modifier = Modifier
+                .padding(bottom = 16.dp, top = 16.dp)
+                .size(32.dp),
             imageVector = ImageVector.vectorResource(id = headerIconResId),
             contentDescription = stringResource(messageResId),
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
-            modifier = Modifier.align(Alignment.CenterVertically),
+            modifier = Modifier
+                .padding(bottom = 16.dp, top = 16.dp)
+                .align(Alignment.CenterVertically),
             text = stringResource(id = messageResId),
             style = MaterialTheme.typography.headlineSmall
         )
         Box(
             modifier = Modifier
+                .padding(bottom = 16.dp, top = 16.dp)
                 .fillMaxWidth()
                 .align(Alignment.CenterVertically),
             contentAlignment = Alignment.CenterEnd
@@ -450,8 +534,11 @@ private fun SheetItem(headerIconResId: Int, messageResId: Int, onClick: () -> Un
 private fun AccountsList(
     paddingValues: PaddingValues,
     scrollState: ScrollState,
-    accountsList: ImmutableList<BankAccountNetwork>,
-    selectAccount: (BankAccountNetwork) -> Unit
+    getAccountsList: () -> ImmutableList<BankAccountNetwork>,
+    selectAccount: (BankAccountNetwork) -> Unit,
+    getCreditsList: () -> ImmutableList<CreditUi>,
+    deleteAccount: (id: String) -> Unit,
+    navigateToOperations: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -459,21 +546,37 @@ private fun AccountsList(
             .verticalScroll(scrollState)
     ) {
         Spacer(modifier = Modifier.height(16.dp))
-        accountsList.forEach {
+        getAccountsList().forEach {
             AccountInfoCard(
                 modifier = Modifier
                     .padding(bottom = 16.dp, start = 16.dp, end = 16.dp)
                     .fillMaxWidth(),
                 account = it,
-                selectAccount = selectAccount
+                selectAccount = selectAccount,
+                deleteAccount = deleteAccount,
+                navigateToOperations = navigateToOperations
             )
             Spacer(modifier = Modifier.height(8.dp))
         }
-        HiddenAccounts(
-            modifier = Modifier.padding(top = 8.dp),
-            hiddenAccounts = accountsList
-        )
-        Spacer(modifier = Modifier.height(16.dp))
+
+        getCreditsList().forEach {
+            CreditItem(
+                modifier = Modifier
+                    .padding(bottom = 16.dp, start = 16.dp, end = 16.dp)
+                    .fillMaxWidth(),
+                id = it.id,
+                debt = it.debt,
+                monthlyPayment = it.monthlyPayment,
+                bankAccountName = it.bankAccountName
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
+//        Spacer(modifier = Modifier.height(16.dp))
+//        HiddenAccounts(
+//            modifier = Modifier.padding(top = 8.dp),
+//            hiddenAccounts = accountsList
+//        )
     }
 }
 
@@ -571,7 +674,8 @@ fun HiddenAccounts(
 }
 
 enum class DragAnchors {
-    Start, End
+    Start,
+    End
 }
 
 @Composable
@@ -580,7 +684,9 @@ private fun AccountInfoCard(
     modifier: Modifier = Modifier,
     account: BankAccountNetwork,
     isHidden: Boolean = false,
-    selectAccount: (BankAccountNetwork) -> Unit
+    selectAccount: (BankAccountNetwork) -> Unit,
+    deleteAccount: (id: String) -> Unit,
+    navigateToOperations: () -> Unit
 ) {
     val density = LocalDensity.current
 
@@ -599,7 +705,7 @@ private fun AccountInfoCard(
                 newAnchors = DraggableAnchors {
                     with(density) {
                         DragAnchors.Start at 0f
-                        DragAnchors.End at -48.dp.toPx()
+                        DragAnchors.End at -56.dp.toPx()
                     }
                 }
             )
@@ -620,6 +726,10 @@ private fun AccountInfoCard(
                         orientation = Orientation.Horizontal,
                         state = dragState,
                     )
+                    .clickable {
+                        ACCOUNT_ID = account.id.toString()
+                        navigateToOperations()
+                    }
             ),
             shadowElevation = 4.dp,
             shape = RoundedCornerShape(16.dp)
@@ -653,7 +763,8 @@ private fun AccountInfoCard(
                 currentAccount = account,
                 updateAnchors = {
                     anchorsUpdate = !anchorsUpdate
-                }
+                },
+                deleteAccount = deleteAccount
             )
         }
     }
@@ -690,7 +801,8 @@ private fun ActionIcons(
     isHidden: Boolean = false,
     selectAccount: (BankAccountNetwork) -> Unit,
     currentAccount: BankAccountNetwork,
-    updateAnchors: () -> Unit
+    updateAnchors: () -> Unit,
+    deleteAccount: (id: String) -> Unit
 ) {
     Row(
         modifier = modifier,
@@ -699,13 +811,13 @@ private fun ActionIcons(
         CommonIcon(
             imageVector = Icons.Filled.Edit,
             modifier = Modifier
-                .size(24.dp)
+                .size(32.dp)
                 .clickable(
                     indication = null,
                     interactionSource = remember { MutableInteractionSource() }
                 ) {
-                    updateAnchors()
                     selectAccount(currentAccount)
+                    updateAnchors()
                 }
         )
         CommonIcon(
@@ -718,19 +830,25 @@ private fun ActionIcons(
             ),
             modifier = Modifier
                 .padding(start = 16.dp)
-                .size(24.dp)
+                .size(32.dp)
         )
         CommonIcon(
             imageVector = Icons.Filled.Delete,
             modifier = Modifier
                 .padding(start = 16.dp)
-                .size(24.dp)
+                .size(32.dp)
+                .clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }) {
+                    updateAnchors()
+                    deleteAccount(currentAccount.id.toString())
+                }
         )
     }
 }
 
 @Composable
-private fun TextWithDescription(balance: String, name: String) {
+fun TextWithDescription(balance: String, name: String) {
     Column(modifier = Modifier.padding(top = 16.dp, start = 16.dp)) {
         Text(
             text = balance,

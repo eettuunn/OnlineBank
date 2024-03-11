@@ -25,8 +25,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -72,35 +70,40 @@ private fun Content(onClick: (String) -> Unit) {
         var text by remember {
             mutableStateOf("")
         }
-        val focusRequester = remember { FocusRequester() }
-        TextField(modifier = Modifier
-            .padding(horizontal = 16.dp)
-            .fillMaxWidth()
-            .focusRequester(focusRequester), value = text, onValueChange = {
-            text = it
-        }, shape = RoundedCornerShape(16.dp), colors = TextFieldDefaults.colors(
-            focusedContainerColor = MaterialTheme.colorScheme.tertiary,
-            unfocusedContainerColor = MaterialTheme.colorScheme.tertiary,
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent,
-            cursorColor = Color(0xFF0990cb),
-        ), trailingIcon = {
-            if (text.isNotEmpty()) {
-                Icon(
-                    modifier = Modifier.clickable {
-                        text = ""
-                    },
-                    imageVector = Icons.Filled.Clear,
-                    contentDescription = null,
-                )
-            }
-        }, placeholder = {
-            Text(text = stringResource(id = R.string.email))
-        }, singleLine = true, keyboardOptions = KeyboardOptions(
-            capitalization = KeyboardCapitalization.Sentences,
-        ), keyboardActions = KeyboardActions(onDone = {
-            onClick(text)
-        })
+        TextField(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .fillMaxWidth(),
+            value = text, onValueChange = {
+                text = it
+            },
+            shape = RoundedCornerShape(16.dp),
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.tertiary,
+                unfocusedContainerColor = MaterialTheme.colorScheme.tertiary,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                cursorColor = Color(0xFF0990cb),
+            ),
+            trailingIcon = {
+                if (text.isNotEmpty()) {
+                    Icon(
+                        modifier = Modifier.clickable {
+                            text = ""
+                        },
+                        imageVector = Icons.Filled.Clear,
+                        contentDescription = null,
+                    )
+                }
+            }, placeholder = {
+                Text(text = stringResource(id = R.string.email))
+            }, singleLine = true,
+            keyboardOptions = KeyboardOptions(
+                capitalization = KeyboardCapitalization.Sentences,
+            ),
+            keyboardActions = KeyboardActions(onDone = {
+                onClick(text)
+            })
         )
     }
 }

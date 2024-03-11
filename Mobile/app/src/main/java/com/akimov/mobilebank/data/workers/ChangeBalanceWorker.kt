@@ -1,15 +1,20 @@
 package com.akimov.mobilebank.data.workers
 
 import android.content.Context
+import androidx.datastore.core.DataStore
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.akimov.mobilebank.UserSettings
 import com.akimov.mobilebank.data.models.OperationType
+import com.akimov.mobilebank.data.models.TransactionBody
 import com.akimov.mobilebank.data.network.CoreService
+import kotlinx.coroutines.flow.first
 
 class ChangeBalanceWorker(
     context: Context,
     private val params: WorkerParameters,
     private val api: CoreService,
+    private val dataStore: DataStore<UserSettings>,
 ) : CoroutineWorker(context, params) {
     override suspend fun doWork(): Result {
         val operationType =
@@ -21,33 +26,45 @@ class ChangeBalanceWorker(
         return when (operationType) {
             OperationType.DEPOSIT -> networkBalanceOperation {
                 api.deposit(
-                    amount = amount,
-                    transactionType = OperationType.DEPOSIT.name,
-                    accountID = accountId
+                    accountID = accountId,
+                    transactionBody = TransactionBody(
+                        amount = amount.toInt(),
+                        transactionType = OperationType.DEPOSIT.name,
+                        userId = dataStore.data.first().uuid
+                    )
                 )
             }
 
             OperationType.WITHDRAW -> networkBalanceOperation {
                 api.withdraw(
-                    amount = amount,
-                    transactionType = OperationType.TAKE_LOAN.name,
-                    accountID = accountId
+                    accountID = accountId,
+                    transactionBody = TransactionBody(
+                        amount = amount.toInt(),
+                        transactionType = OperationType.WITHDRAW.name,
+                        userId = dataStore.data.first().uuid
+                    )
                 )
             }
 
             OperationType.TAKE_LOAN -> networkBalanceOperation {
                 api.deposit(
-                    amount = amount,
-                    transactionType = OperationType.TAKE_LOAN.name,
-                    accountID = accountId
+                    accountID = accountId,
+                    transactionBody = TransactionBody(
+                        amount = amount.toInt(),
+                        transactionType = OperationType.TAKE_LOAN.name,
+                        userId = dataStore.data.first().uuid
+                    )
                 )
             }
 
             OperationType.REPAY_LOAN -> networkBalanceOperation {
                 api.withdraw(
-                    amount = amount,
-                    transactionType = OperationType.REPAY_LOAN.name,
-                    accountID = accountId
+                    accountID = accountId,
+                    transactionBody = TransactionBody(
+                        amount = amount.toInt(),
+                        transactionType = OperationType.REPAY_LOAN.name,
+                        userId = dataStore.data.first().uuid
+                    )
                 )
             }
         }

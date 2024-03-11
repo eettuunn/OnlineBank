@@ -32,6 +32,9 @@ android {
         }
     }
     compileOptions {
+        ksp {
+            arg("room.schemaLocation", "$projectDir/schemas")
+        }
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
@@ -61,6 +64,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.foundation:foundation:1.6.2")
+    implementation("com.google.accompanist:accompanist-swiperefresh:0.25.1")
 
     // Koin DI
     val koinVersion = "3.5.3"

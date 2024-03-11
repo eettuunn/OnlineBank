@@ -4,6 +4,9 @@ import com.akimov.mobilebank.data.models.BankAccountListNetwork
 import com.akimov.mobilebank.data.models.BankAccountNetwork
 import com.akimov.mobilebank.data.models.ChangeNameUpload
 import com.akimov.mobilebank.data.models.CreateAccountUpload
+import com.akimov.mobilebank.data.models.OperationsListNetwork
+import com.akimov.mobilebank.data.models.TransactionBody
+import com.akimov.mobilebank.data.models.UserIdModel
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -41,24 +44,18 @@ interface CoreService {
 
     @POST("/api/bank-accounts/{id}/deposit")
     suspend fun deposit(
-        amount: Long,
-
         @Path("id")
         accountID: String,
-
         @Body
-        transactionType: String
+        transactionBody: TransactionBody
     )
 
     @POST("/api/bank-accounts/{id}/withDraw")
     suspend fun withdraw(
-        amount: Long,
-
         @Path("id")
         accountID: String,
-
         @Body
-        transactionType: String
+        transactionBody: TransactionBody
     )
 
     @PUT("/api/bank-accounts/{id}/name")
@@ -68,4 +65,15 @@ interface CoreService {
         @Body
         changeNameUpload: ChangeNameUpload
     )
+
+    @POST("/api/bank-accounts/{id}/close")
+    suspend fun closeAccount(
+        @Path("id") accountId: String,
+        @Body userId: UserIdModel
+    )
+
+    @GET("api/transactions/bank-account/{id}")
+    suspend fun getOperations(
+        @Path("id") accountId: String
+    ): OperationsListNetwork
 }
