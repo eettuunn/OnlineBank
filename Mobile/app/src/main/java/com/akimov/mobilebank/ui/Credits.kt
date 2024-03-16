@@ -2,9 +2,11 @@ package com.akimov.mobilebank.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -29,6 +31,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -130,6 +133,7 @@ fun GetLoanContent(
             var selectedAccountIndex: Int by remember {
                 mutableIntStateOf(0)
             }
+
             Accounts(
                 names = names,
                 selectedAccount = selectedAccountName,
@@ -138,6 +142,7 @@ fun GetLoanContent(
                     selectedAccountIndex = index
                 }
             )
+            Spacer(modifier = Modifier.height(16.dp))
 
             // Ставка
             val ratesValues =
@@ -157,6 +162,7 @@ fun GetLoanContent(
                     selectedRateIndex = index
                 }
             )
+            Spacer(modifier = Modifier.height(16.dp))
 
             // Срок
             val monthValues = mutableListOf<String>()
@@ -180,6 +186,7 @@ fun GetLoanContent(
                 },
                 monthValues = monthValues
             )
+            Spacer(modifier = Modifier.height(16.dp))
 
             var summ by remember {
                 mutableStateOf("")
@@ -241,29 +248,34 @@ fun GetLoanContent(
                     )
                 }
             )
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(
+            Box(
                 modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .fillMaxWidth(),
-                onClick = {
-                    viewModel.getCredit(
-                        accountId = accounts[selectedAccountIndex].id.toString(),
-                        rateId = rates[selectedRateIndex].id,
-                        amount = summ.toInt(),
-                        months = monthNumbers[selectedMonthIndex]
-                    )
-                },
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF0990cb),
-                    contentColor = Color.White
-                )
+                    .fillMaxHeight(),
+                contentAlignment = Alignment.BottomCenter
             ) {
-                Text(
-                    modifier = Modifier.padding(vertical = 8.dp),
-                    text = stringResource(R.string.take_loan),
-                )
+                Button(
+                    modifier = Modifier
+                        .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+                        .fillMaxWidth(),
+                    onClick = {
+                        viewModel.getCredit(
+                            accountId = accounts[selectedAccountIndex].id.toString(),
+                            rateId = rates[selectedRateIndex].id,
+                            amount = summ.toInt(),
+                            months = monthNumbers[selectedMonthIndex]
+                        )
+                    },
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF0990cb),
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text(
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        text = stringResource(R.string.take_loan),
+                    )
+                }
             }
         }
     }

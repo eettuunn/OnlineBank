@@ -208,7 +208,7 @@ fun OperationItem(operation: OperationUI, accountName: String) {
                             )
                 }
 
-                val prefixText = remember(isDeposite) { if (isDeposite) "+" else "-" }
+                val prefixText = remember(isDeposite) { if (isDeposite) "+" else "" }
                 val color = remember(isDeposite) {
                     if (isDeposite) Color(0xFF18A558) else Color.Unspecified
                 }

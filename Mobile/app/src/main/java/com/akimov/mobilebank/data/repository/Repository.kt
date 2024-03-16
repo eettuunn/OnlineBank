@@ -116,7 +116,11 @@ class Repository(
                     val dbEntity = creditNetwork.toEntity()
                     val localCredit = creditsDao.findCreditById(creditNetwork.id)
                     if (localCredit != dbEntity) {
-                        creditsDao.insertCredit(dbEntity)
+                        coroutineScope {
+                            launch(Dispatchers.IO) {
+                                creditsDao.insertCredit(dbEntity)
+                            }
+                        }
                     }
                 }
             }

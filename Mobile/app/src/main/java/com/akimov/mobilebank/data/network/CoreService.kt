@@ -50,7 +50,7 @@ interface CoreService {
         transactionBody: TransactionBody
     )
 
-    @POST("/api/bank-accounts/{id}/withDraw")
+    @POST("/api/bank-accounts/{id}/withdraw")
     suspend fun withdraw(
         @Path("id")
         accountID: String,
