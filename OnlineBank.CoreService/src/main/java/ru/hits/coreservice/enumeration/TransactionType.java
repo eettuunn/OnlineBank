@@ -4,7 +4,8 @@ public enum TransactionType {
     WITHDRAW,
     DEPOSIT,
     REPAY_LOAN,
-    TAKE_LOAN;
+    TAKE_LOAN,
+    TRANSFER;
 
     public static TransactionType fromDepositTransactionType(DepositTransactionType depositTransactionType) {
         switch (depositTransactionType) {

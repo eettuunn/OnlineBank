@@ -186,6 +186,69 @@ public class BankAccountService {
     }
 
     @Transactional
+    public BankAccountDto transferMoney(UUID toBankAccountId, TransferMoneyDto transferMoneyDto) {
+        if (!integrationRequestsService.checkUserExistence(transferMoneyDto.getUserId())) {
+            throw new NotFoundException("Пользователя с ID " + transferMoneyDto.getUserId() + " не существует");
+        }
+
+        UUID authenticatedUserId = transferMoneyDto.getUserId();
+
+        BankAccountEntity fromBankAccount = bankAccountRepository.findById(transferMoneyDto.getFromAccountId())
+                .orElseThrow(() -> new NotFoundException("Банковский счет, с которого отправляются деньги, с ID " + transferMoneyDto.getFromAccountId() + " не найден"));
+        BankAccountEntity toBankAccount = bankAccountRepository.findById(toBankAccountId)
+                .orElseThrow(() -> new NotFoundException("Банковский счет, на который отправляются деньги, с ID " + toBankAccountId + " не найден"));
+
+        if (!fromBankAccount.getOwnerId().equals(authenticatedUserId)) {
+            throw new ForbiddenException("Пользователь с ID " + authenticatedUserId + " не является " +
+                    " владельцем банковского счета с ID " + fromBankAccount.getId());
+        }
+
+        if (Boolean.TRUE.equals(fromBankAccount.getIsClosed())) {
+            throw new ConflictException("Банковский счет, с которого отправляются деньги, с ID " + fromBankAccount.getId() + " закрыт");
+        }
+
+        if (Boolean.TRUE.equals(toBankAccount.getIsClosed())) {
+            throw new ConflictException("Банковский счет, на который отправляются деньги, с ID " + toBankAccountId + " закрыт");
+        }
+
+        if (fromBankAccount.getBalance().compareTo(transferMoneyDto.getAmount()) < 0) {
+            throw new ConflictException("Недостаточно средств на счете для перевода указанной суммы");
+        }
+
+        fromBankAccount.setBalance(fromBankAccount.getBalance().subtract(transferMoneyDto.getAmount()));
+        toBankAccount.setBalance(toBankAccount.getBalance().add(transferMoneyDto.getAmount()));
+
+        LocalDateTime transactionDate = LocalDateTime.now();
+
+        TransactionEntity transactionFromBankAccount = TransactionEntity.builder()
+                .transactionDate(transactionDate)
+                .amount(transferMoneyDto.getAmount().negate())
+                .transactionType(TransactionType.TRANSFER)
+                .additionalInformation("Перевод")
+                .bankAccount(fromBankAccount)
+                .build();
+
+        TransactionEntity transactionToBankAccount = TransactionEntity.builder()
+                .transactionDate(transactionDate)
+                .amount(transferMoneyDto.getAmount())
+                .transactionType(TransactionType.TRANSFER)
+                .additionalInformation("Перевод")
+                .bankAccount(toBankAccount)
+                .build();
+
+        transactionFromBankAccount = transactionRepository.save(transactionFromBankAccount);
+        transactionToBankAccount = transactionRepository.save(transactionToBankAccount);
+
+        fromBankAccount.getTransactions().add(0, transactionFromBankAccount);
+        toBankAccount.getTransactions().add(0, transactionToBankAccount);
+
+        fromBankAccount = bankAccountRepository.save(fromBankAccount);
+        bankAccountRepository.save(toBankAccount);
+
+        return new BankAccountDto(fromBankAccount);
+    }
+
+    @Transactional
     public BankAccountDto withdrawMoney(UUID bankAccountId, WithdrawMoneyDto withdrawMoneyDto) {
         if (!integrationRequestsService.checkUserExistence(withdrawMoneyDto.getUserId())) {
             throw new NotFoundException("Пользователя с ID " + withdrawMoneyDto.getUserId() + " не существует");

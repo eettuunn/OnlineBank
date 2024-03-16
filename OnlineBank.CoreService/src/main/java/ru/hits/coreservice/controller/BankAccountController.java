@@ -90,6 +90,16 @@ public class BankAccountController {
     }
 
     @Operation(
+            summary = "Перевести деньги на счет."
+//            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @PostMapping("/{id}/transfer")
+    public ResponseEntity<BankAccountDto> transferMoney(@PathVariable("id") UUID toBankAccountId,
+                                                        @RequestBody @Valid TransferMoneyDto transferMoneyDto) {
+        return new ResponseEntity<>(bankAccountService.transferMoney(toBankAccountId, transferMoneyDto), HttpStatus.OK);
+    }
+
+    @Operation(
             summary = "Снять деньги с банковского счёта."
 //            security = @SecurityRequirement(name = "bearerAuth")
     )
