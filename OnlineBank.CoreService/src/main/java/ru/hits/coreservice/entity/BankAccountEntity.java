@@ -30,7 +30,8 @@ public class BankAccountEntity {
 
     private String number;
 
-    private BigDecimal balance;
+    @Embedded
+    private Money balance;
 
     @Column(name = "owner_id")
     private UUID ownerId;

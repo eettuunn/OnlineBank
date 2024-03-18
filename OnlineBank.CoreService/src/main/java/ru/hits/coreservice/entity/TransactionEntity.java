@@ -29,6 +29,7 @@ public class TransactionEntity {
     @Column(name = "transaction_date")
     private LocalDateTime transactionDate;
 
+    @Column(precision = 100, scale = 50)
     private BigDecimal amount;
 
     private String additionalInformation;

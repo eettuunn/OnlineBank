@@ -19,4 +19,7 @@ public class CreateBankAccountDto {
     @NotNull(message = "Идентификатор пользователя не может быть пустым")
     private UUID userId;
 
+    @NotBlank(message = "Валюта счёта является обязательной к заполнению")
+    private String currencyCode;
+
 }

@@ -3,6 +3,7 @@ package ru.hits.coreservice.dto;
 import lombok.*;
 import ru.hits.coreservice.enumeration.DepositTransactionType;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import java.math.BigDecimal;
@@ -23,5 +24,8 @@ public class DepositMoneyDto {
 
     @NotNull(message = "Идентификатор пользователя не может быть пустым")
     private UUID userId;
+
+    @NotBlank(message = "Валюта является обязательной к заполнению")
+    private String currencyCode;
 
 }
