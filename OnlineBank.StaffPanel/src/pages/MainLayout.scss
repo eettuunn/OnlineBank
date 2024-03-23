@@ -37,7 +37,11 @@
     &__container-information {
         display: grid;
         gap: 20px;
-        margin-top: 20px
+        margin-top: 20px;
+        .ant-btn {
+            height: 48px;
+            width: 48px;
+        }
     }
 }
 

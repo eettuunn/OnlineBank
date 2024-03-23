@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Button, Layout } from 'antd';
 import Icon from '@ant-design/icons';
@@ -8,6 +8,8 @@ import MainMenu from '../features/MainMenu/MainMenu';
 import { rootRoutes } from '../Routes';
 import UserBlock from '../features/UserBlock/UserBlock';
 import { SiderIcon } from '../shared/img/menuicons/SiderIcon';
+import { ThemeIcon } from '../shared/img/ThemeIcon';
+import useLocalStorage from '../shared/hooks/useLocalStorage/useLocalStorage';
 
 import './MainLayout.scss';
 
@@ -17,6 +19,8 @@ const { Content, Sider } = Layout;
 
 const MainLayout: React.FC = () => {
     const [ collapsed, setCollapsed ] = useState(false);
+
+    const [ darkTheme, setDarkTheme ] = useLocalStorage('dark-theme', false);
 
     return (
         <Layout>
@@ -43,6 +47,9 @@ const MainLayout: React.FC = () => {
                     </div>
                     <UserBlock collapsed={collapsed} />
                     <MainMenu routes={rootRoutes} />
+                </div>
+                <div className={b('container-information').toString()}>
+                    <Button icon={<Icon component={ThemeIcon} />} shape="circle" type='primary' onClick={() => setDarkTheme(!darkTheme)}/>
                 </div>
             </Sider>
             <Layout className={b({ collapsed }).toString()}>
