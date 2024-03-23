@@ -47,7 +47,7 @@ export const columnsAccount: (ColumnGroupType<Record<string, unknown>> | ColumnT
     },
     {
         key: 'balance',
-        title: 'Баланс, ₽',
+        title: 'Баланс',
         dataIndex: 'balance',
     },
 ];
@@ -93,7 +93,7 @@ export const columnsTransaction: (ColumnGroupType<Record<string, unknown>> | Col
     },
     {
         key: 'amount',
-        title: 'Сумма, ₽',
+        title: 'Сумма',
         dataIndex: 'amount',
     },
     {
@@ -127,10 +127,10 @@ export const enum Status {
 }
 
 export enum TransactionType {
-    WITHDRAW,
-    DEPOSIT,
-    REPAY_LOAN,
-    TAKE_LOAN,
+    WITHDRAW = 'WITHDRAW',
+    DEPOSIT = 'DEPOSIT',
+    REPAY_LOAN = 'REPAY_LOAN',
+    TAKE_LOAN = 'TAKE_LOAN',
 }
 
 export const TransactionTypeRus = {

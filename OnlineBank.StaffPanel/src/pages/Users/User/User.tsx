@@ -27,11 +27,10 @@ const User: React.FC = () => {
 
     const pagination = useAppSelector(store => store.pagination[location.pathname] ?? store.pagination.empty);
 
-    const { data: dataUser } = useGetUserInfoQuery(userId as string, { pollingInterval: 20000 });
-    const { isLoading: isLoadingAccounts, data: dataAccounts } = useGetUserAccountsQuery({ id: userId as string, params: pagination },
-        { pollingInterval: 5000 });
+    const { data: dataUser } = useGetUserInfoQuery(userId as string);
+    const { isLoading: isLoadingAccounts, data: dataAccounts } = useGetUserAccountsQuery({ id: userId as string, params: pagination });
 
-    const { isLoading: isLoadingLoans, data: dataLoans } = useGetUsersLoansQuery(userId as string, { pollingInterval: 5000 });
+    const { isLoading: isLoadingLoans, data: dataLoans } = useGetUsersLoansQuery(userId as string);
 
     useEffect(() => {
         setConfig({ activeMenuKey: Paths.Users, headerTitle: 'Информация о пользователе' });
@@ -48,8 +47,15 @@ const User: React.FC = () => {
             return {
                 ...el,
                 width: '100px',
-                render: (value: any, record: Record<string, unknown>) =>
+                render: (value: any, record: Record<string, boolean>) =>
                     !record.isClosed ? <span style={{ color: '#5E8C4E', fontWeight: '500' }}>{Status.Active}</span> : <span style={{ color: '#EB5757', fontWeight: '500' }}>{Status.Inactive}</span>,
+            };
+        } else if (el.key === 'balance') {
+            return {
+                ...el,
+                width: '200px',
+                render: (value: any, record: Record<string, { amount: number, currency: string }>) =>
+                    <span>{record.balance.amount} {record.balance.currency}</span>,
             };
         } else return el;
     });

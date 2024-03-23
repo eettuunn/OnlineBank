@@ -25,9 +25,8 @@ const Account: React.FC = () => {
 
     const pagination = useAppSelector(store => store.pagination[location.pathname] ?? store.pagination.empty);
 
-    const { data: dataAccount } = useGetAccountInfoQuery(accountId as string, { pollingInterval: 20000 });
-    const { isLoading: isLoadingTransactions, data: dataTransactions } = useGetAccountTransactionQuery({ id: accountId as string, params: pagination },
-        { pollingInterval: 5000 });
+    const { data: dataAccount } = useGetAccountInfoQuery(accountId as string);
+    const { isLoading: isLoadingTransactions, data: dataTransactions } = useGetAccountTransactionQuery({ id: accountId as string, params: pagination });
 
     useEffect(() => {
         setConfig({ activeMenuKey: Paths.Users, headerTitle: `Счет №${dataAccount?.number as string}`,
@@ -58,7 +57,7 @@ const Account: React.FC = () => {
             return {
                 ...el,
                 width: '400px',
-                render: (value: any, record: Record<string, unknown>) => <span style={{ fontWeight: '500' }}>{TransactionTypeRus[TransactionType[record.transactionType]]}</span>,
+                render: (value: any, record: Record<string, TransactionType>) => <span style={{ fontWeight: '500' }}>{TransactionTypeRus[TransactionType[record.transactionType]]}</span>,
             };
         } else if (el.key === 'amount') {
             return {
