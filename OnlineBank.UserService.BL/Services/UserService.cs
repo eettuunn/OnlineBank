@@ -87,7 +87,11 @@ public class UserService : IUserService
     public async Task<LoginResponseDto> Login(LoginCredentialsDto loginCredentialsDto)
     {
         var user = await _userManager.FindByEmailAsync(loginCredentialsDto.email)
-                   ?? throw new NotFoundException($"Can't find user with email {loginCredentialsDto.email}");
+                   ?? throw new BadRequestException("Invalid credentials");
+        
+        var isPasswordValid = await _userManager.CheckPasswordAsync(user, loginCredentialsDto.password);
+        if (!isPasswordValid) throw new BadRequestException("Invalid credentials");
+        
         var token = await _tokenService.CreateToken(Guid.Parse(user.Id));
 
         var response = new LoginResponseDto

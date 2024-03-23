@@ -96,7 +96,7 @@ public class UserController : ControllerBase
     }
 
     /// <summary>
-    /// Login with email that returns Id and generated token
+    /// Login with that returns Id and generated token
     /// </summary>
     [HttpPost]
     [Route("login")]

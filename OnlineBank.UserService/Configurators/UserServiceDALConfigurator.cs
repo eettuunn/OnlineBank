@@ -46,7 +46,7 @@ public static class UserServiceDALConfigurator
                 Passport = "1234 123456",
                 PhoneNumber = "89999999999"
             };
-            _usermanager.CreateAsync(customer).GetAwaiter().GetResult();
+            _usermanager.CreateAsync(customer, "a12345").GetAwaiter().GetResult();
             
             var staff = new AppUser
             {
@@ -55,7 +55,7 @@ public static class UserServiceDALConfigurator
                 Passport = "4321 654321",
                 PhoneNumber = "81111111111"
             };
-            _usermanager.CreateAsync(staff).GetAwaiter().GetResult();
+            _usermanager.CreateAsync(staff, "a12345").GetAwaiter().GetResult();
 
 
             if (dbContext.Users.AnyAsync(u => u.UserName == customer.UserName).GetAwaiter().GetResult())
