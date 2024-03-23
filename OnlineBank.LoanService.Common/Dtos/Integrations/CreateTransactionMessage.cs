@@ -1,6 +1,6 @@
 namespace OnlineBank.LoanService.Common.Dtos.Integrations;
 
-public class CreateTransactionDto
+public class CreateTransactionMessage
 {
     public decimal amount { get; set; }
     public string transactionType { get; set; }

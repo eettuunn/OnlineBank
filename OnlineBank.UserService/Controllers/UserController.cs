@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OnlineBank.UserService.Common.Dtos;
@@ -38,6 +39,18 @@ public class UserController : ControllerBase
     [Authorize(Roles = "Staff")]
     public async Task<UserInfoDto> GetUserInfo(Guid userId)
     {
+        return await _userService.GetUserInfo(userId);
+    }
+    
+    /// <summary>
+    /// Get my user info
+    /// </summary>
+    [HttpGet]
+    [Route("me")]
+    [Authorize]
+    public async Task<UserInfoDto> GetMyUserInfo()
+    {
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
         return await _userService.GetUserInfo(userId);
     }
     

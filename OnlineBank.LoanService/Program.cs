@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
+using Common.Configs;
 using Common.Filters;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -14,6 +15,7 @@ using OnlineBank.LoanService.Common.Interfaces;
 using OnlineBank.LoanService.Configs;
 using OnlineBank.LoanService.Configurators;
 using OnlineBank.UserService.Common.Configs;
+using RabbitMQ.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -54,7 +56,20 @@ builder.Services.Configure<IntegrationApisUrls>(builder.Configuration.GetSection
 
 builder.Services.AddScoped<ILoanRateService, LoanRateService>();
 builder.Services.AddScoped<ILoanService, LoanService>();
+builder.Services.AddScoped<IMessageProducer, MessageProducer>();
 builder.Services.AddAutoMapper(typeof(LoanServiceMapper));
+
+var rabbitMqConnection = builder.Configuration.GetSection("RabbitMqConnection").Get<RabbitMqConnection>();
+builder.Services.AddSingleton<IConnection>(x =>
+    new ConnectionFactory
+    {
+        HostName = rabbitMqConnection.Hostname,
+        UserName = rabbitMqConnection.Username,
+        Password = rabbitMqConnection.Password,
+        VirtualHost = rabbitMqConnection.VirtualHost,
+        Port = 5672
+    }.CreateConnection()
+);
 
 builder.Services.AddAuthentication(opt => {
         opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

@@ -5,7 +5,7 @@ namespace OnlineBank.LoanService.Common.Interfaces;
 
 public interface ILoanService
 {
-    Task TakeOutLoan(CreateLoanDto createLoanDto);
-    Task MakeLoanPayment(Guid loanId, PaymentDto paymentDto);
+    Task TakeOutLoan(CreateLoanDto createLoanDto, Guid userId);
+    Task MakeLoanPayment(Guid loanId, PaymentDto paymentDto, Guid userId);
     Task<List<LoanDto>> GetUserLoans(Guid userId);
 }
