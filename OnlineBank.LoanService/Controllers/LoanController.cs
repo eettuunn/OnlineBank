@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OnlineBank.LoanService.Common.Dtos.Loan;
 using OnlineBank.LoanService.Common.Dtos.LoanRate;
@@ -6,6 +7,7 @@ using OnlineBank.LoanService.Common.Interfaces;
 namespace OnlineBank.LoanService.Controllers;
 
 [Route("loan_api/loan")]
+[Authorize]
 public class LoanController : ControllerBase
 {
     private readonly ILoanService _loanService;
@@ -19,6 +21,7 @@ public class LoanController : ControllerBase
     /// Take out new loan
     /// </summary>
     [HttpPost]
+    [Authorize(Roles = "Customer")]
     public async Task<IActionResult> TakeOutLoan([FromBody] CreateLoanDto createLoanDto)
     {
         if (ModelState.IsValid)
@@ -35,6 +38,7 @@ public class LoanController : ControllerBase
     /// </summary>
     [HttpPost]
     [Route("{loanId}")]
+    [Authorize(Roles = "Customer")]
     public async Task<IActionResult> MakeLoanPayment([FromBody] PaymentDto paymentDto, Guid loanId)
     {
         if (ModelState.IsValid)
@@ -51,6 +55,7 @@ public class LoanController : ControllerBase
     /// </summary>
     [HttpGet]
     [Route("{userId}")]
+    [Authorize(Roles = "Staff")]
     public async Task<List<LoanDto>> GetUserLoans(Guid userId)
     {
         return await _loanService.GetUserLoans(userId);

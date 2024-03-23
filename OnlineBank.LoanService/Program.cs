@@ -1,10 +1,12 @@
 using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
+using Common.Filters;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using OnlineBank.Common.Middlewares.ExceptionHandler;
 using OnlineBank.LoanService.BL;
 using OnlineBank.LoanService.BL.Services;
@@ -24,8 +26,18 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Description = "Please enter a valid token",
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        BearerFormat = "JWT",
+        Scheme = "Bearer"
+    });
     var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+    options.OperationFilter<SwaggerFilter>();
 });
 
 builder.Services.AddCors(options =>

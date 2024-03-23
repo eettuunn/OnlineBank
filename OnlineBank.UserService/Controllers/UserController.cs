@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OnlineBank.UserService.Common.Dtos;
 using OnlineBank.UserService.Common.Dtos.User;
@@ -21,6 +22,8 @@ public class UserController : ControllerBase
     /// Get list of all users
     /// </summary>
     [HttpGet]
+    [Authorize]
+    [Authorize(Roles = "Staff")]
     public async Task<List<UserDto>> GetUsers()
     {
         return await _userService.GetUsers();
@@ -31,6 +34,8 @@ public class UserController : ControllerBase
     /// </summary>
     [HttpGet]
     [Route("{userId}")]
+    [Authorize]
+    [Authorize(Roles = "Staff")]
     public async Task<UserInfoDto> GetUserInfo(Guid userId)
     {
         return await _userService.GetUserInfo(userId);
@@ -41,6 +46,8 @@ public class UserController : ControllerBase
     /// Create new user
     /// </summary>
     [HttpPost]
+    [Authorize]
+    [Authorize(Roles = "Staff")]
     public async Task<IActionResult> CreateUser([FromBody] CreateUserDto createUserDto)
     {
         if (ModelState.IsValid)
@@ -57,6 +64,8 @@ public class UserController : ControllerBase
     /// </summary>
     [HttpPut]
     [Route("{userId}/ban")]
+    [Authorize]
+    [Authorize(Roles = "Staff")]
     public async Task BanUser(Guid userId)
     {
         await _userService.BanUser(userId);
@@ -67,6 +76,8 @@ public class UserController : ControllerBase
     /// </summary>
     [HttpPut]
     [Route("{userId}/unban")]
+    [Authorize]
+    [Authorize(Roles = "Staff")]
     public async Task UnbanUser(Guid userId)
     {
         await _userService.UnbanUser(userId);
@@ -77,6 +88,8 @@ public class UserController : ControllerBase
     /// </summary>
     [HttpGet]
     [Route("{userId}/token")]
+    [Authorize]
+    [Authorize(Roles = "Staff")]
     public async Task<string> GenerateUserToken(Guid userId)
     {
         return await _tokenService.CreateToken(userId);
