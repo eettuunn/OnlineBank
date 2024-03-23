@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.hits.coreservice.dto.*;
@@ -30,6 +31,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class BankAccountService {
+
+    private final SimpMessagingTemplate messagingTemplate;
 
     private final BankAccountRepository bankAccountRepository;
     private final TransactionRepository transactionRepository;
@@ -190,6 +193,8 @@ public class BankAccountService {
 
         bankAccount = bankAccountRepository.save(bankAccount);
 
+        sendTransactionUpdate(new TransactionDto(transaction));
+
         return new BankAccountDto(bankAccount);
     }
 
@@ -266,6 +271,9 @@ public class BankAccountService {
         fromBankAccount = bankAccountRepository.save(fromBankAccount);
         bankAccountRepository.save(toBankAccount);
 
+        sendTransactionUpdate(new TransactionDto(transactionFromBankAccount));
+        sendTransactionUpdate(new TransactionDto(transactionToBankAccount));
+
         return new BankAccountDto(fromBankAccount);
     }
 
@@ -323,6 +331,8 @@ public class BankAccountService {
 
         bankAccount = bankAccountRepository.save(bankAccount);
 
+        sendTransactionUpdate(new TransactionDto(transaction));
+
         return new BankAccountDto(bankAccount);
     }
 
@@ -368,6 +378,11 @@ public class BankAccountService {
         }
 
         return sb.toString();
+    }
+
+    private void sendTransactionUpdate(TransactionDto transaction) {
+        String destination = "/topic/bank-accounts/" + transaction.getBankAccountId() + "/transactions";
+        messagingTemplate.convertAndSend(destination, transaction);
     }
 
 //    /**

@@ -20,7 +20,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "Банковские счета.")
-public class BankAccountController {
+public class BankAccountRestController {
 
     private final BankAccountService bankAccountService;
 
