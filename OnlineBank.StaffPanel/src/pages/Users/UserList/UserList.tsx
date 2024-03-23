@@ -2,7 +2,9 @@ import React, { useCallback, useEffect, useState } from 'react';
 import block from 'bem-cn';
 import { Button, Layout } from 'antd';
 import Icon from '@ant-design/icons/lib/components/Icon';
+import { io } from 'socket.io-client';
 import { useNavigate } from 'react-router-dom';
+import { StompSessionProvider } from 'react-stomp-hooks';
 
 import { useLayoutConfig } from '../../../shared/hooks/useLayoutConfig/useLayoutConfig';
 import { Paths } from '../../../shared/constants';
@@ -36,7 +38,7 @@ const UserList: React.FC = () => {
     const [ formBlockingMode, setFormBlockingMode ] = useState<FormBlockingMode>(FormBlockingMode.Blocking);
     const [ showBlockingModal, setShowBlockingModal ] = useState(false);
 
-    const { isLoading: isLoadingUsers, isFetching: isFetchingUsers, data: dataUsers } = useGetUsersQuery(pagination, { pollingInterval: 20000 });
+    const { isLoading: isLoadingUsers, isFetching: isFetchingUsers, data: dataUsers } = useGetUsersQuery(pagination);
     const [ create, { isLoading: isLoadingCreate } ] = useCreateUserMutation();
     const [ blockUser, { isLoading: isLoadingBlock } ] = useBlockUserMutation();
     const [ unblockUser, { isLoading: isLoadingUnblock } ] = useUnblockUserMutation();

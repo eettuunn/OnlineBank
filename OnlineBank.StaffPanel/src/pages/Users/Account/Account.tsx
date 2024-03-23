@@ -1,32 +1,38 @@
-import React, { useEffect, useState } from 'react';
+/* eslint-disable react/no-multi-comp */
+import React, { useEffect, useMemo, useState } from 'react';
 import block from 'bem-cn';
 import { Button, Layout } from 'antd';
 import { useNavigate, useParams } from 'react-router-dom';
 import Title from 'antd/lib/typography/Title';
 import { ArrowLeftOutlined } from '@ant-design/icons';
+import { StompSessionProvider, useSubscription } from 'react-stomp-hooks';
 
 import BaseTable from '../../../features/BaseTable/BaseTable';
 import MainHeader from '../../../features/MainHeader/MainHeader';
-import { Paths } from '../../../shared/constants';
+import { Paths, apiBaseUrl } from '../../../shared/constants';
 import { useLayoutConfig } from '../../../shared/hooks/useLayoutConfig/useLayoutConfig';
 import { TransactionType, TransactionTypeRus, columnsTransaction } from '../constants';
 import AccountBlockInfo from '../components/AccountBlockInfo/AccountBlockInfo';
 import { useGetAccountInfoQuery, useGetAccountTransactionQuery } from '../api/accountsApi';
 import { useAppSelector } from '../../../redux/hooks';
 import { dateParse } from '../../../shared/helpers/dateParse';
+import { ITransaction } from '../api/types';
 
 const b = block('account');
 const { Content } = Layout;
 
-const Account: React.FC = () => {
+const AccountRaw: React.FC = () => {
     const { setConfig } = useLayoutConfig();
     const navigate = useNavigate();
     const { accountId, userId } = useParams();
 
-    const pagination = useAppSelector(store => store.pagination[location.pathname] ?? store.pagination.empty);
+    const pagination = useAppSelector(store => store.pagination.empty);
 
     const { data: dataAccount } = useGetAccountInfoQuery(accountId as string);
     const { isLoading: isLoadingTransactions, data: dataTransactions } = useGetAccountTransactionQuery({ id: accountId as string, params: pagination });
+
+    const [ newRow, setNewRow ] = useState('');
+    useSubscription('/topic/transactions', (message) => {setNewRow(message.body);});
 
     useEffect(() => {
         setConfig({ activeMenuKey: Paths.Users, headerTitle: `Счет №${dataAccount?.number as string}`,
@@ -44,6 +50,8 @@ const Account: React.FC = () => {
                 </div>
             ) });
     }, [ dataAccount, navigate, userId ]);
+
+    const wsValue = useMemo(() => newRow ? JSON.parse(newRow) as ITransaction : undefined, [ newRow ]);
 
     const prepareTableData = columnsTransaction.map((el) => {
 
@@ -70,6 +78,15 @@ const Account: React.FC = () => {
 
     const newCloumns = [ ...prepareTableData ];
 
+    const [ dataSource, setDataSource ] = useState<ITransaction[]>([]);
+
+    useEffect(() => {
+        setDataSource(dataTransactions?.data ?? []);
+        if (wsValue) {
+            setDataSource([ wsValue, ...dataSource ]);
+        }
+    }, [ dataTransactions?.data, wsValue ]);
+
     return (
         <div className={b().toString()}>
             <MainHeader>
@@ -79,13 +96,20 @@ const Account: React.FC = () => {
                 <Title level={3}>Операции</Title>
                 <BaseTable
                     columns={newCloumns}
-                    dataSource={dataTransactions?.data as Record<any, any>[]}
+                    dataSource={dataSource as Record<any, any>[]}
                     isLoading={isLoadingTransactions}
-                    pageInfo={dataTransactions?.pageInfo}
+                    // pageInfo={dataTransactions?.pageInfo}
                 />
             </Content>
         </div>
     );
 };
+
+const Account: React.FC = () => (
+    <StompSessionProvider
+        url={`${apiBaseUrl ?? ''}ws`}>
+        <AccountRaw/>
+    </StompSessionProvider>
+);
 
 export default Account;
