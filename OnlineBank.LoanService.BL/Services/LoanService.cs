@@ -129,6 +129,7 @@ public class LoanService : ILoanService
             loanInfo = _mapper.Map<LoanListElementDto>(loanEntity),
             loanPayments = _mapper.Map<List<LoanPaymentDto>>(loanEntity.Payments)
         };
+        loanDto.loanPayments = loanDto.loanPayments.OrderBy(p => p.paymentDate).ToList();
         
         return loanDto;
     }
