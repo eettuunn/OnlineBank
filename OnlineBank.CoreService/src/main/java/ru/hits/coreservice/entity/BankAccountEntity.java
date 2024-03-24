@@ -39,7 +39,7 @@ public class BankAccountEntity {
     @Column(name = "is_closed")
     private Boolean isClosed;
 
-    @Column(name = "transaction_date")
+    @Column(name = "creation_date")
     private LocalDateTime creationDate;
 
     @OneToMany(mappedBy = "bankAccount")

@@ -169,6 +169,38 @@ public class BankAccountService {
             additionalInformation = "Пополнение счета";
         } else if (TransactionType.fromDepositTransactionType(depositMoneyDto.getTransactionType()) == TransactionType.TAKE_LOAN) {
             additionalInformation = "Взятие кредита";
+
+            BankAccountEntity masterBankAccount = bankAccountRepository.findById(UUID.fromString("cb1ef860-9f51-4e49-8e7d-f6694b10fc99"))
+                    .orElseThrow(() -> new NotFoundException("Мастер-счет не найден"));
+
+            String masterBankAccountCurrencyCode = masterBankAccount.getBalance().getCurrency().getCurrencyCode();
+
+            BigDecimal exchangeRateToTargetCurrency = currencyExchangeService.getExchangeRate(masterBankAccountCurrencyCode, depositMoneyDto.getCurrencyCode());
+            BigDecimal masterBankAccountBalanceWithExchangeRate = masterBankAccount.getBalance().getAmount().multiply(exchangeRateToTargetCurrency);
+
+            if (masterBankAccountBalanceWithExchangeRate.compareTo(depositMoneyDto.getAmount()) < 0) {
+                throw new ConflictException("Недостаточно средств на мастер-счете для списания указанной суммы");
+            }
+
+            BigDecimal invertedExchangeRate = currencyExchangeService.getExchangeRate(depositMoneyDto.getCurrencyCode(), masterBankAccountCurrencyCode);
+
+            masterBankAccount.getBalance().setAmount(masterBankAccount.getBalance().getAmount().subtract(depositMoneyDto.getAmount().multiply(invertedExchangeRate)));
+
+            TransactionEntity masterBankAccountTransaction = TransactionEntity.builder()
+                    .transactionDate(LocalDateTime.now())
+                    .amount(depositMoneyDto.getAmount().multiply(invertedExchangeRate).negate())
+                    .transactionType(TransactionType.fromDepositTransactionType(depositMoneyDto.getTransactionType()))
+                    .additionalInformation("Снятие средств")
+                    .bankAccount(masterBankAccount)
+                    .build();
+
+            masterBankAccountTransaction = transactionRepository.save(masterBankAccountTransaction);
+
+            masterBankAccount.getTransactions().add(0, masterBankAccountTransaction);
+
+            bankAccountRepository.save(masterBankAccount);
+
+            sendTransactionUpdate(new TransactionDto(masterBankAccountTransaction));
         }
 
         String bankAccountCurrencyCode = bankAccount.getBalance().getCurrency().getCurrencyCode();
@@ -302,6 +334,33 @@ public class BankAccountService {
             additionalInformation = "Снятие средств";
         } else if (TransactionType.fromWithdrawTransactionType(withdrawMoneyDto.getTransactionType()) == TransactionType.REPAY_LOAN) {
             additionalInformation = "Платеж по кредиту";
+
+            BankAccountEntity masterBankAccount = bankAccountRepository.findById(UUID.fromString("cb1ef860-9f51-4e49-8e7d-f6694b10fc99"))
+                    .orElseThrow(() -> new NotFoundException("Мастер-счет не найден"));
+
+            String masterBankAccountCurrencyCode = masterBankAccount.getBalance().getCurrency().getCurrencyCode();
+
+            BigDecimal exchangeRateToTargetCurrency = currencyExchangeService.getExchangeRate(withdrawMoneyDto.getCurrencyCode(), masterBankAccountCurrencyCode);
+            BigDecimal amountWithExchangeRate = withdrawMoneyDto.getAmount().multiply(exchangeRateToTargetCurrency);
+
+            BigDecimal newMasterBankAccountBalance = masterBankAccount.getBalance().getAmount().add(amountWithExchangeRate);
+            masterBankAccount.getBalance().setAmount(newMasterBankAccountBalance);
+
+            TransactionEntity masterBankAccountTransaction = TransactionEntity.builder()
+                    .transactionDate(LocalDateTime.now())
+                    .amount(amountWithExchangeRate)
+                    .transactionType(TransactionType.fromWithdrawTransactionType(withdrawMoneyDto.getTransactionType()))
+                    .additionalInformation("Пополнение счета")
+                    .bankAccount(masterBankAccount)
+                    .build();
+
+            masterBankAccountTransaction = transactionRepository.save(masterBankAccountTransaction);
+
+            masterBankAccount.getTransactions().add(0, masterBankAccountTransaction);
+
+            bankAccountRepository.save(bankAccount);
+
+            sendTransactionUpdate(new TransactionDto(masterBankAccountTransaction));
         }
 
         String bankAccountCurrencyCode = bankAccount.getBalance().getCurrency().getCurrencyCode();
