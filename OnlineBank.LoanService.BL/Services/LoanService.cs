@@ -44,7 +44,7 @@ public class LoanService : ILoanService
             .FirstOrDefaultAsync(lr => lr.Id == createLoanDto.loanRateId)
                 ?? throw new CantFindByIdException("loan rate", createLoanDto.loanRateId);
         
-        MakeTransaction(createLoanDto.bankAccountId, userId, createLoanDto.loanAmount, "TAKE_LOAN");
+        MakeTransaction(createLoanDto.bankAccountId, userId, createLoanDto.loanAmount, "TAKE_LOAN", createLoanDto.currencyCode);
         
         var loanEntity = new LoanEntity
         {   
@@ -81,7 +81,7 @@ public class LoanService : ILoanService
         var percents = CountCurrentPercents(loan);
         var paymentWithPercents = (double)payment + percents;
 
-        MakeTransaction(paymentDto.bankAccountId, userId, (decimal)paymentWithPercents, "REPAY_LOAN");
+        MakeTransaction(paymentDto.bankAccountId, userId, (decimal)paymentWithPercents, "REPAY_LOAN", loan.CurrencyCode);
 
         loan.Debt -= payment;
 
@@ -153,13 +153,15 @@ public class LoanService : ILoanService
         }
     }
 
-    private void MakeTransaction(Guid baId, Guid userId, decimal amount, string transactionType)
+    private void MakeTransaction(Guid baId, Guid userId, decimal amount, string transactionType, string currencyCode)
     {
         var transactionMessage = new CreateTransactionMessage
         {   
             amount = amount,
             transactionType = transactionType,
-            userId = userId
+            userId = userId,
+            bankAccountId = baId,
+            currencyCode = currencyCode
         };
         _messageProducer.SendMessage(transactionMessage);
         /*using (var client = new HttpClient())

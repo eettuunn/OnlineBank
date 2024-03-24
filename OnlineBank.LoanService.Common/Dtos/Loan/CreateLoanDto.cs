@@ -12,6 +12,9 @@ public class CreateLoanDto
     public decimal loanAmount { get; set; }
     
     [Required]
+    public string currencyCode { get; set; }
+        
+    [Required]
     public Guid loanRateId { get; set; }
     
     [Required]
