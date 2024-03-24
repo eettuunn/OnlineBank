@@ -50,8 +50,8 @@ public class LoanService : ILoanService
         var loanEntity = new LoanEntity
         {   
             StartDate = DateTime.UtcNow,
-            EndDate = DateTime.UtcNow.AddMonths(createLoanDto.months),
-            MonthlyPayment = createLoanDto.loanAmount / createLoanDto.months,
+            EndDate = DateTime.UtcNow.AddDays(createLoanDto.days),
+            MonthlyPayment = createLoanDto.loanAmount / createLoanDto.days,
             Debt = createLoanDto.loanAmount,
             LoanRate = loanRateEntity,
             UserId = userId,
@@ -229,10 +229,10 @@ public class LoanService : ILoanService
 
     private async Task<List<LoanPaymentEntity>> CreatePayments(CreateLoanDto createLoanDto)
     {
-        var monthlyPayment = createLoanDto.loanAmount / createLoanDto.months;
+        var monthlyPayment = createLoanDto.loanAmount / createLoanDto.days;
         var currentDate = DateTime.UtcNow;
         var payments = new List<LoanPaymentEntity>();
-        for (var i = 0; i < createLoanDto.months; i++)
+        for (var i = 0; i < createLoanDto.days; i++)
         {
             var payment = new LoanPaymentEntity
             {

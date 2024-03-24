@@ -11,6 +11,7 @@ using Microsoft.OpenApi.Models;
 using OnlineBank.Common.Middlewares.ExceptionHandler;
 using OnlineBank.LoanService.BL;
 using OnlineBank.LoanService.BL.Services;
+using OnlineBank.LoanService.BL.Services.Background;
 using OnlineBank.LoanService.Common.Interfaces;
 using OnlineBank.LoanService.Configs;
 using OnlineBank.LoanService.Configurators;
@@ -57,6 +58,7 @@ builder.Services.Configure<IntegrationApisUrls>(builder.Configuration.GetSection
 builder.Services.AddScoped<ILoanRateService, LoanRateService>();
 builder.Services.AddScoped<ILoanService, LoanService>();
 builder.Services.AddScoped<IMessageProducer, MessageProducer>();
+builder.Services.AddHostedService<LoanPaymentChecker>();
 builder.Services.AddAutoMapper(typeof(LoanServiceMapper));
 
 var rabbitMqConnection = builder.Configuration.GetSection("RabbitMqConnection").Get<RabbitMqConnection>();
