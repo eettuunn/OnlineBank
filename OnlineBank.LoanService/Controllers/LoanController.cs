@@ -22,7 +22,6 @@ public class LoanController : ControllerBase
     /// Take out new loan
     /// </summary>
     [HttpPost]
-    [Authorize(Roles = "Customer")]
     public async Task<IActionResult> TakeOutLoan([FromBody] CreateLoanDto createLoanDto)
     {
         if (ModelState.IsValid)
@@ -40,7 +39,6 @@ public class LoanController : ControllerBase
     /// </summary>
     [HttpPost]
     [Route("{loanId}")]
-    [Authorize(Roles = "Customer")]
     public async Task<IActionResult> MakeLoanPayment([FromBody] PaymentDto paymentDto, Guid loanId)
     {
         if (ModelState.IsValid)

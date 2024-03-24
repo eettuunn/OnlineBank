@@ -38,7 +38,6 @@ public class LoanRateController : ControllerBase
     /// Get loan rates list
     /// </summary>
     [HttpGet]
-    [Authorize(Roles = "Customer")]
     public async Task<List<LoanRateDto>> GetLoanRates()
     {
         return await _loanRateService.GetLoanRates();
