@@ -9,4 +9,6 @@ public class RabbitMqConnection
     public required string Password { get; set; }
 
     public required string VirtualHost { get; set; }
+    
+    public required string Port { get; set; }
 }

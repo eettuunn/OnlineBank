@@ -60,7 +60,7 @@ public class LoanPaymentChecker : BackgroundService
 
                 await context.SaveChangesAsync(stoppingToken);
 
-                await Task.Delay(1 * 1000 * 60, stoppingToken);
+                await Task.Delay(1 * 1000 * 60 * 60 * 24, stoppingToken);
             }
         }
     }

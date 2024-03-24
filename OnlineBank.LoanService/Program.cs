@@ -69,7 +69,7 @@ builder.Services.AddSingleton<IConnection>(x =>
         UserName = rabbitMqConnection.Username,
         Password = rabbitMqConnection.Password,
         VirtualHost = rabbitMqConnection.VirtualHost,
-        Port = 5672
+        Port = int.Parse(rabbitMqConnection.Port)
     }.CreateConnection()
 );
 

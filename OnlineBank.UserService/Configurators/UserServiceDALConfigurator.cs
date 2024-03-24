@@ -74,8 +74,8 @@ public static class UserServiceDALConfigurator
                 var adminUser = dbContext.Users.FirstOrDefaultAsync(u => u.Email == admin.Email).GetAwaiter().GetResult();
                 
                 _usermanager.AddToRoleAsync(staffUser, "Staff").GetAwaiter().GetResult();
-                _usermanager.AddToRoleAsync(admin, "Staff").GetAwaiter().GetResult();
-                _usermanager.AddToRoleAsync(admin, "Customer").GetAwaiter().GetResult();
+                _usermanager.AddToRoleAsync(adminUser, "Staff").GetAwaiter().GetResult();
+                _usermanager.AddToRoleAsync(adminUser, "Customer").GetAwaiter().GetResult();
                 _usermanager.AddToRoleAsync(customerUser, "Customer").GetAwaiter().GetResult();
             }
             dbContext.SaveChanges();

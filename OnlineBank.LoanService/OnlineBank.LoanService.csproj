@@ -7,6 +7,7 @@
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <NoWarn>$(NoWarn);1591</NoWarn>
         <DockerDefaultTargetOS>Windows</DockerDefaultTargetOS>
+        <UserSecretsId>bc4a0632-6db3-40d4-b705-4d117a535b19</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>
@@ -43,10 +44,6 @@
       <Content Include="..\.dockerignore">
         <Link>.dockerignore</Link>
       </Content>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Configs\" />
     </ItemGroup>
 
 </Project>
