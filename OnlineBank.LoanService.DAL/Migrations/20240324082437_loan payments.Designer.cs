@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OnlineBank.LoanService.DAL;
@@ -11,9 +12,11 @@ using OnlineBank.LoanService.DAL;
 namespace OnlineBank.LoanService.DAL.Migrations
 {
     [DbContext(typeof(LoanServiceDbContext))]
-    partial class LoanServiceDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240324082437_loan payments")]
+    partial class loanpayments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -72,7 +75,7 @@ namespace OnlineBank.LoanService.DAL.Migrations
                     b.Property<bool>("IsExpired")
                         .HasColumnType("boolean");
 
-                    b.Property<Guid?>("LoanEntityId")
+                    b.Property<Guid>("LoanId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("PaymentDate")
@@ -80,7 +83,7 @@ namespace OnlineBank.LoanService.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("LoanEntityId");
+                    b.HasIndex("LoanId");
 
                     b.ToTable("LoanPayments");
                 });
@@ -116,9 +119,13 @@ namespace OnlineBank.LoanService.DAL.Migrations
 
             modelBuilder.Entity("OnlineBank.LoanService.DAL.Entities.LoanPaymentEntity", b =>
                 {
-                    b.HasOne("OnlineBank.LoanService.DAL.Entities.LoanEntity", null)
+                    b.HasOne("OnlineBank.LoanService.DAL.Entities.LoanEntity", "Loan")
                         .WithMany("Payments")
-                        .HasForeignKey("LoanEntityId");
+                        .HasForeignKey("LoanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Loan");
                 });
 
             modelBuilder.Entity("OnlineBank.LoanService.DAL.Entities.LoanEntity", b =>

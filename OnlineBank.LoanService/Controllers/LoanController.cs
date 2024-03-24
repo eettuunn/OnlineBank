@@ -39,12 +39,12 @@ public class LoanController : ControllerBase
     /// </summary>
     [HttpPost]
     [Route("{loanId}")]
-    public async Task<IActionResult> MakeLoanPayment([FromBody] PaymentDto paymentDto, Guid loanId)
+    public async Task<IActionResult> MakeLoanPayment([FromBody] CreatePaymentDto createPaymentDto, Guid loanId)
     {
         if (ModelState.IsValid)
         {
             var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            await _loanService.MakeLoanPayment(loanId, paymentDto, userId);
+            await _loanService.MakeLoanPayment(loanId, createPaymentDto, userId);
             return Ok();
         }
 
@@ -57,7 +57,7 @@ public class LoanController : ControllerBase
     [HttpGet]
     [Route("{userId}")]
     [Authorize(Roles = "Staff")]
-    public async Task<List<LoanDto>> GetUserLoans(Guid userId)
+    public async Task<List<LoanListElementDto>> GetUserLoans(Guid userId)
     {
         return await _loanService.GetUserLoans(userId);
     }
@@ -67,9 +67,21 @@ public class LoanController : ControllerBase
     /// </summary>
     [HttpGet]
     [Authorize]
-    public async Task<List<LoanDto>> GetMyLoans()
+    public async Task<List<LoanListElementDto>> GetMyLoans()
     {
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
         return await _loanService.GetUserLoans(userId);
+    }
+
+    /// <summary>
+    /// Get my loan info
+    /// </summary>
+    [HttpGet]
+    [Route("info/{loanId}")]
+    [Authorize]
+    public async Task<LoanInfoDto> GetLoanInfo(Guid loanId)
+    {
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+        return await _loanService.GetLoanInfo(loanId, userId);
     }
 }

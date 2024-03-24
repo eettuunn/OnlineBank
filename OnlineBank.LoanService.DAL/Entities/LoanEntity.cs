@@ -31,4 +31,7 @@ public class LoanEntity
     
     [Required]
     public LoanRateEntity LoanRate { get; set; }
+    
+    [Required]
+    public List<LoanPaymentEntity> Payments { get; set; }
 }

@@ -1,6 +1,6 @@
 namespace OnlineBank.LoanService.Common.Dtos.Loan;
 
-public class LoanDto
+public class LoanListElementDto
 {
     public Guid id { get; set; }
     
