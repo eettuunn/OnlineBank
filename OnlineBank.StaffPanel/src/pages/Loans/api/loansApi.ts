@@ -3,16 +3,16 @@ import { createApi } from '@reduxjs/toolkit/query/react';
 import { axiosBaseQuery } from '../../../shared/api/query';
 import { IResponseLists } from '../../../shared/types';
 
-import { ICreateLoanRate, ILoan, ILoanRate } from './types';
+import { ICreateLoanRate, ILoan, ILoanRate, ILoanResponse } from './types';
 
 export const loansApi = createApi({
     reducerPath: 'loansApi',
     baseQuery: axiosBaseQuery('/loan_api'),
     tagTypes: [ 'Loans', 'LoanRates' ],
     endpoints: builder => ({
-        getUsersLoans: builder.query<IResponseLists<ILoan>, string>({
+        getUsersLoans: builder.query<IResponseLists<ILoan>, undefined>({
             query: id => ({
-                url: `/loan/${id}`,
+                url: '/loan',
                 method: 'get',
             }),
             providesTags: [ 'Loans' ],
@@ -32,7 +32,13 @@ export const loansApi = createApi({
             }),
             invalidatesTags: [ 'LoanRates' ],
         }),
+        getLoanInfo: builder.query<ILoanResponse, string>({
+            query: id => ({
+                url: `/loan/info/${id}`,
+                method: 'get',
+            }),
+        }),
     }),
 });
 
-export const { useGetUsersLoansQuery, useGetLoanRatesQuery, useCreateLoanRateMutation } = loansApi;
+export const { useGetUsersLoansQuery, useGetLoanRatesQuery, useCreateLoanRateMutation, useGetLoanInfoQuery } = loansApi;

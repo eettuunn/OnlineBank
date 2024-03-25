@@ -30,7 +30,7 @@ const User: React.FC = () => {
     const { data: dataUser } = useGetUserInfoQuery(userId as string);
     const { isLoading: isLoadingAccounts, data: dataAccounts } = useGetUserAccountsQuery({ id: userId as string, params: pagination });
 
-    const { isLoading: isLoadingLoans, data: dataLoans } = useGetUsersLoansQuery(userId as string);
+    const { isLoading: isLoadingLoans, data: dataLoans } = useGetUsersLoansQuery(undefined);
 
     useEffect(() => {
         setConfig({ activeMenuKey: Paths.Users, headerTitle: 'Информация о пользователе' });
@@ -87,6 +87,16 @@ const User: React.FC = () => {
         },
     });
 
+    const onRowLoans = (record: Record<string, unknown>, rowIndex: number | undefined) => ({
+        onMouseEnter: (event: React.MouseEvent) => {
+        },
+        onMouseLeave: (event: React.MouseEvent) => {
+        },
+        onClick: (event: React.MouseEvent) => {
+            navigate(`loan/${record.id as string}`);
+        },
+    });
+
     const newCloumnsAccounts = [ ...prepareTableDataAccounts ];
     const newColumnsLoans = [ ...prepareTableDataLoans ];
     return (
@@ -99,9 +109,11 @@ const User: React.FC = () => {
                 <Collapse bordered={true} className={b('collapse-loans').toString()} defaultActiveKey={[ '' ]}>
                     <Panel header={<Divider orientation="left">Кредиты</Divider>} key="loans">
                         <BaseTable
+                            cursorPointer
                             columns={newColumnsLoans}
                             dataSource={dataLoans as unknown as Record<string, unknown>[]}
                             isLoading={isLoadingLoans}
+                            onRow={onRowLoans}
                         />
                     </Panel>
                 </Collapse>

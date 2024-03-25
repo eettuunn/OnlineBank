@@ -108,6 +108,24 @@ export const columnsTransaction: (ColumnGroupType<Record<string, unknown>> | Col
     },
 ];
 
+export const columnsLoanPayments: (ColumnGroupType<Record<string, unknown>> | ColumnType<Record<string, unknown>>)[] = [
+    {
+        key: 'paymentDate',
+        title: 'Дата платежа',
+        dataIndex: 'paymentDate',
+    },
+    {
+        key: 'debt',
+        title: 'Долг',
+        dataIndex: 'debt',
+    },
+    {
+        key: 'isExpired',
+        title: 'Просрочен',
+        dataIndex: 'isExpired',
+    },
+];
+
 export const enum Role {
     staff = 'Staff',
     customer = 'Customer',

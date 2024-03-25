@@ -6,6 +6,10 @@
     row-gap: 12px;
     min-width: 1200px;
 
+    .ant-btn {
+        margin-right: 10px;
+    }
+
     &__block-search {
         column-gap: 8px;
     }

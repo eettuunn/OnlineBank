@@ -32,7 +32,7 @@ const AccountRaw: React.FC = () => {
     const { isLoading: isLoadingTransactions, data: dataTransactions } = useGetAccountTransactionQuery({ id: accountId as string, params: pagination });
 
     const [ newRow, setNewRow ] = useState('');
-    useSubscription('/topic/transactions', (message) => {setNewRow(message.body);});
+    useSubscription(`/topic/bank-accounts/${accountId as string}/transactions`, (message) => {setNewRow(message.body);});
 
     useEffect(() => {
         setConfig({ activeMenuKey: Paths.Users, headerTitle: `Счет №${dataAccount?.number as string}`,

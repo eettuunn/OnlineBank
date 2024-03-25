@@ -2,9 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import block from 'bem-cn';
 import { Button, Layout } from 'antd';
 import Icon from '@ant-design/icons/lib/components/Icon';
-import { io } from 'socket.io-client';
 import { useNavigate } from 'react-router-dom';
-import { StompSessionProvider } from 'react-stomp-hooks';
 
 import { useLayoutConfig } from '../../../shared/hooks/useLayoutConfig/useLayoutConfig';
 import { Paths } from '../../../shared/constants';
