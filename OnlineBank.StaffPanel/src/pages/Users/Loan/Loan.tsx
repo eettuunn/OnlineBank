@@ -15,7 +15,7 @@ import { useGetLoanInfoQuery } from '../../Loans/api/loansApi';
 import MainHeader from '../../../features/MainHeader/MainHeader';
 import LoanBlockInfo from '../components/LoanBlockInfo/LoanBlockInfo';
 
-const b = block('loan');
+const b = block('account');
 const { Content } = Layout;
 
 const Loan: React.FC = () => {

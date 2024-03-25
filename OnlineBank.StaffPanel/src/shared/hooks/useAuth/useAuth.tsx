@@ -21,10 +21,10 @@ interface IAuth {
     isFetching?: boolean;
     isError?: boolean;
     user?: string;
-    login: ({ email }: ICredentials) => void;
+    login: (data: ICredentials) => void;
     data?: IGetCurrentUser;
     currentRole?: Role;
-    isLoginFetching: boolean;
+    isLoginFetching?: boolean;
 }
 
 /**
@@ -61,8 +61,6 @@ const useProvideAuth = (): IAuth => {
     const [ storedValue, setStoredValue ] = useLocalStorage('access', '');
     const [ isAuth, setIsAuth ] = useState(false);
 
-    const [ loginQuery, { isLoading: isLoginFetching, data: userData } ] = useLoginMutation();
-
     useEffect(() => {
         if (storedValue) {
             const data = tokenDecode(storedValue);
@@ -75,35 +73,12 @@ const useProvideAuth = (): IAuth => {
         }
     }, [ storedValue ]);
 
-    useEffect(() => {
-        if (userData?.token) {
-            const data = tokenDecode(storedValue);
-            if (data.ban !== 'True' && data.role === Role.staff) {
-                setIsAuth(true);
-            }
-            setStoredValue(userData?.token);
-        }
-    }, [ setStoredValue, storedValue, userData ]);
-
-    /**
-     * локальный вход с помощью логина и пароля
-     * @param email
-     */
-
     const login = (data: ICredentials) => {
-        loginQuery(data)
-            .unwrap()
-            .then((res: { token: string; id: string }) => {
-                setStoredValue(res.token);
-            })
-            .catch((error) => {
-                console.log(error);
-            });
+        setStoredValue(data.token);
     };
 
     return {
         isAuth,
         login,
-        isLoginFetching,
     };
 };
