@@ -1,10 +1,13 @@
 using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
+using Common.Configs;
+using Common.Filters;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using OnlineBank.Common.Middlewares.ExceptionHandler;
 using OnlineBank.LoanService.BL;
 using OnlineBank.LoanService.BL.Services;
@@ -12,6 +15,7 @@ using OnlineBank.LoanService.Common.Interfaces;
 using OnlineBank.LoanService.Configs;
 using OnlineBank.LoanService.Configurators;
 using OnlineBank.UserService.Common.Configs;
+using RabbitMQ.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,8 +28,18 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Description = "Please enter a valid token",
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        BearerFormat = "JWT",
+        Scheme = "Bearer"
+    });
     var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+    options.OperationFilter<SwaggerFilter>();
 });
 
 builder.Services.AddCors(options =>
@@ -42,7 +56,20 @@ builder.Services.Configure<IntegrationApisUrls>(builder.Configuration.GetSection
 
 builder.Services.AddScoped<ILoanRateService, LoanRateService>();
 builder.Services.AddScoped<ILoanService, LoanService>();
+builder.Services.AddScoped<IMessageProducer, MessageProducer>();
 builder.Services.AddAutoMapper(typeof(LoanServiceMapper));
+
+var rabbitMqConnection = builder.Configuration.GetSection("RabbitMqConnection").Get<RabbitMqConnection>();
+builder.Services.AddSingleton<IConnection>(x =>
+    new ConnectionFactory
+    {
+        HostName = rabbitMqConnection.Hostname,
+        UserName = rabbitMqConnection.Username,
+        Password = rabbitMqConnection.Password,
+        VirtualHost = rabbitMqConnection.VirtualHost,
+        Port = 5672
+    }.CreateConnection()
+);
 
 builder.Services.AddAuthentication(opt => {
         opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

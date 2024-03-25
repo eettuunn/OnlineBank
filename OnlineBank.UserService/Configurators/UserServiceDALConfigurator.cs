@@ -46,7 +46,7 @@ public static class UserServiceDALConfigurator
                 Passport = "1234 123456",
                 PhoneNumber = "89999999999"
             };
-            _usermanager.CreateAsync(customer).GetAwaiter().GetResult();
+            _usermanager.CreateAsync(customer, "a12345").GetAwaiter().GetResult();
             
             var staff = new AppUser
             {
@@ -55,15 +55,27 @@ public static class UserServiceDALConfigurator
                 Passport = "4321 654321",
                 PhoneNumber = "81111111111"
             };
-            _usermanager.CreateAsync(staff).GetAwaiter().GetResult();
+            _usermanager.CreateAsync(staff, "a12345").GetAwaiter().GetResult();
 
+            var admin = new AppUser
+            {
+                Id = "7e58c0d2-7738-4f78-a1bb-9f8c7d7ce0f4",
+                UserName = "admin",
+                Email = "admin@gmail.com",
+                Passport = "1111 111111",
+                PhoneNumber = "89999999999"
+            };
+            _usermanager.CreateAsync(admin, "a12345").GetAwaiter().GetResult();
 
             if (dbContext.Users.AnyAsync(u => u.UserName == customer.UserName).GetAwaiter().GetResult())
             {
                 var customerUser = dbContext.Users.FirstOrDefaultAsync(u => u.Email == customer.Email).GetAwaiter().GetResult();
                 var staffUser = dbContext.Users.FirstOrDefaultAsync(u => u.Email == staff.Email).GetAwaiter().GetResult();
+                var adminUser = dbContext.Users.FirstOrDefaultAsync(u => u.Email == admin.Email).GetAwaiter().GetResult();
                 
                 _usermanager.AddToRoleAsync(staffUser, "Staff").GetAwaiter().GetResult();
+                _usermanager.AddToRoleAsync(admin, "Staff").GetAwaiter().GetResult();
+                _usermanager.AddToRoleAsync(admin, "Customer").GetAwaiter().GetResult();
                 _usermanager.AddToRoleAsync(customerUser, "Customer").GetAwaiter().GetResult();
             }
             dbContext.SaveChanges();

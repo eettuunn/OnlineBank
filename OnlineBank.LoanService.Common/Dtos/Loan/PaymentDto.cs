@@ -8,7 +8,4 @@ public class PaymentDto
     
     [Required]
     public Guid bankAccountId { get; set; }
-    
-    [Required]
-    public Guid userId { get; set; }
 }

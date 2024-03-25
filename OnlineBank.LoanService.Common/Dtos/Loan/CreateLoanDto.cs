@@ -15,8 +15,5 @@ public class CreateLoanDto
     public Guid loanRateId { get; set; }
     
     [Required]
-    public Guid userId { get; set; }
-    
-    [Required]
     public Guid bankAccountId { get; set; }
 }

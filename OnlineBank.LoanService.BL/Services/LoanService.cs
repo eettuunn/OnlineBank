@@ -19,30 +19,32 @@ public class LoanService : ILoanService
     private readonly LoanServiceDbContext _context;
     private readonly IMapper _mapper;
     private readonly IntegrationApisUrls _integrationApisUrls;
+    private readonly IMessageProducer _messageProducer;
 
-    public LoanService(LoanServiceDbContext context, IMapper mapper, IOptions<IntegrationApisUrls> options)
+    public LoanService(LoanServiceDbContext context, IMapper mapper, IOptions<IntegrationApisUrls> options, IMessageProducer messageProducer)
     {
         _context = context;
         _mapper = mapper;
+        _messageProducer = messageProducer;
         _integrationApisUrls = options.Value;
     }
 
-    public async Task TakeOutLoan(CreateLoanDto createLoanDto)
+    public async Task TakeOutLoan(CreateLoanDto createLoanDto, Guid userId)
     {
         if (createLoanDto.loanAmount <= 0)
         {
             throw new BadRequestException("Loan amount must be greater, than 0");
         }
 
-        await IsUserExists(createLoanDto.userId);
-        await IsBankAccountExists(createLoanDto.bankAccountId);
+        await IsUserExists(userId);
+        // await IsBankAccountExists(createLoanDto.bankAccountId);
         
         var loanRateEntity = await _context
             .LoanRates
             .FirstOrDefaultAsync(lr => lr.Id == createLoanDto.loanRateId)
                 ?? throw new CantFindByIdException("loan rate", createLoanDto.loanRateId);
         
-        await MakeTransaction(createLoanDto.bankAccountId, createLoanDto.userId, createLoanDto.loanAmount, "TAKE_LOAN");
+        MakeTransaction(createLoanDto.bankAccountId, userId, createLoanDto.loanAmount, "TAKE_LOAN");
         
         var loanEntity = new LoanEntity
         {   
@@ -51,7 +53,7 @@ public class LoanService : ILoanService
             MonthlyPayment = createLoanDto.loanAmount / createLoanDto.months,
             Debt = createLoanDto.loanAmount,
             LoanRate = loanRateEntity,
-            UserId = createLoanDto.userId,
+            UserId = userId,
             BankAccountId = createLoanDto.bankAccountId
         };
         
@@ -59,17 +61,17 @@ public class LoanService : ILoanService
         await _context.SaveChangesAsync();
     }
 
-    public async Task MakeLoanPayment(Guid loanId, PaymentDto paymentDto)
+    public async Task MakeLoanPayment(Guid loanId, PaymentDto paymentDto, Guid userId)
     {
         var loan = await _context.Loans
                        .Include(l => l.LoanRate)
                        .FirstOrDefaultAsync(l => l.Id == loanId)
                    ?? throw new CantFindByIdException("loan", loanId);
-        if (loan.UserId != paymentDto.userId) throw new ConflictException("This is not your bank account"); 
+        if (loan.UserId != userId) throw new ConflictException("This is not your bank account"); 
         if (loan.Debt <= 0) throw new ConflictException("The loan has already closed");
        
-        await IsUserExists(paymentDto.userId);
-        await IsBankAccountExists(paymentDto.bankAccountId);
+        await IsUserExists(userId);
+        // await IsBankAccountExists(paymentDto.bankAccountId);
         
         var payment = paymentDto.paymentAmount ?? loan.MonthlyPayment;
         if (payment > loan.Debt)
@@ -79,7 +81,7 @@ public class LoanService : ILoanService
         var percents = CountCurrentPercents(loan);
         var paymentWithPercents = (double)payment + percents;
 
-        await MakeTransaction(paymentDto.bankAccountId, paymentDto.userId, (decimal)paymentWithPercents, "REPAY_LOAN");
+        MakeTransaction(paymentDto.bankAccountId, userId, (decimal)paymentWithPercents, "REPAY_LOAN");
 
         loan.Debt -= payment;
 
@@ -151,9 +153,16 @@ public class LoanService : ILoanService
         }
     }
 
-    private async Task MakeTransaction(Guid baId, Guid userId, decimal amount, string transactionType)
+    private void MakeTransaction(Guid baId, Guid userId, decimal amount, string transactionType)
     {
-        using (var client = new HttpClient())
+        var transactionMessage = new CreateTransactionMessage
+        {   
+            amount = amount,
+            transactionType = transactionType,
+            userId = userId
+        };
+        _messageProducer.SendMessage(transactionMessage);
+        /*using (var client = new HttpClient())
         {
             var url = _integrationApisUrls.CoreServiceUrl + "/api/bank-accounts/" + baId;
             if (transactionType == "TAKE_LOAN" || transactionType == "DEPOSIT")
@@ -164,7 +173,7 @@ public class LoanService : ILoanService
             {
                 url += "/withdraw";
             }
-            var body = new CreateTransactionDto
+            var body = new CreateTransactionMessage
             {   
                 amount = amount,
                 transactionType = transactionType,
@@ -178,7 +187,7 @@ public class LoanService : ILoanService
             {
                 throw new Exception(await response.Content.ReadAsStringAsync());
             }
-        }
+        }*/
     }
 
     private double CountCurrentPercents(LoanEntity loan)

@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OnlineBank.LoanService.Common.Dtos.Loan;
 using OnlineBank.LoanService.Common.Dtos.LoanRate;
@@ -6,6 +8,7 @@ using OnlineBank.LoanService.Common.Interfaces;
 namespace OnlineBank.LoanService.Controllers;
 
 [Route("loan_api/loan")]
+[Authorize]
 public class LoanController : ControllerBase
 {
     private readonly ILoanService _loanService;
@@ -23,7 +26,8 @@ public class LoanController : ControllerBase
     {
         if (ModelState.IsValid)
         {
-            await _loanService.TakeOutLoan(createLoanDto);
+            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            await _loanService.TakeOutLoan(createLoanDto, userId);
             return Ok();
         }
 
@@ -39,7 +43,8 @@ public class LoanController : ControllerBase
     {
         if (ModelState.IsValid)
         {
-            await _loanService.MakeLoanPayment(loanId, paymentDto);
+            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            await _loanService.MakeLoanPayment(loanId, paymentDto, userId);
             return Ok();
         }
 
@@ -51,8 +56,20 @@ public class LoanController : ControllerBase
     /// </summary>
     [HttpGet]
     [Route("{userId}")]
+    [Authorize(Roles = "Staff")]
     public async Task<List<LoanDto>> GetUserLoans(Guid userId)
     {
+        return await _loanService.GetUserLoans(userId);
+    }
+    
+    /// <summary>
+    /// Get my loans list
+    /// </summary>
+    [HttpGet]
+    [Authorize]
+    public async Task<List<LoanDto>> GetMyLoans()
+    {
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
         return await _loanService.GetUserLoans(userId);
     }
 }
