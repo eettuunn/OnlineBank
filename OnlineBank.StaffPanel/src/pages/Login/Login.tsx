@@ -31,6 +31,7 @@ const Login: React.FC = () => {
 
     const onFinish = useCallback(
         (credentials: ICredentials) => {
+            console.log(credentials);
             login(credentials);
         },
         [ login ],
@@ -57,6 +58,18 @@ const Login: React.FC = () => {
                             className={b('form-input').toString()}
                             placeholder="email"
                             prefix={<Icon className={b('form-user-icon').toString()}/>}
+                        />
+                    </Form.Item>
+                    <Form.Item
+                        className={b('form-item').toString()}
+                        label="Пароль"
+                        name="password"
+                        rules={[ { required: true, message: 'Введите логин' } ]}
+                    >
+                        <Input
+                            className={b('form-input').toString()}
+                            placeholder="password"
+                            type='password'
                         />
                     </Form.Item>
                     <Form.Item className={b('form-item').toString()}>

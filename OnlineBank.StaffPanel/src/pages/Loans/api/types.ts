@@ -19,3 +19,15 @@ export interface ICreateLoanRate {
     name: string,
     interestRate: number
 }
+
+export type ILoanPayment = {
+    id: string,
+    debt: number,
+    paymentDate: string,
+    isExpired: boolean
+};
+
+export interface ILoanResponse {
+    loanInfo: ILoan,
+    loanPayments: ILoanPayment[]
+}

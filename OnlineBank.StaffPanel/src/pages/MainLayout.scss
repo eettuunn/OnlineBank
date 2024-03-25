@@ -21,10 +21,6 @@
         }
     }
 
-    &__primary-content {
-        background: white;
-    }
-
     &__sider {
         position: fixed !important;
         z-index: 999;
@@ -37,7 +33,11 @@
     &__container-information {
         display: grid;
         gap: 20px;
-        margin-top: 20px
+        margin-top: 20px;
+        .ant-btn {
+            height: 48px;
+            width: 48px;
+        }
     }
 }
 

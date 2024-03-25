@@ -83,3 +83,7 @@
 .ant-tooltip-placement-right {
     max-width: max-content;
 }
+
+.ant-menu-inline, .ant-menu-vertical {
+    border-right: 0 !important
+}

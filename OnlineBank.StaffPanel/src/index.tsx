@@ -12,6 +12,8 @@ import reportWebVitals from './reportWebVitals';
 import { ProvideLayoutConfig } from './shared/hooks/useLayoutConfig/useLayoutConfig';
 import { ProvideAuth } from './shared/hooks/useAuth/useAuth';
 
+import './theme.dark.less';
+import './theme.light.less';
 import './index.less';
 
 const rootComponent = (
