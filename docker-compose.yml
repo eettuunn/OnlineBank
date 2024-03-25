@@ -6,7 +6,7 @@ services:
     container_name: postgres_image
     image: postgres:latest
     ports:
-      - "5432:5432"
+      - "5432"
     restart: always
     volumes:
       - user_service_volume:/var/lib/postgresql/data
@@ -51,28 +51,28 @@ services:
     depends_on:
       - "postgres_image"
 
-#  bank-core-service:
-#    container_name: bank-core-service
-#    image: iseeyouwatching/onlinebankcoreservice-app:latest
-#    ports:
-#      - '8080:8080'
-#    depends_on:
-#      - postgres
-#    environment:
-#      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/core-service-db
-#      - SPRING_DATASOURCE_USERNAME=postgres
-#      - SPRING_DATASOURCE_PASSWORD=postgres
-#      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
-#
-#  postgres:
-#    container_name: core-service-db
-#    image: 'postgres:13.1-alpine'
-#    ports:
-#      - '5432:5432'
-#    environment:
-#      - POSTGRES_DB=core-service-db
-#      - POSTGRES_USER=postgres
-#      - POSTGRES_PASSWORD=postgres
+  bank-core-service:
+   container_name: bank-core-service
+   image: iseeyouwatching/onlinebankcoreservice-app:tag
+   ports:
+     - '8080:8080'
+   depends_on:
+     - postgres
+   environment:
+     - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/core-service-db
+     - SPRING_DATASOURCE_USERNAME=postgres
+     - SPRING_DATASOURCE_PASSWORD=postgres
+     - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+
+  postgres:
+   container_name: core-service-db
+   image: 'postgres:13.1-alpine'
+   ports:
+     - '5432:5432'
+   environment:
+     - POSTGRES_DB=core-service-db
+     - POSTGRES_USER=postgres
+     - POSTGRES_PASSWORD=postgres
 
 volumes:
   user_service_volume:
