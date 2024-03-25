@@ -14,9 +14,13 @@ const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (errorInfo) => {
 
 const App: React.FC = () => {
   const url = useLocation();
-
   const onFinish: FormProps<FieldType>["onFinish"] = (values) => {
-    login(values, url.search.substring(5));
+    login(
+      values,
+      url.search?.includes("url")
+        ? url.search?.substring(5)
+        : "http://localhost:3001/"
+    );
   };
 
   return (
