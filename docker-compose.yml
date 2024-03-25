@@ -46,7 +46,7 @@ services:
     ports:
       - "7788:80"
     environment:
-            ConnectionStrings__PostgresUserService: "host=postgres_image;port=5432;database=bank_users_db2;username=postgres;password=root"
+      ConnectionStrings__PostgresUserService: "host=postgres_image;port=5432;database=bank_users_db2;username=postgres;password=root"
     restart: on-failure
     depends_on:
       - "postgres_image"
