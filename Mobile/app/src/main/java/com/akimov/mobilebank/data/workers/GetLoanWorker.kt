@@ -36,7 +36,7 @@ class GetLoanWorker(
             )
             Result.success()
         } catch (e: Throwable) {
-            Result.retry()
+            Result.failure()
         }
     }
 }

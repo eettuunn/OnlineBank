@@ -1,16 +1,14 @@
-package com.akimov.mobilebank.ui
+package com.akimov.mobilebank.ui.accounts
 
 import androidx.datastore.core.DataStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.akimov.mobilebank.UserSettings
 import com.akimov.mobilebank.data.models.BankAccountNetwork
-import com.akimov.mobilebank.data.models.CreditUi
 import com.akimov.mobilebank.data.models.LoanRate
 import com.akimov.mobilebank.data.models.OperationType
-import com.akimov.mobilebank.data.models.SelectedScreen
 import com.akimov.mobilebank.data.repository.Repository
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -42,15 +40,18 @@ class AccountsViewModel(
         repository.credits,
         isRefreshing
     ) { settings, accounts, selectedAccount, credits, isNowRefreshing ->
+
+        val showProgress = isNowRefreshing || ((accounts == null) && (credits == null))
+
         AccountsScreenState(
             loanRates = loanRates.toImmutableList(),
-            isRefreshing = isNowRefreshing,
+            isRefreshing = showProgress,
             accountsState = AccountsState.Content(
                 userName = settings.name,
                 isDarkTheme = settings.isDarkMode,
-                accountsList = accounts.toImmutableList(),
+                accountsList = accounts?.toImmutableList() ?: persistentListOf(),
                 selectedAccount = selectedAccount,
-                creditsList = credits.toImmutableList(),
+                creditsList = credits?.toImmutableList() ?: persistentListOf(),
             )
         )
     }
@@ -137,29 +138,8 @@ class AccountsViewModel(
                 }
             }
 
-            UIIntent.NavigateToGetLoan -> {
-                viewModelScope.launch {
-                    dataStore.updateData {
-                        it.toBuilder()
-                            .setSelectedScreen(SelectedScreen.ADD_CREDIT.name)
-                            .build()
-                    }
-                }
-            }
-
             is UIIntent.DeleteAccount -> {
                 repository.closeAccount(intent.it)
-            }
-
-            UIIntent.NavigateToOperations -> {
-                viewModelScope.launch {
-                    dataStore.updateData {
-                        it.toBuilder()
-                            .setSelectedScreen(SelectedScreen.OPERATIONS.name)
-                            .build()
-                    }
-                }
-
             }
         }
     }
@@ -180,27 +160,8 @@ sealed class UIIntent {
 
     data object UnselectAccount : UIIntent()
     data object UpdateDataFromRemote : UIIntent()
-    data object NavigateToGetLoan : UIIntent()
-    data object NavigateToOperations : UIIntent()
 }
 
 sealed class ViewAction {
     data class ShowError(val message: String) : ViewAction()
-}
-
-data class AccountsScreenState(
-    val loanRates: ImmutableList<LoanRate>,
-    val isRefreshing: Boolean,
-    val accountsState: AccountsState
-)
-
-sealed class AccountsState {
-    data object Loading : AccountsState()
-    data class Content(
-        val userName: String,
-        val isDarkTheme: Boolean,
-        val accountsList: ImmutableList<BankAccountNetwork>,
-        val selectedAccount: BankAccountNetwork?,
-        val creditsList: ImmutableList<CreditUi>,
-    ) : AccountsState()
 }

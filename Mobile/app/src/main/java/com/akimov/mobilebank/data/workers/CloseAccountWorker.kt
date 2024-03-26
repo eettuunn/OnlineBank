@@ -24,7 +24,7 @@ class CloseAccountWorker(
             )
             Result.success()
         } catch (e: Throwable) {
-            Result.retry()
+            Result.failure()
         }
     }
 }

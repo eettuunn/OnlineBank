@@ -1,4 +1,4 @@
-package com.akimov.mobilebank.ui
+package com.akimov.mobilebank.ui.accounts
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
@@ -96,6 +96,7 @@ import com.akimov.mobilebank.R
 import com.akimov.mobilebank.data.models.BankAccountNetwork
 import com.akimov.mobilebank.data.models.CreditUi
 import com.akimov.mobilebank.data.models.LoanRate
+import com.akimov.mobilebank.ui.components.CreditItem
 import com.akimov.mobilebank.ui.theme.MobileBankTheme
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
@@ -104,7 +105,10 @@ import kotlinx.coroutines.delay
 import org.koin.compose.koinInject
 
 @Composable
-fun AccountsScreen() {
+fun AccountsScreen(
+    navigateToOperations: (accountId: String) -> Unit,
+    navigateToGetLoan: () -> Unit,
+) {
     val viewModel = koinInject<AccountsViewModel>()
     val state by viewModel.state.collectAsState()
 
@@ -129,7 +133,9 @@ fun AccountsScreen() {
             { intent ->
                 viewModel.onIntent(intent)
             }
-        }
+        },
+        navigateToOperations = navigateToOperations,
+        navigateToGetLoan = navigateToGetLoan
     )
 }
 
@@ -139,6 +145,8 @@ private fun AccountsScreenStateless(
     onChangeThemeClicked: () -> Unit,
     hostState: SnackbarHostState? = null,
     reduce: (UIIntent) -> Unit,
+    navigateToOperations: (accountId: String) -> Unit,
+    navigateToGetLoan: () -> Unit
 ) {
     when (state.accountsState) {
         is AccountsState.Content -> AccountsContent(
@@ -151,7 +159,9 @@ private fun AccountsScreenStateless(
             },
             getIsRefreshing = {
                 state.isRefreshing
-            }
+            },
+            navigateToOperations = navigateToOperations,
+            navigateToGetLoan = navigateToGetLoan
         )
 
         AccountsState.Loading -> LoadingScreen()
@@ -174,6 +184,8 @@ private fun AccountsContent(
     reduce: (UIIntent) -> Unit,
     getRates: () -> ImmutableList<LoanRate>,
     getIsRefreshing: () -> Boolean,
+    navigateToOperations: (accountId: String) -> Unit,
+    navigateToGetLoan: () -> Unit,
 ) {
     val accountsListScrollState = rememberScrollState()
 
@@ -208,9 +220,7 @@ private fun AccountsContent(
                     deleteAccount = {
                         reduce(UIIntent.DeleteAccount(it))
                     },
-                    navigateToOperations = {
-                        reduce(UIIntent.NavigateToOperations)
-                    }
+                    navigateToOperations = navigateToOperations
                 )
             },
             floatingActionButton = {
@@ -240,12 +250,11 @@ private fun AccountsContent(
 
     if (showActionsBottomSheet) {
         BottomSheetActions(
-            getAccounts = { accountsState.accountsList },
             onDismissRequest = {
                 showActionsBottomSheet = false
             },
             reduce = reduce,
-            getRates = getRates
+            navigateToGetLoan = navigateToGetLoan
         )
     }
 
@@ -299,11 +308,10 @@ private fun CommonSnackBar(it: SnackbarData) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun BottomSheetActions(
-    getAccounts: () -> ImmutableList<BankAccountNetwork>,
     onDismissRequest: () -> Unit,
     contentSheetState: ContentSheetState = ContentSheetState.ACTIONS,
     reduce: (UIIntent) -> Unit,
-    getRates: () -> ImmutableList<LoanRate>
+    navigateToGetLoan: () -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState()
     var shouldExpand by remember {
@@ -340,7 +348,7 @@ private fun BottomSheetActions(
             })
 
             ContentSheetState.GET_LOAN -> {
-                reduce(UIIntent.NavigateToGetLoan)
+                navigateToGetLoan()
             }
         }
     }
@@ -538,7 +546,7 @@ private fun AccountsList(
     selectAccount: (BankAccountNetwork) -> Unit,
     getCreditsList: () -> ImmutableList<CreditUi>,
     deleteAccount: (id: String) -> Unit,
-    navigateToOperations: () -> Unit
+    navigateToOperations: (accountId: String) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -686,7 +694,7 @@ private fun AccountInfoCard(
     isHidden: Boolean = false,
     selectAccount: (BankAccountNetwork) -> Unit,
     deleteAccount: (id: String) -> Unit,
-    navigateToOperations: () -> Unit
+    navigateToOperations: (accountId: String) -> Unit
 ) {
     val density = LocalDensity.current
 
@@ -727,8 +735,9 @@ private fun AccountInfoCard(
                         state = dragState,
                     )
                     .clickable {
-                        ACCOUNT_ID = account.id.toString()
-                        navigateToOperations()
+                        navigateToOperations(
+                            account.id.toString()
+                        )
                     }
             ),
             shadowElevation = 4.dp,

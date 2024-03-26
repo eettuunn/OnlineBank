@@ -65,13 +65,14 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.foundation:foundation:1.6.2")
     implementation("com.google.accompanist:accompanist-swiperefresh:0.25.1")
+    implementation("androidx.navigation:navigation-runtime-ktx:2.7.7")
 
     // Koin DI
     val koinVersion = "3.5.3"
     implementation("io.insert-koin:koin-core:$koinVersion")
     implementation("io.insert-koin:koin-android:$koinVersion")
     implementation("io.insert-koin:koin-compose:1.1.2")
-    implementation ("io.insert-koin:koin-androidx-workmanager:$koinVersion")
+    implementation("io.insert-koin:koin-androidx-workmanager:$koinVersion")
 
     // DataStore
     val datastoreVersion = "1.0.0"
@@ -98,7 +99,9 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.7")
 
     // WorkManager
-    implementation ("androidx.work:work-runtime-ktx:2.9.0")
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
+
+    implementation("androidx.navigation:navigation-compose:$2.7.7")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

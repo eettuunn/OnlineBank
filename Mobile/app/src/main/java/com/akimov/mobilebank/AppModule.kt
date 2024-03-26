@@ -17,9 +17,9 @@ import com.akimov.mobilebank.data.workers.CreateAccountWorker
 import com.akimov.mobilebank.data.workers.GetLoanWorker
 import com.akimov.mobilebank.data.workers.RenameAccountWorker
 import com.akimov.mobilebank.domain.GetSortedByDateOperationsUseCase
-import com.akimov.mobilebank.ui.AccountsViewModel
-import com.akimov.mobilebank.ui.LoanViewModel
-import com.akimov.mobilebank.ui.OperationsViewModel
+import com.akimov.mobilebank.ui.accounts.AccountsViewModel
+import com.akimov.mobilebank.ui.loan.LoanViewModel
+import com.akimov.mobilebank.ui.operations.OperationsViewModel
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
@@ -52,7 +52,7 @@ val appModule = module {
     single<OkHttpClient> {
         OkHttpClient()
             .newBuilder()
-            .connectTimeout(15, TimeUnit.SECONDS)
+            .connectTimeout(10, TimeUnit.SECONDS)
             .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
             .build()
     }
@@ -170,14 +170,10 @@ val appModule = module {
             creditsDao = get<RoomDb>().creditsDao(),
             accountsDao = get<RoomDb>().accountsDao(),
             repository = get(),
-            dataStore = get()
         )
     }
     viewModel {
         OperationsViewModel(
-            getSortedByDateOperationsUseCase = get(),
-            accountsDao = get<RoomDb>().accountsDao(),
-            dataStore = get(),
             repository = get()
         )
     }

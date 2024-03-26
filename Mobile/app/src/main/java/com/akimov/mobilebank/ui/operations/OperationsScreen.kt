@@ -1,4 +1,4 @@
-package com.akimov.mobilebank.ui
+package com.akimov.mobilebank.ui.operations
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -43,6 +43,9 @@ import androidx.compose.ui.unit.dp
 import com.akimov.mobilebank.R
 import com.akimov.mobilebank.data.models.OperationType
 import com.akimov.mobilebank.domain.OperationUI
+import com.akimov.mobilebank.ui.accounts.CommonIcon
+import com.akimov.mobilebank.ui.accounts.InputDataContent
+import com.akimov.mobilebank.ui.accounts.TextWithDescription
 import com.akimov.mobilebank.ui.components.ButtonWithExposedDropDownMenu
 import com.akimov.mobilebank.ui.theme.MobileBankTheme
 import com.google.accompanist.swiperefresh.SwipeRefresh
@@ -51,7 +54,10 @@ import kotlinx.collections.immutable.toImmutableList
 import org.koin.compose.koinInject
 
 @Composable
-fun OperationsScreen() {
+fun OperationsScreen(
+    accountID: String,
+    onNavigateBack: () -> Unit,
+) {
     val viewModel = koinInject<OperationsViewModel>()
     val operations by viewModel.operations.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
@@ -61,11 +67,17 @@ fun OperationsScreen() {
         operations = operations,
         loading = isLoading,
         accountName = accountName,
-        onRefresh = remember(viewModel) { { viewModel.refresh() } },
-        onNavigateBack = remember(viewModel) { { viewModel.navigateBack() } },
+        onRefresh = remember(viewModel) { {} },
+        onNavigateBack = onNavigateBack,
         onCompleteClick = remember(viewModel) {
             { amount: String, operationType: OperationType ->
-                viewModel.invokeOperation(amount, operationType)
+                viewModel.reduce(
+                    OperationsScreenIntent.OnAddOperationClicked(
+                        amount = amount,
+                        operationType = operationType,
+                        accountId = accountID
+                    )
+                )
             }
         }
     )
@@ -81,10 +93,10 @@ fun OperationsStateless(
     onNavigateBack: () -> Unit,
     onCompleteClick: (String, OperationType) -> Unit,
 ) {
-    val srState = rememberSwipeRefreshState(isRefreshing = loading)
+    val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = loading)
     var showActionsBottomSheet by remember { mutableStateOf(false) }
 
-    SwipeRefresh(state = srState, onRefresh = onRefresh) {
+    SwipeRefresh(state = swipeRefreshState, onRefresh = onRefresh) {
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -121,7 +133,6 @@ fun OperationsStateless(
                         tint = Color.White
                     )
                 }
-
             }
         ) { paddingValues ->
             val scrollState = rememberScrollState()

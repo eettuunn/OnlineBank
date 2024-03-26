@@ -28,8 +28,7 @@ class RenameAccountWorker(
             )
             Result.success()
         } catch (e: Throwable) {
-            Result.retry()
+            Result.failure()
         }
     }
-
 }

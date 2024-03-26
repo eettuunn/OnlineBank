@@ -15,5 +15,5 @@ interface OperationsDao {
     suspend fun insertOperation(dbEntity: OperationEntity)
 
     @Query("SELECT * FROM operations")
-    abstract fun getOperations(): List<OperationEntity>
+    suspend fun getOperations(): List<OperationEntity>
 }

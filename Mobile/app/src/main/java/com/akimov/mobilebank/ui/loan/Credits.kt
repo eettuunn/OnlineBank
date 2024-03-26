@@ -1,15 +1,14 @@
-package com.akimov.mobilebank.ui
+package com.akimov.mobilebank.ui.loan
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,7 +20,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -37,95 +35,26 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.akimov.mobilebank.R
 import com.akimov.mobilebank.ui.components.ButtonWithExposedDropDownMenu
-import com.akimov.mobilebank.ui.theme.MobileBankTheme
 import kotlinx.collections.immutable.toImmutableList
 import org.koin.compose.koinInject
 
 @Composable
-fun CreditItem(
-    modifier: Modifier = Modifier,
-    id: String,
-    debt: String,
-    monthlyPayment: String,
-    bankAccountName: String
-) {
-    Surface(
-        modifier = modifier,
-        shadowElevation = 4.dp,
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Column {
-            Row(modifier = Modifier.padding(bottom = 16.dp)) {
-                CommonIcon(
-                    imageVector = ImageVector.vectorResource(
-                        id = R.drawable.loan_ic
-                    ),
-                    modifier = Modifier
-                        .padding(start = 16.dp, top = 16.dp)
-                        .size(24.dp),
-                    isHidden = false
-                )
-
-                TextWithDescription(
-                    stringResource(R.string.credit_in_sum) +
-                            debt + stringResource(R.string.rubbles_short),
-                    bankAccountName
-                )
-            }
-            Row(modifier = Modifier.padding(bottom = 8.dp)) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(
-                        id = R.drawable.take_money
-                    ),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .padding(start = 16.dp)
-                        .size(24.dp)
-                        .offset(y = (-8).dp)
-                )
-                Text(
-                    modifier = Modifier.padding(start = 16.dp),
-                    text = monthlyPayment + stringResource(R.string.rubbles_short),
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        platformStyle = PlatformTextStyle(includeFontPadding = false),
-                        fontWeight = FontWeight.Bold,
-                    ),
-                )
-            }
-        }
-    }
-}
-
-@Preview
-@Composable
-private fun PreviewCreditsList() {
-    MobileBankTheme(darkTheme = false) {
-        CreditItem(
-            id = "2343",
-            debt = "100000",
-            monthlyPayment = "41.56",
-            bankAccountName = "Основной счет"
-        )
-    }
-}
-
-@Composable
-fun GetLoanContent(
-    modifier: Modifier = Modifier,
-) {
+fun GetLoanScreen(navigateBack: () -> Unit) {
     val viewModel = koinInject<LoanViewModel>()
     val accounts by remember { viewModel.accounts }
     val rates by remember { viewModel.rates }
 
     if (accounts.isNotEmpty() && rates.isNotEmpty()) {
-        Column(modifier = modifier.then(Modifier.background(MaterialTheme.colorScheme.background))) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+        ) {
             val names = accounts.map { it.name }
             var selectedAccountName: String by remember {
                 mutableStateOf(names.first())
@@ -264,6 +193,7 @@ fun GetLoanContent(
                             amount = summ.toInt(),
                             months = monthNumbers[selectedMonthIndex]
                         )
+                        navigateBack()
                     },
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(

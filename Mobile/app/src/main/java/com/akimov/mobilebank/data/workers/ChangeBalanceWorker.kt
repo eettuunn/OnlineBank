@@ -78,7 +78,7 @@ class ChangeBalanceWorker(
             apiCall()
             Result.success()
         } catch (e: Throwable) {
-            Result.retry()
+            Result.failure()
         }
     }
 }

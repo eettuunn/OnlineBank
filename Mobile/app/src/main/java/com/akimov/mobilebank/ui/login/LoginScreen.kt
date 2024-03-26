@@ -1,4 +1,4 @@
-package com.akimov.mobilebank.ui
+package com.akimov.mobilebank.ui.login
 
 import android.util.Log
 import androidx.compose.foundation.background
@@ -39,7 +39,9 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 @Composable
-fun LoginScreen() {
+fun LoginScreen(
+    navigateToNextScreen: () -> Unit
+) {
     val api = koinInject<UserService>()
     val dataStore = koinInject<DataStore<UserSettings>>()
     val scope = rememberCoroutineScope()
@@ -51,6 +53,7 @@ fun LoginScreen() {
                 dataStore.updateData {
                     it.toBuilder().setUuid(id.id.toString()).build()
                 }
+                navigateToNextScreen()
             } catch (e: Exception) {
                 Log.e("LoginScreen", "Error: ${e.message}")
             }

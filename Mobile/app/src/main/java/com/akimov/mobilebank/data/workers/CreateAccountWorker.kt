@@ -28,7 +28,7 @@ class CreateAccountWorker(
                 )
                 return Result.success()
             } catch (e: Throwable) {
-                return Result.retry()
+                return Result.failure()
             }
         }
         return Result.failure()

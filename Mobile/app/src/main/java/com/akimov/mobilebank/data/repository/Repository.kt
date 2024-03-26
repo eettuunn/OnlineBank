@@ -1,7 +1,7 @@
 package com.akimov.mobilebank.data.repository
 
+import android.util.Log
 import androidx.datastore.core.DataStore
-import androidx.work.BackoffPolicy
 import androidx.work.Constraints
 import androidx.work.Data
 import androidx.work.ListenableWorker
@@ -43,10 +43,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.UUID
-import java.util.concurrent.TimeUnit
-
-// 10 мин.
-// private const val DELAY_BETWEEN_REQUEST_UPDATES_MILLIS = 600000L
 
 class Repository(
     private val coreService: CoreService,
@@ -58,17 +54,18 @@ class Repository(
     private val workManager: WorkManager,
 ) {
 
-    private val _accountsFlow: MutableStateFlow<List<BankAccountNetwork>> =
-        MutableStateFlow(listOf())
+    private val _accountsFlow: MutableStateFlow<List<BankAccountNetwork>?> =
+        MutableStateFlow(null)
     val accounts = _accountsFlow.asStateFlow()
 
-    private val _creditsFlow: MutableStateFlow<List<CreditUi>> = MutableStateFlow(listOf())
+    private val _creditsFlow: MutableStateFlow<List<CreditUi>?> = MutableStateFlow(null)
     val credits = _creditsFlow.asStateFlow()
 
     suspend fun updateAccounts() {
         val response = try {
             coreService.getAccounts(UUID.fromString(dataStore.data.first().uuid))
         } catch (e: Throwable) {
+            Log.e("Repository", "updateAccounts: ${e.message}")
             null
         }
 
@@ -244,13 +241,15 @@ class Repository(
     }
 
     private suspend fun getCreditsFromLocalStorage(): List<CreditNetwork> {
-        return creditsDao.getLoansList().map { creditEntity ->
-            CreditNetwork(
-                id = creditEntity.id,
-                debt = creditEntity.debt,
-                monthlyPayment = creditEntity.monthlyPayment,
-                bankAccountId = creditEntity.bankAccountId
-            )
+        return withContext(Dispatchers.IO) {
+            creditsDao.getLoansList().map { creditEntity ->
+                CreditNetwork(
+                    id = creditEntity.id,
+                    debt = creditEntity.debt,
+                    monthlyPayment = creditEntity.monthlyPayment,
+                    bankAccountId = creditEntity.bankAccountId
+                )
+            }
         }
     }
 
@@ -278,7 +277,6 @@ class Repository(
 
             return operations
         } catch (e: Throwable) {
-
             return withContext(Dispatchers.IO) {
                 operationsDao.getOperations().map { it.toNetwork() }
             }
@@ -286,14 +284,16 @@ class Repository(
     }
 
     private suspend fun getAccountsFromLocalStorage(): List<BankAccountNetwork> {
-        return accountsDao.getAccounts().map { accountEntity ->
-            BankAccountNetwork(
-                id = accountEntity.id,
-                name = accountEntity.name,
-                balance = accountEntity.balance.toBigDecimal(),
-                number = accountEntity.number,
-                isClosed = accountEntity.isClosed
-            )
+        return withContext(Dispatchers.IO) {
+            accountsDao.getAccounts().map { accountEntity ->
+                BankAccountNetwork(
+                    id = accountEntity.id,
+                    name = accountEntity.name,
+                    balance = accountEntity.balance.toBigDecimal(),
+                    number = accountEntity.number,
+                    isClosed = accountEntity.isClosed
+                )
+            }
         }
     }
 
@@ -304,11 +304,6 @@ class Repository(
             .setInputData(inputData)
             .setConstraints(
                 Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
-            )
-            .setBackoffCriteria(
-                BackoffPolicy.EXPONENTIAL,
-                5000L,
-                TimeUnit.MILLISECONDS
             )
             .build()
 
