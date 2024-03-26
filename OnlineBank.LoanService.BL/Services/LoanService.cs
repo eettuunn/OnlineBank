@@ -37,7 +37,7 @@ public class LoanService : ILoanService
         }
 
         await IsUserExists(userId);
-        // await IsBankAccountExists(createLoanDto.bankAccountId);
+        await IsBankAccountExists(createLoanDto.bankAccountId);
         
         var loanRateEntity = await _context
             .LoanRates
@@ -71,11 +71,11 @@ public class LoanService : ILoanService
                        .Include(l => l.Payments)
                        .FirstOrDefaultAsync(l => l.Id == loanId)
                    ?? throw new CantFindByIdException("loan", loanId);
-        if (loan.UserId != userId) throw new ConflictException("This is not your bank account"); 
+        if (loan.UserId != userId) throw new ConflictException("This is not your loan"); 
         if (loan.Debt <= 0) throw new ConflictException("The loan has already closed");
        
         await IsUserExists(userId);
-        // await IsBankAccountExists(paymentDto.bankAccountId);
+        await IsBankAccountExists(createPaymentDto.bankAccountId);
 
         var loanPayment = loan.Payments.FirstOrDefault(p => p.Id == createPaymentDto.paymentId)
                           ?? throw new CantFindByIdException("payment", createPaymentDto.paymentId);
@@ -86,6 +86,8 @@ public class LoanService : ILoanService
         }
         var percents = CountCurrentPercents(loan);
         var paymentWithPercents = (double)payment + percents;
+
+        await CheckEnoughMoneyOnBankAcc(createPaymentDto.bankAccountId, paymentWithPercents, loan.CurrencyCode);
 
         MakeTransaction(createPaymentDto.bankAccountId, (decimal)paymentWithPercents, "REPAY_LOAN", loan.CurrencyCode);
 
@@ -177,6 +179,32 @@ public class LoanService : ILoanService
         }
     }
 
+    private async Task CheckEnoughMoneyOnBankAcc(Guid baId, double amount, string currencyCode)
+    {
+        using (var client = new HttpClient())
+        {
+            var url = _integrationApisUrls.CoreServiceUrl + "/api/bank-accounts/" + baId + "/check-money";
+            var body = new CheckMoneyDto
+            {   
+                amount = amount,
+                currencyCode = currencyCode
+            };
+            var strBody = JsonSerializer.Serialize(body);
+            var content = new StringContent(strBody, Encoding.UTF8, "application/json");
+            var response = await client.PostAsync(url, content);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception(await response.Content.ReadAsStringAsync());
+            }
+            
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var enough = Boolean.Parse(responseContent);
+
+            if (!enough) throw new ConflictException("Not enough money on bank account");
+        }
+    }
+
     private void MakeTransaction(Guid baId, decimal amount, string transactionType, string currencyCode)
     {
         var transactionMessage = new CreateTransactionMessage
@@ -187,32 +215,6 @@ public class LoanService : ILoanService
             currencyCode = currencyCode
         };
         _messageProducer.SendMessage(transactionMessage);
-        /*using (var client = new HttpClient())
-        {
-            var url = _integrationApisUrls.CoreServiceUrl + "/api/bank-accounts/" + baId;
-            if (transactionType == "TAKE_LOAN" || transactionType == "DEPOSIT")
-            {
-                url += "/deposit";
-            }
-            else
-            {
-                url += "/withdraw";
-            }
-            var body = new CreateTransactionMessage
-            {   
-                amount = amount,
-                transactionType = transactionType,
-                userId = userId
-            };
-            var strBody = JsonSerializer.Serialize(body);
-            var content = new StringContent(strBody, Encoding.UTF8, "application/json");
-            var response = await client.PostAsync(url, content);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new Exception(await response.Content.ReadAsStringAsync());
-            }
-        }*/
     }
 
     private double CountCurrentPercents(LoanEntity loan)
