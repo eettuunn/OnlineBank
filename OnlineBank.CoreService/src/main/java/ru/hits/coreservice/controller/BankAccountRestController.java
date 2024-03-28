@@ -130,6 +130,17 @@ public class BankAccountRestController {
         return new ResponseEntity<>(isExists, HttpStatus.OK);
     }
 
+    @Operation(
+            summary = "Проверить наличие средств на счете."
+//            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @PostMapping("/{id}/check-money")
+    public ResponseEntity<Boolean> checkBankAccountAmountOfMoney(@PathVariable("id") UUID bankAccountId,
+                                                                 @RequestBody CheckMoneyDto checkMoneyDto) {
+        Boolean hasMoney = bankAccountService.checkBankAccountAmountOfMoney(bankAccountId, checkMoneyDto);
+        return new ResponseEntity<>(hasMoney, HttpStatus.OK);
+    }
+
 //    @GetMapping("/token")
 //    public ResponseEntity<String> getToken() {
 //        return new ResponseEntity<>(jwtUtil.generateToken(UUID.fromString("77141e72-da79-44c8-b057-ea1ea39bac2a")), HttpStatus.OK);

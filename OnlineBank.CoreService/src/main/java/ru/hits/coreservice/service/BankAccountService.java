@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.hits.coreservice.dto.*;
 import ru.hits.coreservice.entity.BankAccountEntity;
 import ru.hits.coreservice.entity.Money;
-import ru.hits.coreservice.entity.TransactionEntity;
 import ru.hits.coreservice.enumeration.TransactionType;
 import ru.hits.coreservice.exception.ConflictException;
 import ru.hits.coreservice.exception.ForbiddenException;
@@ -186,21 +185,7 @@ public class BankAccountService {
 
             masterBankAccount.getBalance().setAmount(masterBankAccount.getBalance().getAmount().subtract(depositMoneyDto.getAmount().multiply(invertedExchangeRate)));
 
-            TransactionEntity masterBankAccountTransaction = TransactionEntity.builder()
-                    .transactionDate(LocalDateTime.now())
-                    .amount(depositMoneyDto.getAmount().multiply(invertedExchangeRate).negate())
-                    .transactionType(TransactionType.fromDepositTransactionType(depositMoneyDto.getTransactionType()))
-                    .additionalInformation("Снятие средств")
-                    .bankAccount(masterBankAccount)
-                    .build();
-
-            masterBankAccountTransaction = transactionRepository.save(masterBankAccountTransaction);
-
-            masterBankAccount.getTransactions().add(0, masterBankAccountTransaction);
-
             bankAccountRepository.save(masterBankAccount);
-
-            sendTransactionUpdate(new TransactionDto(masterBankAccountTransaction));
         }
 
         String bankAccountCurrencyCode = bankAccount.getBalance().getCurrency().getCurrencyCode();
@@ -210,22 +195,7 @@ public class BankAccountService {
 
         BigDecimal newBalance = bankAccount.getBalance().getAmount().add(amountWithExchangeRate);
         bankAccount.getBalance().setAmount(newBalance);
-
-        TransactionEntity transaction = TransactionEntity.builder()
-                .transactionDate(LocalDateTime.now())
-                .amount(amountWithExchangeRate)
-                .transactionType(TransactionType.fromDepositTransactionType(depositMoneyDto.getTransactionType()))
-                .additionalInformation(additionalInformation)
-                .bankAccount(bankAccount)
-                .build();
-
-        transaction = transactionRepository.save(transaction);
-
-        bankAccount.getTransactions().add(0, transaction);
-
         bankAccount = bankAccountRepository.save(bankAccount);
-
-        sendTransactionUpdate(new TransactionDto(transaction));
 
         return new BankAccountDto(bankAccount);
     }
@@ -276,35 +246,8 @@ public class BankAccountService {
         fromBankAccount.getBalance().setAmount(fromBankAccount.getBalance().getAmount().subtract(transferMoneyDto.getAmount().multiply(invertedExchangeRate)));
         toBankAccount.getBalance().setAmount(toBankAccount.getBalance().getAmount().add(convertedAmount));
 
-        LocalDateTime transactionDate = LocalDateTime.now();
-
-        TransactionEntity transactionFromBankAccount = TransactionEntity.builder()
-                .transactionDate(transactionDate)
-                .amount(transferMoneyDto.getAmount().multiply(invertedExchangeRate).negate())
-                .transactionType(TransactionType.TRANSFER)
-                .additionalInformation("Перевод")
-                .bankAccount(fromBankAccount)
-                .build();
-
-        TransactionEntity transactionToBankAccount = TransactionEntity.builder()
-                .transactionDate(transactionDate)
-                .amount(convertedAmount)
-                .transactionType(TransactionType.TRANSFER)
-                .additionalInformation("Перевод")
-                .bankAccount(toBankAccount)
-                .build();
-
-        transactionFromBankAccount = transactionRepository.save(transactionFromBankAccount);
-        transactionToBankAccount = transactionRepository.save(transactionToBankAccount);
-
-        fromBankAccount.getTransactions().add(0, transactionFromBankAccount);
-        toBankAccount.getTransactions().add(0, transactionToBankAccount);
-
         fromBankAccount = bankAccountRepository.save(fromBankAccount);
         bankAccountRepository.save(toBankAccount);
-
-        sendTransactionUpdate(new TransactionDto(transactionFromBankAccount));
-        sendTransactionUpdate(new TransactionDto(transactionToBankAccount));
 
         return new BankAccountDto(fromBankAccount);
     }
@@ -345,22 +288,7 @@ public class BankAccountService {
 
             BigDecimal newMasterBankAccountBalance = masterBankAccount.getBalance().getAmount().add(amountWithExchangeRate);
             masterBankAccount.getBalance().setAmount(newMasterBankAccountBalance);
-
-            TransactionEntity masterBankAccountTransaction = TransactionEntity.builder()
-                    .transactionDate(LocalDateTime.now())
-                    .amount(amountWithExchangeRate)
-                    .transactionType(TransactionType.fromWithdrawTransactionType(withdrawMoneyDto.getTransactionType()))
-                    .additionalInformation("Пополнение счета")
-                    .bankAccount(masterBankAccount)
-                    .build();
-
-            masterBankAccountTransaction = transactionRepository.save(masterBankAccountTransaction);
-
-            masterBankAccount.getTransactions().add(0, masterBankAccountTransaction);
-
-            bankAccountRepository.save(bankAccount);
-
-            sendTransactionUpdate(new TransactionDto(masterBankAccountTransaction));
+            bankAccountRepository.save(masterBankAccount);
         }
 
         String bankAccountCurrencyCode = bankAccount.getBalance().getCurrency().getCurrencyCode();
@@ -373,24 +301,8 @@ public class BankAccountService {
         }
 
         BigDecimal invertedExchangeRate = currencyExchangeService.getExchangeRate(withdrawMoneyDto.getCurrencyCode(), bankAccountCurrencyCode);
-
         bankAccount.getBalance().setAmount(bankAccount.getBalance().getAmount().subtract(withdrawMoneyDto.getAmount().multiply(invertedExchangeRate)));
-
-        TransactionEntity transaction = TransactionEntity.builder()
-                .transactionDate(LocalDateTime.now())
-                .amount(withdrawMoneyDto.getAmount().multiply(invertedExchangeRate).negate())
-                .transactionType(TransactionType.fromWithdrawTransactionType(withdrawMoneyDto.getTransactionType()))
-                .additionalInformation(additionalInformation)
-                .bankAccount(bankAccount)
-                .build();
-
-        transaction = transactionRepository.save(transaction);
-
-        bankAccount.getTransactions().add(0, transaction);
-
         bankAccount = bankAccountRepository.save(bankAccount);
-
-        sendTransactionUpdate(new TransactionDto(transaction));
 
         return new BankAccountDto(bankAccount);
     }
@@ -426,6 +338,22 @@ public class BankAccountService {
         }
 
         return !bankAccount.getIsClosed();
+    }
+
+    public Boolean  checkBankAccountAmountOfMoney(UUID bankAccountId, CheckMoneyDto checkMoneyDto) {
+        BankAccountEntity bankAccount = bankAccountRepository.findById(bankAccountId)
+                .orElseThrow(() -> new NotFoundException("Банковский счет с ID " + bankAccountId + " не найден"));
+
+        String bankAccountCurrencyCode = bankAccount.getBalance().getCurrency().getCurrencyCode();
+
+        BigDecimal exchangeRateToTargetCurrency = currencyExchangeService.getExchangeRate(bankAccountCurrencyCode, checkMoneyDto.getCurrencyCode());
+        BigDecimal balanceWithExchangeRate = bankAccount.getBalance().getAmount().multiply(exchangeRateToTargetCurrency);
+
+        if (balanceWithExchangeRate.compareTo(checkMoneyDto.getAmount()) < 0) {
+            return false;
+        }
+
+        return true;
     }
 
     private String generateAccountNumber() {

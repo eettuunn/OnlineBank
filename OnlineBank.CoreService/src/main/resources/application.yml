@@ -1,6 +1,12 @@
+server:
+  port: 8080
+
 spring:
+  flyway:
+    locations: classpath:migrations
+    enabled: true
   datasource:
-    url: ${spring_datasource_url:jdbc:postgresql://postgres:5432/core-service-db}
+    url: ${spring_datasource_url:jdbc:postgresql://localhost:5432/core-service-db}
     username: ${spring_datasource_username:postgres}
     password: ${spring_datasource_password:postgres}
     driver-class-name: org.postgresql.Driver
@@ -8,6 +14,25 @@ spring:
     hibernate:
       ddl-auto: ${spring_jpa_hibernate_ddl-auto:update}
     database-platform: org.hibernate.dialect.PostgreSQL9Dialect
+#  rabbitmq:
+#    host: ${RABBITMQ_HOST:localhost}
+#    port: ${RABBITMQ_PORT:5672}
+#    username: ${RABBITMQ_USER:user}
+#    password: ${RABBITMQ_PASSWORD:1234}
+#    virtual_host: /
+#    queue:
+#      name: transactions
+#      durable: false
+#      exclusive: true
+#      autoDelete: true
+#  cloud:
+#    stream:
+#      function:
+#        definition: createTransactionEvent
+#      bindings:
+#        createTransactionEvent-in-0:
+#          destination: transactions
+#          content-type: application/json
 
 app:
   security:
@@ -24,4 +49,4 @@ app:
 
 integration:
   request:
-    check-user-existence: http://92.118.114.182:7788/user_api/user/{userId}/exist
+    check-user-existence: http://host.docker.internal:7788/user_api/user/{userId}/exist

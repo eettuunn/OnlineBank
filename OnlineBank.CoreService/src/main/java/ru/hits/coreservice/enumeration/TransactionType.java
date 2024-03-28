@@ -28,4 +28,21 @@ public enum TransactionType {
                 throw new IllegalArgumentException("Неподдерживаемый тип операции: " + withdrawTransactionType);
         }
     }
+
+    public static TransactionType fromString(String transationType) {
+        switch (transationType) {
+            case "WITHDRAW":
+                return WITHDRAW;
+            case "REPAY_LOAN":
+                return REPAY_LOAN;
+            case "DEPOSIT":
+                return DEPOSIT;
+            case "TAKE_LOAN":
+                return TAKE_LOAN;
+            case "TRANSFER":
+                return TRANSFER;
+            default:
+                throw new IllegalArgumentException("Неподдерживаемый тип операции: " + transationType);
+        }
+    }
 }
