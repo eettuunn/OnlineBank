@@ -22,9 +22,6 @@ public class DepositMoneyDto {
     @NotNull(message = "Тип транзакции не может быть пустым")
     private DepositTransactionType transactionType;
 
-    @NotNull(message = "Идентификатор пользователя не может быть пустым")
-    private UUID userId;
-
     @NotBlank(message = "Валюта является обязательной к заполнению")
     private String currencyCode;
 

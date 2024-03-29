@@ -6,6 +6,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.hits.coreservice.dto.CreateTransactionMessage;
@@ -16,10 +18,12 @@ import ru.hits.coreservice.entity.BankAccountEntity;
 import ru.hits.coreservice.entity.TransactionEntity;
 import ru.hits.coreservice.enumeration.TransactionType;
 import ru.hits.coreservice.exception.ConflictException;
+import ru.hits.coreservice.exception.ForbiddenException;
 import ru.hits.coreservice.exception.NotFoundException;
 import ru.hits.coreservice.helpingservices.CheckPaginationInfoService;
 import ru.hits.coreservice.repository.BankAccountRepository;
 import ru.hits.coreservice.repository.TransactionRepository;
+import ru.hits.coreservice.security.JwtUserData;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -40,16 +44,16 @@ public class TransactionService {
     private final CoinGateCurrencyExchangeService currencyExchangeService;
 
     public TransactionsWithPaginationDto getTransactionsByBankAccountId(UUID bankAccountId, TransactionType transactionType, int pageNumber, int pageSize) {
-//        UUID authenticatedUserId = UUID.fromString("77141e72-da79-44c8-b057-ea1ea39bac2a");
+        UUID authenticatedUserId = getAuthenticatedUserData().getId();
+        List<String> authenticatedUserRoles = getAuthenticatedUserData().getRoles();
 
         BankAccountEntity bankAccount = bankAccountRepository.findById(bankAccountId)
                 .orElseThrow(() -> new NotFoundException("Банковский счет с ID " + bankAccountId + " не найден"));
 
-        //TODO: потом раскомментить, когда в токене появятся роли
-//        if (!bankAccount.getOwnerId().equals(authenticatedUserId)) {
-//            throw new ForbiddenException("Пользователь с ID " + authenticatedUserId + " не является " +
-//                    " владельцем банковского счета с ID " + bankAccountId);
-//        }
+        if (!bankAccount.getOwnerId().equals(authenticatedUserId) && authenticatedUserRoles.size() == 1 && authenticatedUserRoles.contains("Customer")) {
+            throw new ForbiddenException("Пользователь с ID " + authenticatedUserId + " не является" +
+                    " владельцем банковского счета с ID " + bankAccountId);
+        }
 
         checkPaginationInfoService.checkPagination(pageNumber, pageSize);
         Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
@@ -225,7 +229,7 @@ public class TransactionService {
     }
 
     @Transactional
-    private void handleRepayLoanTransaction(CreateTransactionMessage createTransactionMessage) {
+    void handleRepayLoanTransaction(CreateTransactionMessage createTransactionMessage) {
         BankAccountEntity masterBankAccount = bankAccountRepository.findById(UUID.fromString("cb1ef860-9f51-4e49-8e7d-f6694b10fc99"))
                 .orElseThrow(() -> new NotFoundException("Мастер-счет не найден"));
 
@@ -259,15 +263,10 @@ public class TransactionService {
         messagingTemplate.convertAndSend(destination, transaction);
     }
 
-//    /**
-//     * Метод для получения ID аутентифицированного пользователя.
-//     *
-//     * @return ID аутентифицированного пользователя.
-//     */
-//    private UUID getAuthenticatedUserId() {
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        JwtUserData userData = (JwtUserData) authentication.getPrincipal();
-//        return userData.getId();
-//    }
+    private JwtUserData getAuthenticatedUserData() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        JwtUserData userData = (JwtUserData) authentication.getPrincipal();
+        return userData;
+    }
 
 }

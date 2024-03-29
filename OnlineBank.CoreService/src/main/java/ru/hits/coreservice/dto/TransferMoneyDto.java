@@ -21,9 +21,6 @@ public class TransferMoneyDto {
     @Positive(message = "Сумма для перевода должна быть положительным числом")
     private BigDecimal amount;
 
-    @NotNull(message = "Идентификатор пользователя не может быть пустым")
-    private UUID userId;
-
     @NotBlank(message = "Валюта является обязательной к заполнению")
     private String currencyCode;
 

@@ -7,6 +7,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.hits.coreservice.dto.*;
@@ -19,6 +21,7 @@ import ru.hits.coreservice.exception.NotFoundException;
 import ru.hits.coreservice.helpingservices.CheckPaginationInfoService;
 import ru.hits.coreservice.repository.BankAccountRepository;
 import ru.hits.coreservice.repository.TransactionRepository;
+import ru.hits.coreservice.security.JwtUserData;
 //import ru.hits.coreservice.security.JwtUserData;
 
 import java.math.BigDecimal;
@@ -42,6 +45,12 @@ public class BankAccountService {
 
     public BankAccountsWithPaginationDto getAllBankAccounts(Sort.Direction creationDateSortDirection, Boolean isClosed, int pageNumber, int pageSize) {
         checkPaginationInfoService.checkPagination(pageNumber, pageSize);
+
+        List<String> authenticatedUserRoles = getAuthenticatedUserData().getRoles();
+        if (authenticatedUserRoles.size() == 1 && authenticatedUserRoles.contains("Customer")) {
+            throw new ForbiddenException("Клиент не может просматривать список всех счетов");
+        }
+
         Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(creationDateSortDirection, "creationDate"));
 
         Page<BankAccountEntity> bankAccountPage;
@@ -66,6 +75,13 @@ public class BankAccountService {
 
     public BankAccountsWithPaginationDto getBankAccountsByOwnerId(UUID ownerId, Sort.Direction creationDateSortDirection, Boolean isClosed, int pageNumber, int pageSize) {
         checkPaginationInfoService.checkPagination(pageNumber, pageSize);
+
+        UUID authenticatedUserId = getAuthenticatedUserData().getId();
+        List<String> authenticatedUserRoles = getAuthenticatedUserData().getRoles();
+        if (authenticatedUserId != ownerId && authenticatedUserRoles.size() == 1 && authenticatedUserRoles.contains("Customer")) {
+            throw new ForbiddenException("Клиент не может просматривать список счетов другого человека");
+        }
+
         Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(creationDateSortDirection, "creationDate"));
 
         Page<BankAccountEntity> bankAccountPage;
@@ -92,13 +108,22 @@ public class BankAccountService {
         BankAccountEntity bankAccount = bankAccountRepository.findById(bankAccountId)
                 .orElseThrow(() -> new NotFoundException("Банковский счет с ID " + bankAccountId + " не найден"));
 
+        UUID authenticatedUserId = getAuthenticatedUserData().getId();
+        List<String> authenticatedUserRoles = getAuthenticatedUserData().getRoles();
+        if (!bankAccount.getOwnerId().equals(authenticatedUserId) && authenticatedUserRoles.size() == 1 && authenticatedUserRoles.contains("Customer")) {
+            throw new ForbiddenException("Пользователь с ID " + authenticatedUserId + " не является" +
+                    " владельцем банковского счета с ID " + bankAccountId);
+        }
+
         return new BankAccountWithoutTransactionsDto(bankAccount);
     }
 
     @Transactional
     public BankAccountWithoutTransactionsDto createBankAccount(CreateBankAccountDto createBankAccountDto) {
-        if (!integrationRequestsService.checkUserExistence(createBankAccountDto.getUserId())) {
-            throw new NotFoundException("Пользователя с ID " + createBankAccountDto.getUserId() + " не существует");
+        UUID authenticatedUserId = getAuthenticatedUserId();
+
+        if (!integrationRequestsService.checkUserExistence(authenticatedUserId)) {
+            throw new NotFoundException("Пользователя с ID " + authenticatedUserId + " не существует");
         }
 
         Currency currency = Currency.getInstance(createBankAccountDto.getCurrencyCode());
@@ -107,7 +132,7 @@ public class BankAccountService {
                 .name(createBankAccountDto.getName())
                 .number(generateAccountNumber())
                 .balance(new Money(BigDecimal.ZERO, currency))
-                .ownerId(createBankAccountDto.getUserId())
+                .ownerId(authenticatedUserId)
                 .isClosed(false)
                 .creationDate(LocalDateTime.now())
                 .transactions(Collections.emptyList())
@@ -119,16 +144,18 @@ public class BankAccountService {
     }
 
     @Transactional
-    public BankAccountWithoutTransactionsDto closeBankAccount(UUID bankAccountId, CloseBankAccountDto closeBankAccountDto) {
-        if (!integrationRequestsService.checkUserExistence(closeBankAccountDto.getUserId())) {
-            throw new NotFoundException("Пользователя с ID " + closeBankAccountDto.getUserId() + " не существует");
+    public BankAccountWithoutTransactionsDto closeBankAccount(UUID bankAccountId) {
+        UUID authenticatedUserId = getAuthenticatedUserId();
+
+        if (!integrationRequestsService.checkUserExistence(authenticatedUserId)) {
+            throw new NotFoundException("Пользователя с ID " + authenticatedUserId + " не существует");
         }
 
         BankAccountEntity bankAccount = bankAccountRepository.findById(bankAccountId)
                 .orElseThrow(() -> new NotFoundException("Банковский счет с ID " + bankAccountId + " не найден"));
 
-        if (!bankAccount.getOwnerId().equals(closeBankAccountDto.getUserId())) {
-            throw new ForbiddenException("Пользователь с ID " + closeBankAccountDto.getUserId() + " не является " +
+        if (!bankAccount.getOwnerId().equals(authenticatedUserId)) {
+            throw new ForbiddenException("Пользователь с ID " + authenticatedUserId + " не является" +
                     " владельцем банковского счета с ID " + bankAccountId);
         }
 
@@ -145,17 +172,17 @@ public class BankAccountService {
 
     @Transactional
     public BankAccountDto depositMoney(UUID bankAccountId, DepositMoneyDto depositMoneyDto) {
-        if (!integrationRequestsService.checkUserExistence(depositMoneyDto.getUserId())) {
-            throw new NotFoundException("Пользователя с ID " + depositMoneyDto.getUserId() + " не существует");
-        }
+        UUID authenticatedUserId = getAuthenticatedUserId();
 
-        UUID authenticatedUserId = depositMoneyDto.getUserId();
+        if (!integrationRequestsService.checkUserExistence(authenticatedUserId)) {
+            throw new NotFoundException("Пользователя с ID " + authenticatedUserId + " не существует");
+        }
 
         BankAccountEntity bankAccount = bankAccountRepository.findById(bankAccountId)
                 .orElseThrow(() -> new NotFoundException("Банковский счет с ID " + bankAccountId + " не найден"));
 
         if (!bankAccount.getOwnerId().equals(authenticatedUserId)) {
-            throw new ForbiddenException("Пользователь с ID " + authenticatedUserId + " не является " +
+            throw new ForbiddenException("Пользователь с ID " + authenticatedUserId + " не является" +
                     " владельцем банковского счета с ID " + bankAccountId);
         }
 
@@ -202,11 +229,11 @@ public class BankAccountService {
 
     @Transactional
     public BankAccountDto transferMoney(UUID toBankAccountId, TransferMoneyDto transferMoneyDto) {
-        if (!integrationRequestsService.checkUserExistence(transferMoneyDto.getUserId())) {
-            throw new NotFoundException("Пользователя с ID " + transferMoneyDto.getUserId() + " не существует");
-        }
+        UUID authenticatedUserId = getAuthenticatedUserId();
 
-        UUID authenticatedUserId = transferMoneyDto.getUserId();
+        if (!integrationRequestsService.checkUserExistence(authenticatedUserId)) {
+            throw new NotFoundException("Пользователя с ID " + authenticatedUserId + " не существует");
+        }
 
         BankAccountEntity fromBankAccount = bankAccountRepository.findById(transferMoneyDto.getFromAccountId())
                 .orElseThrow(() -> new NotFoundException("Банковский счет, с которого отправляются деньги, с ID " + transferMoneyDto.getFromAccountId() + " не найден"));
@@ -214,7 +241,7 @@ public class BankAccountService {
                 .orElseThrow(() -> new NotFoundException("Банковский счет, на который отправляются деньги, с ID " + toBankAccountId + " не найден"));
 
         if (!fromBankAccount.getOwnerId().equals(authenticatedUserId)) {
-            throw new ForbiddenException("Пользователь с ID " + authenticatedUserId + " не является " +
+            throw new ForbiddenException("Пользователь с ID " + authenticatedUserId + " не является" +
                     " владельцем банковского счета с ID " + fromBankAccount.getId());
         }
 
@@ -254,17 +281,17 @@ public class BankAccountService {
 
     @Transactional
     public BankAccountDto withdrawMoney(UUID bankAccountId, WithdrawMoneyDto withdrawMoneyDto) {
-        if (!integrationRequestsService.checkUserExistence(withdrawMoneyDto.getUserId())) {
-            throw new NotFoundException("Пользователя с ID " + withdrawMoneyDto.getUserId() + " не существует");
-        }
+        UUID authenticatedUserId = getAuthenticatedUserId();
 
-        UUID authenticatedUserId = withdrawMoneyDto.getUserId();
+        if (!integrationRequestsService.checkUserExistence(authenticatedUserId)) {
+            throw new NotFoundException("Пользователя с ID " + authenticatedUserId + " не существует");
+        }
 
         BankAccountEntity bankAccount = bankAccountRepository.findById(bankAccountId)
                 .orElseThrow(() -> new NotFoundException("Банковский счет с ID " + bankAccountId + " не найден"));
 
         if (!bankAccount.getOwnerId().equals(authenticatedUserId)) {
-            throw new ForbiddenException("Пользователь с ID " + authenticatedUserId + " не является " +
+            throw new ForbiddenException("Пользователь с ID " + authenticatedUserId + " не является" +
                     " владельцем банковского счета с ID " + bankAccountId);
         }
 
@@ -309,17 +336,17 @@ public class BankAccountService {
 
     public BankAccountWithoutTransactionsDto updateBankAccountName(UUID bankAccountId,
                                                                    UpdateBankAccountNameDto updateBankAccountNameDto) {
-        if (!integrationRequestsService.checkUserExistence(updateBankAccountNameDto.getUserId())) {
-            throw new NotFoundException("Пользователя с ID " + updateBankAccountNameDto.getUserId() + " не существует");
-        }
+        UUID authenticatedUserId = getAuthenticatedUserId();
 
-        UUID authenticatedUserId = updateBankAccountNameDto.getUserId();
+        if (!integrationRequestsService.checkUserExistence(authenticatedUserId)) {
+            throw new NotFoundException("Пользователя с ID " + authenticatedUserId + " не существует");
+        }
 
         BankAccountEntity bankAccount = bankAccountRepository.findById(bankAccountId)
                 .orElseThrow(() -> new NotFoundException("Банковский счет с ID " + bankAccountId + " не найден"));
 
         if (!bankAccount.getOwnerId().equals(authenticatedUserId)) {
-            throw new ForbiddenException("Пользователь с ID " + authenticatedUserId + " не является " +
+            throw new ForbiddenException("Пользователь с ID " + authenticatedUserId + " не является" +
                     " владельцем банковского счета с ID " + bankAccountId);
         }
 
@@ -367,20 +394,21 @@ public class BankAccountService {
         return sb.toString();
     }
 
-    private void sendTransactionUpdate(TransactionDto transaction) {
-        String destination = "/topic/bank-accounts/" + transaction.getBankAccountId() + "/transactions";
-        messagingTemplate.convertAndSend(destination, transaction);
+    /**
+     * Метод для получения ID аутентифицированного пользователя.
+     *
+     * @return ID аутентифицированного пользователя.
+     */
+    private UUID getAuthenticatedUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        JwtUserData userData = (JwtUserData) authentication.getPrincipal();
+        return userData.getId();
     }
 
-//    /**
-//     * Метод для получения ID аутентифицированного пользователя.
-//     *
-//     * @return ID аутентифицированного пользователя.
-//     */
-//    private UUID getAuthenticatedUserId() {
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        JwtUserData userData = (JwtUserData) authentication.getPrincipal();
-//        return userData.getId();
-//    }
+    private JwtUserData getAuthenticatedUserData() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        JwtUserData userData = (JwtUserData) authentication.getPrincipal();
+        return userData;
+    }
 
 }

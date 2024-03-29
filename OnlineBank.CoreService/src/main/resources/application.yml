@@ -40,8 +40,8 @@ app:
       permit-all:
         - /api/bank-accounts/token
       root-path: /api
-      secret: qqqwwweeerrrtttyyyuuuiiiooopppqqqwwweeerrrtttyyyuuuiiiooopppqqqwwweeerrrtttyyyuuuiiiooopppqqqwwweeerrrtttyyyuuuiiiooopppqqqwwweeerrrtttyyyuuuiiiooopppqqqwwweeerrrtttyyyuuuiiiooopppqqqwwweeerrrtttyyyuuuiiiooopppqqqwwweeerrrtttyyyuuuiiiooopppqqqwwweeerrrttty
-      issuer: online-bank-api
+      secret: TheVeryStrongKeyOrPasswordQwerty123
+      issuer: bank_backend
       subject: User details
     integrations:
       root-path: /integration

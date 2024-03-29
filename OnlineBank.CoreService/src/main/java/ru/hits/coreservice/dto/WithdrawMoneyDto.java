@@ -23,9 +23,6 @@ public class WithdrawMoneyDto {
     @NotNull(message = "Тип транзакции не может быть пустым")
     private WithdrawTransactionType transactionType;
 
-    @NotNull(message = "Идентификатор пользователя не может быть пустым")
-    private UUID userId;
-
     @NotBlank(message = "Валюта является обязательной к заполнению")
     private String currencyCode;
 
