@@ -76,35 +76,35 @@ public class BankAccountRestController {
         return new ResponseEntity<>(bankAccountService.closeBankAccount(bankAccountId), HttpStatus.OK);
     }
 
-    @Operation(
-            summary = "Пополнить банковский счёт.",
-            security = @SecurityRequirement(name = "bearerAuth")
-    )
-    @PostMapping("/{id}/deposit")
-    public ResponseEntity<BankAccountDto> depositMoney(@PathVariable("id") UUID bankAccountId,
-                                                       @RequestBody @Valid DepositMoneyDto depositMoneyDto) {
-        return new ResponseEntity<>(bankAccountService.depositMoney(bankAccountId, depositMoneyDto), HttpStatus.OK);
-    }
+//    @Operation(
+//            summary = "Пополнить банковский счёт.",
+//            security = @SecurityRequirement(name = "bearerAuth")
+//    )
+//    @PostMapping("/{id}/deposit")
+//    public ResponseEntity<BankAccountDto> depositMoney(@PathVariable("id") UUID bankAccountId,
+//                                                       @RequestBody @Valid DepositMoneyDto depositMoneyDto) {
+//        return new ResponseEntity<>(bankAccountService.depositMoney(bankAccountId, depositMoneyDto), HttpStatus.OK);
+//    }
+//
+//    @Operation(
+//            summary = "Перевести деньги на счет.",
+//            security = @SecurityRequirement(name = "bearerAuth")
+//    )
+//    @PostMapping("/{id}/transfer")
+//    public ResponseEntity<BankAccountDto> transferMoney(@PathVariable("id") UUID toBankAccountId,
+//                                                        @RequestBody @Valid TransferMoneyDto transferMoneyDto) {
+//        return new ResponseEntity<>(bankAccountService.transferMoney(toBankAccountId, transferMoneyDto), HttpStatus.OK);
+//    }
 
-    @Operation(
-            summary = "Перевести деньги на счет.",
-            security = @SecurityRequirement(name = "bearerAuth")
-    )
-    @PostMapping("/{id}/transfer")
-    public ResponseEntity<BankAccountDto> transferMoney(@PathVariable("id") UUID toBankAccountId,
-                                                        @RequestBody @Valid TransferMoneyDto transferMoneyDto) {
-        return new ResponseEntity<>(bankAccountService.transferMoney(toBankAccountId, transferMoneyDto), HttpStatus.OK);
-    }
-
-    @Operation(
-            summary = "Снять деньги с банковского счёта.",
-            security = @SecurityRequirement(name = "bearerAuth")
-    )
-    @PostMapping("/{id}/withdraw")
-    public ResponseEntity<BankAccountDto> withdrawMoney(@PathVariable("id") UUID bankAccountId,
-                                                        @RequestBody @Valid WithdrawMoneyDto withdrawMoneyDto) {
-        return new ResponseEntity<>(bankAccountService.withdrawMoney(bankAccountId, withdrawMoneyDto), HttpStatus.OK);
-    }
+//    @Operation(
+//            summary = "Снять деньги с банковского счёта.",
+//            security = @SecurityRequirement(name = "bearerAuth")
+//    )
+//    @PostMapping("/{id}/withdraw")
+//    public ResponseEntity<BankAccountDto> withdrawMoney(@PathVariable("id") UUID bankAccountId,
+//                                                        @RequestBody @Valid WithdrawMoneyDto withdrawMoneyDto) {
+//        return new ResponseEntity<>(bankAccountService.withdrawMoney(bankAccountId, withdrawMoneyDto), HttpStatus.OK);
+//    }
 
     @Operation(
             summary = "Обновить название банковского счёта.",
@@ -117,20 +117,12 @@ public class BankAccountRestController {
         return new ResponseEntity<>(bankAccountService.updateBankAccountName(bankAccountId, updateBankAccountNameDto), HttpStatus.OK);
     }
 
-    @Operation(
-            summary = "Проверить существование банковского счета.",
-            security = @SecurityRequirement(name = "bearerAuth")
-    )
     @GetMapping("/{id}/check-existence")
     public ResponseEntity<Boolean> checkBankAccountExistence(@PathVariable("id") UUID bankAccountId) {
         Boolean isExists = bankAccountService.checkBankAccountExistenceById(bankAccountId);
         return new ResponseEntity<>(isExists, HttpStatus.OK);
     }
 
-    @Operation(
-            summary = "Проверить наличие средств на счете.",
-            security = @SecurityRequirement(name = "bearerAuth")
-    )
     @PostMapping("/{id}/check-money")
     public ResponseEntity<Boolean> checkBankAccountAmountOfMoney(@PathVariable("id") UUID bankAccountId,
                                                                  @RequestBody CheckMoneyDto checkMoneyDto) {

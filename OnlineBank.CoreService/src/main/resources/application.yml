@@ -38,7 +38,8 @@ app:
   security:
     jwt-token:
       permit-all:
-        - /api/bank-accounts/token
+        - /api/bank-accounts/{id}/check-existence
+        - /api/bank-accounts/{id}/check-money
       root-path: /api
       secret: TheVeryStrongKeyOrPasswordQwerty123
       issuer: bank_backend

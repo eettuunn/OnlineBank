@@ -40,6 +40,7 @@ public class TransactionService {
     private final SimpMessagingTemplate messagingTemplate;
     private final BankAccountRepository bankAccountRepository;
     private final TransactionRepository transactionRepository;
+    private final IntegrationRequestsService integrationRequestsService;
     private final CheckPaginationInfoService checkPaginationInfoService;
     private final CoinGateCurrencyExchangeService currencyExchangeService;
 
@@ -97,37 +98,81 @@ public class TransactionService {
 
     @Transactional
     void processWithdrawOrRepayLoan(CreateTransactionMessage createTransactionMessage, String additionalInformation) {
+        UUID authenticatedUserId = createTransactionMessage.getAuthenticatedUserId();
+
+        if (!integrationRequestsService.checkUserExistence(authenticatedUserId)) {
+            throw new NotFoundException("Пользователя с ID " + authenticatedUserId + " не существует");
+        }
+
         BankAccountEntity bankAccount = bankAccountRepository.findById(createTransactionMessage.getBankAccountId())
-                .orElseThrow(() -> new NotFoundException("Банковский счет с ID " + createTransactionMessage.getFromBankAccountId() + " не найден"));
+                .orElseThrow(() -> new NotFoundException("Банковский счет с ID " + createTransactionMessage.getBankAccountId() + " не найден"));
+
+        if (!bankAccount.getOwnerId().equals(authenticatedUserId)) {
+            throw new ForbiddenException("Пользователь с ID " + authenticatedUserId + " не является" +
+                    " владельцем банковского счета с ID " + createTransactionMessage.getBankAccountId());
+        }
+
+        if (Boolean.TRUE.equals(bankAccount.getIsClosed())) {
+            throw new ConflictException("Банковский счет с ID " + createTransactionMessage.getBankAccountId() + " закрыт");
+        }
 
         String bankAccountCurrencyCode = bankAccount.getBalance().getCurrency().getCurrencyCode();
+        BigDecimal exchangeRateToTargetCurrency = currencyExchangeService.getExchangeRate(bankAccountCurrencyCode, createTransactionMessage.getCurrencyCode());
+        BigDecimal balanceWithExchangeRate = bankAccount.getBalance().getAmount().multiply(exchangeRateToTargetCurrency);
+
+        if (balanceWithExchangeRate.compareTo(createTransactionMessage.getAmount()) < 0) {
+            throw new ConflictException("Недостаточно средств на счете для перевода указанной суммы");
+        }
+
         BigDecimal invertedExchangeRate = currencyExchangeService.getExchangeRate(createTransactionMessage.getCurrencyCode(), bankAccountCurrencyCode);
-        BigDecimal amountWithExchangeRate = createTransactionMessage.getAmount().multiply(invertedExchangeRate).negate();
+
+        bankAccount.getBalance().setAmount(bankAccount.getBalance().getAmount().subtract(createTransactionMessage.getAmount().multiply(invertedExchangeRate)));
 
         TransactionEntity transaction = TransactionEntity.builder()
                 .transactionDate(LocalDateTime.now())
-                .amount(amountWithExchangeRate)
+                .amount(createTransactionMessage.getAmount().multiply(invertedExchangeRate).negate())
                 .transactionType(TransactionType.fromString(createTransactionMessage.getTransactionType()))
                 .additionalInformation(additionalInformation)
                 .bankAccount(bankAccount)
                 .build();
 
         transaction = transactionRepository.save(transaction);
+
         bankAccount.getTransactions().add(0, transaction);
+
         bankAccountRepository.save(bankAccount);
 
         sendTransactionUpdate(new TransactionDto(transaction));
+
     }
 
     @Transactional
     void processDepositOrTakeLoan(CreateTransactionMessage createTransactionMessage, String additionalInformation) {
+        UUID authenticatedUserId = createTransactionMessage.getAuthenticatedUserId();
+
+        if (!integrationRequestsService.checkUserExistence(authenticatedUserId)) {
+            throw new NotFoundException("Пользователя с ID " + authenticatedUserId + " не существует");
+        }
+
         BankAccountEntity bankAccount = bankAccountRepository.findById(createTransactionMessage.getBankAccountId())
                 .orElseThrow(() -> new NotFoundException("Банковский счет с ID " + createTransactionMessage.getBankAccountId() + " не найден"));
+
+        if (!bankAccount.getOwnerId().equals(authenticatedUserId)) {
+            throw new ForbiddenException("Пользователь с ID " + authenticatedUserId + " не является" +
+                    " владельцем банковского счета с ID " + createTransactionMessage.getBankAccountId());
+        }
+
+        if (Boolean.TRUE.equals(bankAccount.getIsClosed())) {
+            throw new ConflictException("Банковский счет с ID " + createTransactionMessage.getBankAccountId() + " закрыт");
+        }
 
         String bankAccountCurrencyCode = bankAccount.getBalance().getCurrency().getCurrencyCode();
         BigDecimal exchangeRateToTargetCurrency = currencyExchangeService.getExchangeRate(createTransactionMessage.getCurrencyCode(), bankAccountCurrencyCode);
         BigDecimal amountWithExchangeRate = createTransactionMessage.getAmount().multiply(exchangeRateToTargetCurrency);
 
+        BigDecimal newBalance = bankAccount.getBalance().getAmount().add(amountWithExchangeRate);
+        bankAccount.getBalance().setAmount(newBalance);
+
         TransactionEntity transaction = TransactionEntity.builder()
                 .transactionDate(LocalDateTime.now())
                 .amount(amountWithExchangeRate)
@@ -137,7 +182,9 @@ public class TransactionService {
                 .build();
 
         transaction = transactionRepository.save(transaction);
+
         bankAccount.getTransactions().add(0, transaction);
+
         bankAccountRepository.save(bankAccount);
 
         sendTransactionUpdate(new TransactionDto(transaction));
@@ -145,12 +192,39 @@ public class TransactionService {
 
     @Transactional
     void processTransfer(CreateTransactionMessage createTransactionMessage, String additionalInformation) {
+        UUID authenticatedUserId = createTransactionMessage.getAuthenticatedUserId();
+
+        if (!integrationRequestsService.checkUserExistence(authenticatedUserId)) {
+            throw new NotFoundException("Пользователя с ID " + authenticatedUserId + " не существует");
+        }
+
         BankAccountEntity fromBankAccount = bankAccountRepository.findById(createTransactionMessage.getFromBankAccountId())
                 .orElseThrow(() -> new NotFoundException("Банковский счет, с которого отправляются деньги, с ID " + createTransactionMessage.getFromBankAccountId() + " не найден"));
         BankAccountEntity toBankAccount = bankAccountRepository.findById(createTransactionMessage.getToBankAccountId())
                 .orElseThrow(() -> new NotFoundException("Банковский счет, на который отправляются деньги, с ID " + createTransactionMessage.getToBankAccountId() + " не найден"));
 
+        if (!fromBankAccount.getOwnerId().equals(authenticatedUserId)) {
+            throw new ForbiddenException("Пользователь с ID " + authenticatedUserId + " не является " +
+                    " владельцем банковского счета с ID " + fromBankAccount.getId());
+        }
+
+        if (Boolean.TRUE.equals(fromBankAccount.getIsClosed())) {
+            throw new ConflictException("Банковский счет, с которого отправляются деньги, с ID " + fromBankAccount.getId() + " закрыт");
+        }
+
+        if (Boolean.TRUE.equals(toBankAccount.getIsClosed())) {
+            throw new ConflictException("Банковский счет, на который отправляются деньги, с ID " + toBankAccount.getId() + " закрыт");
+        }
+
         String fromCurrencyCode = fromBankAccount.getBalance().getCurrency().getCurrencyCode();
+
+        BigDecimal exchangeRateToTargetCurrency = currencyExchangeService.getExchangeRate(fromCurrencyCode, createTransactionMessage.getCurrencyCode());
+        BigDecimal balanceWithExchangeRate = fromBankAccount.getBalance().getAmount().multiply(exchangeRateToTargetCurrency);
+
+        if (balanceWithExchangeRate.compareTo(createTransactionMessage.getAmount()) < 0) {
+            throw new ConflictException("Недостаточно средств на счете для перевода указанной суммы");
+        }
+
         String toCurrencyCode = toBankAccount.getBalance().getCurrency().getCurrencyCode();
 
         BigDecimal exchangeRate = currencyExchangeService.getExchangeRate(createTransactionMessage.getCurrencyCode(), toCurrencyCode);
@@ -168,7 +242,7 @@ public class TransactionService {
                 .transactionDate(transactionDate)
                 .amount(createTransactionMessage.getAmount().multiply(invertedExchangeRate).negate())
                 .transactionType(TransactionType.TRANSFER)
-                .additionalInformation(additionalInformation)
+                .additionalInformation("Перевод")
                 .bankAccount(fromBankAccount)
                 .build();
 
@@ -176,7 +250,7 @@ public class TransactionService {
                 .transactionDate(transactionDate)
                 .amount(convertedAmount)
                 .transactionType(TransactionType.TRANSFER)
-                .additionalInformation(additionalInformation)
+                .additionalInformation("Перевод")
                 .bankAccount(toBankAccount)
                 .build();
 
@@ -191,6 +265,7 @@ public class TransactionService {
 
         sendTransactionUpdate(new TransactionDto(transactionFromBankAccount));
         sendTransactionUpdate(new TransactionDto(transactionToBankAccount));
+
     }
 
     @Transactional

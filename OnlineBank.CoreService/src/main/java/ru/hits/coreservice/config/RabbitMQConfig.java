@@ -33,7 +33,12 @@ public class RabbitMQConfig {
 
     @Bean
     public Queue myQueue() {
-        return new Queue("transactions1");
+        return new Queue("transactions1", true);
+    }
+
+    @Bean
+    public Queue deadLetterQueue() {
+        return new Queue("dlq-name", true);
     }
 
     @Bean
@@ -42,8 +47,22 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    Binding binding(Queue queue, DirectExchange exchange) {
-        return BindingBuilder.bind(queue).to(exchange).with("transactions");
+    public DirectExchange deadLetterExchange() {
+        return new DirectExchange("dlx-name");
+    }
+
+    @Bean
+    Binding binding() {
+        return BindingBuilder.bind(myQueue()).to(exchange()).with("transactions");
+    }
+
+    @Bean
+    public Binding deadLetterBinding() {
+        return BindingBuilder.bind(deadLetterQueue()).to(exchange()).with("dlq-name");
+    }
+    @Bean
+    public Binding queueToDeadLetterExchangeBinding() {
+        return BindingBuilder.bind(myQueue()).to(deadLetterExchange()).with("transactions1");
     }
 
 }

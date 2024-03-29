@@ -17,6 +17,8 @@ import java.util.UUID;
 @Builder
 public class CreateTransactionMessage {
 
+    private UUID authenticatedUserId;
+
     private BigDecimal amount;
 
     private String transactionType;
