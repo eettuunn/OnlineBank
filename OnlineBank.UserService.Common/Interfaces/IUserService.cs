@@ -1,3 +1,4 @@
+using OnlineBank.LoanService.Common.Dtos.Loan;
 using OnlineBank.UserService.Common.Dtos;
 using OnlineBank.UserService.Common.Dtos.User;
 
@@ -12,4 +13,6 @@ public interface IUserService
     Task<LoginResponseDto> Login(LoginCredentialsDto loginCredentialsDto);
     Task<UserInfoDto> GetUserInfo(Guid userId);
     Task<bool> CheckIfUserExists(Guid userId);
+    Task EditUserLoanRating(UpdateRatingDto amount, Guid userId);
+    Task<double> GetUserLoanRating(Guid userId);
 }

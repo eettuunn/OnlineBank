@@ -25,6 +25,6 @@ public class MessageProducer : IMessageProducer
         var jsonStr = JsonSerializer.Serialize(message);
         var body = Encoding.UTF8.GetBytes(jsonStr);
         
-        channel.BasicPublish("", "transactions", body: body);
+        channel.BasicPublish("transactionsExchange", "transactions", body: body);
     }
 }

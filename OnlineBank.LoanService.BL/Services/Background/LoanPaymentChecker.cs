@@ -1,6 +1,13 @@
+using System.Text;
+using Common.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
+using System.Text.Json;
+using OnlineBank.LoanService.Common.Dtos.Loan;
+using OnlineBank.LoanService.Common.Interfaces;
+using OnlineBank.LoanService.Configs;
 using OnlineBank.LoanService.DAL;
 
 namespace OnlineBank.LoanService.BL.Services.Background;
@@ -21,6 +28,7 @@ public class LoanPaymentChecker : BackgroundService
             using (var scope = _serviceScopeFactory.CreateScope())
             {
                 var context = scope.ServiceProvider.GetRequiredService<LoanServiceDbContext>();
+                var loanRatingHelper = scope.ServiceProvider.GetRequiredService<ILoanRatingHelper>();
 
                 var loans = await context.Loans
                     .Include(l => l.Payments)
@@ -28,10 +36,12 @@ public class LoanPaymentChecker : BackgroundService
                 foreach (var loan in loans)
                 {
                     var totalPenalties = 0;
+                    var userId = loan.UserId;
                     foreach (var payment in loan.Payments)
                     {
                         if (payment.Debt > 0 && payment.PaymentDate < DateTime.UtcNow)
                         {
+                            await loanRatingHelper.UpdateUserLoanRating(false, userId);
                             loan.Debt += 100;
                             totalPenalties += 100;
                         }

@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using OnlineBank.LoanService.Common.Dtos.Loan;
 using OnlineBank.UserService.Common.Dtos;
 using OnlineBank.UserService.Common.Dtos.User;
 using OnlineBank.UserService.Common.Interfaces;
@@ -129,5 +130,25 @@ public class UserController : ControllerBase
     public async Task<bool> CheckUser(Guid userId)
     {
         return await _userService.CheckIfUserExists(userId);
+    }
+    
+    /// <summary>
+    /// Update user's loan rating
+    /// </summary>
+    [HttpPost]
+    [Route("{userId}/loan_rating")]
+    public async Task UpdateLoanRating([FromBody] UpdateRatingDto updateRatingDto, Guid userId)
+    {
+        await _userService.EditUserLoanRating(updateRatingDto, userId);
+    }
+    
+    /// <summary>
+    /// Get user's loan rating
+    /// </summary>
+    [HttpGet]
+    [Route("{userId}/loan_rating")]
+    public async Task<double> GetUserLoanRating(Guid userId)
+    {
+        return await _userService.GetUserLoanRating(userId);
     }
 }

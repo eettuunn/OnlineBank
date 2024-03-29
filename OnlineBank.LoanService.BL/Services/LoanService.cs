@@ -20,12 +20,14 @@ public class LoanService : ILoanService
     private readonly IMapper _mapper;
     private readonly IntegrationApisUrls _integrationApisUrls;
     private readonly IMessageProducer _messageProducer;
+    private readonly ILoanRatingHelper _loanRatingHelper;
 
-    public LoanService(LoanServiceDbContext context, IMapper mapper, IOptions<IntegrationApisUrls> options, IMessageProducer messageProducer)
+    public LoanService(LoanServiceDbContext context, IMapper mapper, IOptions<IntegrationApisUrls> options, IMessageProducer messageProducer, ILoanRatingHelper loanRatingHelper)
     {
         _context = context;
         _mapper = mapper;
         _messageProducer = messageProducer;
+        _loanRatingHelper = loanRatingHelper;
         _integrationApisUrls = options.Value;
     }
 
@@ -79,6 +81,10 @@ public class LoanService : ILoanService
 
         var loanPayment = loan.Payments.FirstOrDefault(p => p.Id == createPaymentDto.paymentId)
                           ?? throw new CantFindByIdException("payment", createPaymentDto.paymentId);
+        if (loanPayment.PaymentDate >= DateTime.UtcNow)
+        {
+            await _loanRatingHelper.UpdateUserLoanRating(true, userId);
+        }
         var payment = createPaymentDto.paymentAmount ?? loanPayment.Debt;
         if (payment > loanPayment.Debt)
         {

@@ -44,7 +44,8 @@ public static class UserServiceDALConfigurator
                 UserName = "Customer",
                 Email = "customer@gmail.com",
                 Passport = "1234 123456",
-                PhoneNumber = "89999999999"
+                PhoneNumber = "89999999999",
+                LoanRating = 100
             };
             _usermanager.CreateAsync(customer, "a12345").GetAwaiter().GetResult();
             
@@ -53,7 +54,8 @@ public static class UserServiceDALConfigurator
                 UserName = "Staff",
                 Email = "staff@gmail.com",
                 Passport = "4321 654321",
-                PhoneNumber = "81111111111"
+                PhoneNumber = "81111111111",
+                LoanRating = 100
             };
             _usermanager.CreateAsync(staff, "a12345").GetAwaiter().GetResult();
 
@@ -63,7 +65,8 @@ public static class UserServiceDALConfigurator
                 UserName = "admin",
                 Email = "admin@gmail.com",
                 Passport = "1111 111111",
-                PhoneNumber = "89999999999"
+                PhoneNumber = "89999999999",
+                LoanRating = 100
             };
             _usermanager.CreateAsync(admin, "a12345").GetAwaiter().GetResult();
 
