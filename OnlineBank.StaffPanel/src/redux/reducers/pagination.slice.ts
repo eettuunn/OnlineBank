@@ -12,7 +12,7 @@ interface IInitialState {
 }
 
 const initDefaultPage = {
-    empty: { pageSize: 10, pageNumber: 1 },
+    empty: { pageSize: 10000, pageNumber: 1 },
 };
 
 const initialState: IInitialState = getStorageValue<{ [path: string]: IPaginationData }>('pagination') ?? { ...initDefaultPage };

@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import block from 'bem-cn';
 import { Button, Card, Layout, List } from 'antd';
+import { useNavigate } from 'react-router-dom';
 
 import { useLayoutConfig } from '../../../shared/hooks/useLayoutConfig/useLayoutConfig';
-import { Paths } from '../../../shared/constants';
+import { Paths, adminId, masterAccountId } from '../../../shared/constants';
 import MainHeader from '../../../features/MainHeader/MainHeader';
 import { useCreateLoanRateMutation, useGetLoanRatesQuery } from '../api/loansApi';
 import ModalCreateRate from '../components/ModalCreateRate/ModalCreateRate';
@@ -17,6 +18,7 @@ const { Content } = Layout;
 const LoanRates: React.FC = () => {
     const { setConfig } = useLayoutConfig();
     const [ visible, setVisible ] = useState(false);
+    const navigate = useNavigate();
 
     const { isLoading: isLoadingRates, data: dataRates } = useGetLoanRatesQuery(undefined);
     const [ create, { isLoading: isLoadingCreate } ] = useCreateLoanRateMutation();
@@ -40,6 +42,7 @@ const LoanRates: React.FC = () => {
         <div className={b().toString()}>
             <MainHeader>
                 <Button type="primary" onClick={() => setVisible(true)}>Добавить тариф</Button>
+                <Button onClick={() => navigate(`/users/${adminId}/account/${masterAccountId}`)}>Мастер счет</Button>
             </MainHeader>
             <Content>
                 <List

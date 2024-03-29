@@ -90,8 +90,8 @@ const useProvideAuth = (): IAuth => {
      * @param email
      */
 
-    const login = ({ email }: ICredentials) => {
-        loginQuery({ email })
+    const login = (data: ICredentials) => {
+        loginQuery(data)
             .unwrap()
             .then((res: { token: string; id: string }) => {
                 setStoredValue(res.token);

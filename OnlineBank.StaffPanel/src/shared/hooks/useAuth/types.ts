@@ -11,4 +11,5 @@ export interface IGetCurrentUser {
 }
 export interface ICredentials {
     email: string;
+    password: string;
 }

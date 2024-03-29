@@ -1,4 +1,7 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using OnlineBank.LoanService.Common.Dtos.Loan;
 using OnlineBank.UserService.Common.Dtos;
 using OnlineBank.UserService.Common.Dtos.User;
 using OnlineBank.UserService.Common.Interfaces;
@@ -21,6 +24,8 @@ public class UserController : ControllerBase
     /// Get list of all users
     /// </summary>
     [HttpGet]
+    [Authorize]
+    [Authorize(Roles = "Staff")]
     public async Task<List<UserDto>> GetUsers()
     {
         return await _userService.GetUsers();
@@ -31,8 +36,22 @@ public class UserController : ControllerBase
     /// </summary>
     [HttpGet]
     [Route("{userId}")]
+    [Authorize]
+    [Authorize(Roles = "Staff")]
     public async Task<UserInfoDto> GetUserInfo(Guid userId)
     {
+        return await _userService.GetUserInfo(userId);
+    }
+    
+    /// <summary>
+    /// Get my user info
+    /// </summary>
+    [HttpGet]
+    [Route("me")]
+    [Authorize]
+    public async Task<UserInfoDto> GetMyUserInfo()
+    {
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
         return await _userService.GetUserInfo(userId);
     }
     
@@ -41,6 +60,8 @@ public class UserController : ControllerBase
     /// Create new user
     /// </summary>
     [HttpPost]
+    [Authorize]
+    [Authorize(Roles = "Staff")]
     public async Task<IActionResult> CreateUser([FromBody] CreateUserDto createUserDto)
     {
         if (ModelState.IsValid)
@@ -57,6 +78,8 @@ public class UserController : ControllerBase
     /// </summary>
     [HttpPut]
     [Route("{userId}/ban")]
+    [Authorize]
+    [Authorize(Roles = "Staff")]
     public async Task BanUser(Guid userId)
     {
         await _userService.BanUser(userId);
@@ -67,6 +90,8 @@ public class UserController : ControllerBase
     /// </summary>
     [HttpPut]
     [Route("{userId}/unban")]
+    [Authorize]
+    [Authorize(Roles = "Staff")]
     public async Task UnbanUser(Guid userId)
     {
         await _userService.UnbanUser(userId);
@@ -77,13 +102,15 @@ public class UserController : ControllerBase
     /// </summary>
     [HttpGet]
     [Route("{userId}/token")]
+    [Authorize]
+    [Authorize(Roles = "Staff")]
     public async Task<string> GenerateUserToken(Guid userId)
     {
         return await _tokenService.CreateToken(userId);
     }
 
     /// <summary>
-    /// Login with email that returns Id and generated token
+    /// Login with that returns Id and generated token
     /// </summary>
     [HttpPost]
     [Route("login")]
@@ -103,5 +130,25 @@ public class UserController : ControllerBase
     public async Task<bool> CheckUser(Guid userId)
     {
         return await _userService.CheckIfUserExists(userId);
+    }
+    
+    /// <summary>
+    /// Update user's loan rating
+    /// </summary>
+    [HttpPost]
+    [Route("{userId}/loan_rating")]
+    public async Task UpdateLoanRating([FromBody] UpdateRatingDto updateRatingDto, Guid userId)
+    {
+        await _userService.EditUserLoanRating(updateRatingDto, userId);
+    }
+    
+    /// <summary>
+    /// Get user's loan rating
+    /// </summary>
+    [HttpGet]
+    [Route("{userId}/loan_rating")]
+    public async Task<double> GetUserLoanRating(Guid userId)
+    {
+        return await _userService.GetUserLoanRating(userId);
     }
 }

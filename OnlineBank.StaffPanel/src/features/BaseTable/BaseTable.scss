@@ -16,10 +16,10 @@
 }
 
 .ant-pagination-item-active a {
-    color: white;
+    color: white !important;
 
     &:hover {
-        color: white;
+        color: white !important;
     }
 }
 
@@ -28,22 +28,22 @@
 }
 
 .ant-pagination-item {
-    padding: 8px 0;
-    font-weight: 400;
-    font-size: 16px;
-    line-height: 16px;
-    letter-spacing: 0.01em;
-    border: 0;
+    padding: 8px 0 !important;
+    font-weight: 400 !important;
+    font-size: 16px !important;
+    line-height: 16px !important;
+    letter-spacing: 0.01em !important;
+    border: 0 !important;
 
     &:hover:not(.ant-pagination-item-active) {
-        background-color: color.$hover-button;
-        border-color: transparent;
+        background-color: color.$hover-button !important;
+        border-color: transparent !important;
     }
 }
 
 .ant-pagination-prev .ant-pagination-item-link,
 .ant-pagination-next .ant-pagination-item-link {
-    border: 0;
+    border: 0 !important;
     box-shadow: unset;
 
     &:hover {

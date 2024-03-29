@@ -1,5 +1,5 @@
-import { IAccount, ITransaction, IUser, TransactionType } from './api/types';
-import { Role } from './constants';
+import { IAccount, ITransaction, IUser } from './api/types';
+import { Role, TransactionType } from './constants';
 
 export const UsersMock: IUser[] = [
     {
@@ -39,7 +39,10 @@ export const AccountMock: IAccount[] = [
         number: '12233434',
         creationDate: 23233454545,
         isClosed: true,
-        balance: 12232,
+        balance: {
+            amount: 1212,
+            currency: 'RUB',
+        },
     },
     {
         id: '2',
@@ -47,7 +50,10 @@ export const AccountMock: IAccount[] = [
         number: '12233434',
         creationDate: 23233454545,
         isClosed: false,
-        balance: 12232,
+        balance: {
+            amount: 1212,
+            currency: 'RUB',
+        },
     },
     {
         id: '3',
@@ -55,7 +61,10 @@ export const AccountMock: IAccount[] = [
         number: '12233434',
         creationDate: 23233454545,
         isClosed: true,
-        balance: 12232,
+        balance: {
+            amount: 1212,
+            currency: 'RUB',
+        },
     },
 ];
 
@@ -65,27 +74,27 @@ export const TransactionMock : ITransaction[] = [
         transactionDate: 233434335,
         amount: 12323,
         additionalInformation: 'на подарок',
-        type: TransactionType.WITHDRAW,
+        transactionType: TransactionType.WITHDRAW,
     },
     {
         id: '2',
         transactionDate: 233434335,
         amount: 12323,
         additionalInformation: 'на подарок',
-        type: TransactionType.WITHDRAW,
+        transactionType: TransactionType.WITHDRAW,
     },
     {
         id: '3',
         transactionDate: 233434335,
         amount: 12323,
         additionalInformation: 'на подарок',
-        type: TransactionType.WITHDRAW,
+        transactionType: TransactionType.WITHDRAW,
     },
     {
         id: '4',
         transactionDate: 233434335,
         amount: 12323,
         additionalInformation: 'на подарок',
-        type: TransactionType.WITHDRAW,
+        transactionType: TransactionType.WITHDRAW,
     },
 ];

@@ -19,17 +19,20 @@ const AccountBlockInfo: React.FC<IProps> = ({ account }) => (
         className={b().toString()}
     >
         <Row className={b('inner').toString()}>
-            <Col span={6}>
+            <Col span={5}>
                 <UserBlockInfoText label="Наименование" value={account?.name} />
             </Col>
-            <Col span={6}>
+            <Col span={4}>
+                <UserBlockInfoText label="Валюта" value={<span style={{ fontWeight: '500' }}>{account?.balance?.currency}</span>} />
+            </Col>
+            <Col span={5}>
                 <UserBlockInfoText label="Дата создания" value={dateParse(account?.creationDate as unknown as string)} />
             </Col>
-            <Col span={6}>
+            <Col span={5}>
                 <UserBlockInfoText label="Статус" value={!account?.isClosed ? <span style={{ color: '#5E8C4E', fontWeight: '500' }}>{Status.Active}</span> : <span style={{ color: '#EB5757', fontWeight: '500' }}>{Status.Inactive}</span>} />
             </Col>
-            <Col span={6}>
-                <UserBlockInfoText label="Баланс" value={`${account?.balance as unknown as string} ₽`} />
+            <Col span={5}>
+                <UserBlockInfoText label="Баланс" value={<>{account?.balance?.amount} <span style={{ fontWeight: '500' }}>{account?.balance?.currency as unknown as string}</span></>} />
             </Col>
         </Row>
     </div>

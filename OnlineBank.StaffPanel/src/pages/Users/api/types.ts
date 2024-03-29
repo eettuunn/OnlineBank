@@ -33,7 +33,10 @@ export interface IAccount {
     number: string,
     creationDate: number,
     isClosed: boolean,
-    balance: number
+    balance: {
+        amount: number,
+        currency: string,
+    }
 }
 
 export type IAccountsResponse = IResponseLists<IAccount[]>;
@@ -43,5 +46,5 @@ export interface ITransaction {
     transactionDate: number,
     amount: number,
     additionalInformation: string,
-    type: TransactionType
+    transactionType: TransactionType
 }

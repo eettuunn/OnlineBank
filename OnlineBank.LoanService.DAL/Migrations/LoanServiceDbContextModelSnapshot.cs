@@ -31,6 +31,10 @@ namespace OnlineBank.LoanService.DAL.Migrations
                     b.Property<Guid>("BankAccountId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("CurrencyCode")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<decimal>("Debt")
                         .HasColumnType("numeric");
 
@@ -54,6 +58,31 @@ namespace OnlineBank.LoanService.DAL.Migrations
                     b.HasIndex("LoanRateId");
 
                     b.ToTable("Loans");
+                });
+
+            modelBuilder.Entity("OnlineBank.LoanService.DAL.Entities.LoanPaymentEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Debt")
+                        .HasColumnType("numeric");
+
+                    b.Property<bool>("IsExpired")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid?>("LoanEntityId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("PaymentDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LoanEntityId");
+
+                    b.ToTable("LoanPayments");
                 });
 
             modelBuilder.Entity("OnlineBank.LoanService.DAL.Entities.LoanRateEntity", b =>
@@ -83,6 +112,18 @@ namespace OnlineBank.LoanService.DAL.Migrations
                         .IsRequired();
 
                     b.Navigation("LoanRate");
+                });
+
+            modelBuilder.Entity("OnlineBank.LoanService.DAL.Entities.LoanPaymentEntity", b =>
+                {
+                    b.HasOne("OnlineBank.LoanService.DAL.Entities.LoanEntity", null)
+                        .WithMany("Payments")
+                        .HasForeignKey("LoanEntityId");
+                });
+
+            modelBuilder.Entity("OnlineBank.LoanService.DAL.Entities.LoanEntity", b =>
+                {
+                    b.Navigation("Payments");
                 });
 #pragma warning restore 612, 618
         }
