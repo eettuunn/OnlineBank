@@ -46,7 +46,7 @@ public class LoanService : ILoanService
             .FirstOrDefaultAsync(lr => lr.Id == createLoanDto.loanRateId)
                 ?? throw new CantFindByIdException("loan rate", createLoanDto.loanRateId);
         
-        MakeTransaction(createLoanDto.bankAccountId, createLoanDto.loanAmount, "TAKE_LOAN", createLoanDto.currencyCode);
+        MakeTransaction(createLoanDto.bankAccountId, createLoanDto.loanAmount, "TAKE_LOAN", createLoanDto.currencyCode, userId);
 
         var payments = await CreatePayments(createLoanDto);
         var loanEntity = new LoanEntity
@@ -95,7 +95,7 @@ public class LoanService : ILoanService
 
         await CheckEnoughMoneyOnBankAcc(createPaymentDto.bankAccountId, paymentWithPercents, loan.CurrencyCode);
 
-        MakeTransaction(createPaymentDto.bankAccountId, (decimal)paymentWithPercents, "REPAY_LOAN", loan.CurrencyCode);
+        MakeTransaction(createPaymentDto.bankAccountId, (decimal)paymentWithPercents, "REPAY_LOAN", loan.CurrencyCode, userId);
 
         loanPayment.Debt -= payment;
         loan.Debt -= payment;
@@ -211,14 +211,15 @@ public class LoanService : ILoanService
         }
     }
 
-    private void MakeTransaction(Guid baId, decimal amount, string transactionType, string currencyCode)
+    private void MakeTransaction(Guid baId, decimal amount, string transactionType, string currencyCode, Guid userId)
     {
         var transactionMessage = new CreateTransactionMessage
         {   
             amount = amount,
             transactionType = transactionType,
             bankAccountId = baId,
-            currencyCode = currencyCode
+            currencyCode = currencyCode,
+            authenticatedUserId = userId
         };
         _messageProducer.SendMessage(transactionMessage);
     }

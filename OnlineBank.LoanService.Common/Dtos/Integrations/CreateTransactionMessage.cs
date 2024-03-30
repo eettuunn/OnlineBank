@@ -8,4 +8,5 @@ public class CreateTransactionMessage
     public Guid bankAccountId { get; set; }
     public Guid? fromBankAccountId { get; set; }
     public Guid? toBankAccountId { get; set; }
+    public Guid authenticatedUserId { get; set; }
 }
