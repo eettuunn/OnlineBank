@@ -25,6 +25,7 @@ interface IAuth {
     data?: IGetCurrentUser;
     currentRole?: Role;
     isLoginFetching?: boolean;
+    id: string;
 }
 
 /**
@@ -41,6 +42,7 @@ const authContext = createContext<IAuth>({
     data: undefined,
     currentRole: undefined,
     isLoginFetching: false,
+    id: '',
 });
 
 export const ProvideAuth: React.FC = ({ children }) => {
@@ -60,12 +62,14 @@ export const useAuth = (): IAuth => useContext(authContext);
 const useProvideAuth = (): IAuth => {
     const [ storedValue, setStoredValue ] = useLocalStorage('access', '');
     const [ isAuth, setIsAuth ] = useState(false);
+    const [ id, setUserId ] = useState('');
 
     useEffect(() => {
-        if (storedValue) {
+        if (storedValue || localStorage.getItem('access')) {
             const data = tokenDecode(storedValue);
             if (data.ban !== 'True' && data.role === Role.staff) {
                 setIsAuth(true);
+                setUserId(data.id);
             }
         } else {
             setIsAuth(false);
@@ -90,5 +94,6 @@ const useProvideAuth = (): IAuth => {
     return {
         isAuth,
         login,
+        id,
     };
 };

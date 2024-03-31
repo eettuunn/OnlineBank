@@ -11,6 +11,7 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { ProvideLayoutConfig } from './shared/hooks/useLayoutConfig/useLayoutConfig';
 import { ProvideAuth } from './shared/hooks/useAuth/useAuth';
+import './firebase';
 
 import './theme.dark.less';
 import './theme.light.less';

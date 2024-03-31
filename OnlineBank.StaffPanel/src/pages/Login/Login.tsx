@@ -6,6 +6,7 @@ import { Button, Layout } from 'antd';
 import './Login.scss';
 import { useAuth } from '../../shared/hooks/useAuth/useAuth';
 import { urlAuth } from '../../shared/constants';
+import { getStorageValue } from '../../shared/hooks/useLocalStorage/useLocalStorage';
 
 const b = block('login');
 
@@ -20,7 +21,9 @@ const Login: React.FC = () => {
         }), [ search ]);
 
     useEffect(() => {
-        login(authData);
+        if (!getStorageValue('access')) {
+            login(authData);
+        }
     }, [ authData, login ]);
 
     if (isAuth) {
