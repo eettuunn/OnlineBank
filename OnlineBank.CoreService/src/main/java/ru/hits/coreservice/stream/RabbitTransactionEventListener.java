@@ -35,8 +35,6 @@ public class RabbitTransactionEventListener {
         try {
             transactionService.createTransaction(objectMapper.readValue(message, CreateTransactionMessage.class));
         }  catch (JsonProcessingException e) {
-            log.error("Error processing message: " + e.getMessage());
-            rabbitTemplate.send("transactionsExchange", "dlq-name", new Message(message.getBytes()));
             throw new AmqpRejectAndDontRequeueException(e.getMessage());
         }
     }
