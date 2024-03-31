@@ -27,7 +27,7 @@ export const columnsUser: (ColumnGroupType<Record<string, unknown>> | ColumnType
 export const columnsAccount: (ColumnGroupType<Record<string, unknown>> | ColumnType<Record<string, unknown>>)[] = [
     {
         key: 'number',
-        title: '№',
+        title: '№ счета',
         dataIndex: 'number',
     },
     {
