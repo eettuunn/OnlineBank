@@ -13,7 +13,8 @@ const MainLayout = React.lazy(() => import('./pages/MainLayout'));
 const createRoutes = (isAuth: boolean) => [
     {
         path: '/',
-        element: isAuth ? (
+        element:
+        isAuth ? (
             <Suspense fallback={<Spin className="main-loader" />}>
                 <MainLayout />
             </Suspense>

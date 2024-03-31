@@ -10,6 +10,5 @@ export interface IGetCurrentUser {
     passport: string,
 }
 export interface ICredentials {
-    email: string;
-    password: string;
+    token: string;
 }
