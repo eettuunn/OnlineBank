@@ -57,7 +57,7 @@ const User: React.FC = () => {
                 render: (value: any, record: Record<string, { amount: number, currency: string }>) =>
                     <span>{record.balance.amount} {record.balance.currency}</span>,
             };
-         } else return el;
+        } else return el;
     });
 
     const prepareTableDataLoans = columnLoans.map((el) =>{
