@@ -24,6 +24,12 @@ export const usersApi = createApi({
                 method: 'get',
             }),
         }),
+        getUserLoanRate: builder.query<number, string>({
+            query: id => ({
+                url: `/user/${id}/loan_rating`,
+                method: 'get',
+            }),
+        }),
         blockUser: builder.mutation<IUser, number>({
             query: id => ({
                 url: `/user/${id}/ban`,
@@ -49,4 +55,4 @@ export const usersApi = createApi({
     }),
 });
 
-export const { useGetUsersQuery, useBlockUserMutation, useCreateUserMutation, useUnblockUserMutation, useGetUserInfoQuery } = usersApi;
+export const { useGetUsersQuery, useBlockUserMutation, useCreateUserMutation, useUnblockUserMutation, useGetUserInfoQuery, useGetUserLoanRateQuery } = usersApi;

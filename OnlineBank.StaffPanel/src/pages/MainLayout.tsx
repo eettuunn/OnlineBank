@@ -3,7 +3,7 @@ import { Outlet } from 'react-router-dom';
 import { Button, Layout } from 'antd';
 import Icon from '@ant-design/icons';
 import block from 'bem-cn';
-import { collection, getDocs } from 'firebase/firestore';
+// import { collection, getDocs } from 'firebase/firestore';
 
 import MainMenu from '../features/MainMenu/MainMenu';
 import { rootRoutes } from '../Routes';
@@ -11,7 +11,7 @@ import UserBlock from '../features/UserBlock/UserBlock';
 import { SiderIcon } from '../shared/img/menuicons/SiderIcon';
 import { ThemeIcon } from '../shared/img/ThemeIcon';
 import useLocalStorage from '../shared/hooks/useLocalStorage/useLocalStorage';
-import { db } from '../firebaseConfig';
+// import { db } from '../firebaseConfig';
 
 import './MainLayout.scss';
 
@@ -24,21 +24,21 @@ const MainLayout: React.FC = () => {
 
     const [ darkTheme, setDarkTheme ] = useLocalStorage('dark-theme', false);
 
-    const fetchPost = async () => {
+    // const fetchPost = async () => {
 
-        await getDocs(collection(db, 'themes'))
-            .then((querySnapshot)=>{
-                const newData = querySnapshot.docs
-                    .map(doc => ({ ...doc.data(), id:doc.id }));
-                // setTodos(newData);
-                console.log(newData);
-            });
+    //     await getDocs(collection(db, 'themes'))
+    //         .then((querySnapshot)=>{
+    //             const newData = querySnapshot.docs
+    //                 .map(doc => ({ ...doc.data(), id:doc.id }));
+    //             // setTodos(newData);
+    //             console.log(newData);
+    //         });
 
-    };
+    // };
 
-    useEffect(()=>{
-        fetchPost();
-    }, []);
+    // useEffect(()=>{
+    //     fetchPost();
+    // }, []);
 
     useEffect(() => {
         if (darkTheme) {

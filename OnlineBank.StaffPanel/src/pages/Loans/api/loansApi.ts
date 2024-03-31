@@ -8,14 +8,13 @@ import { ICreateLoanRate, ILoan, ILoanRate, ILoanResponse } from './types';
 export const loansApi = createApi({
     reducerPath: 'loansApi',
     baseQuery: axiosBaseQuery('/loan_api'),
-    tagTypes: [ 'Loans', 'LoanRates' ],
+    tagTypes: [ 'LoanRates' ],
     endpoints: builder => ({
-        getUsersLoans: builder.query<IResponseLists<ILoan>, undefined>({
+        getUsersLoans: builder.query<IResponseLists<ILoan>, string>({
             query: id => ({
-                url: '/loan',
+                url: `/loan/${id}`,
                 method: 'get',
             }),
-            providesTags: [ 'Loans' ],
         }),
         getLoanRates: builder.query<ILoanRate[], unknown>({
             query: () => ({
