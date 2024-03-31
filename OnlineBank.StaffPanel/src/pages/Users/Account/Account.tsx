@@ -17,6 +17,7 @@ import { useGetAccountInfoQuery, useGetAccountTransactionQuery } from '../api/ac
 import { useAppSelector } from '../../../redux/hooks';
 import { dateParse } from '../../../shared/helpers/dateParse';
 import { ITransaction } from '../api/types';
+import { getStorageValue } from '../../../shared/hooks/useLocalStorage/useLocalStorage';
 
 const b = block('account');
 const { Content } = Layout;
@@ -30,9 +31,13 @@ const AccountRaw: React.FC = () => {
 
     const { data: dataAccount } = useGetAccountInfoQuery(accountId as string);
     const { isLoading: isLoadingTransactions, data: dataTransactions } = useGetAccountTransactionQuery({ id: accountId as string, params: pagination });
+    const access = getStorageValue<string>('access');
 
     const [ newRow, setNewRow ] = useState('');
-    useSubscription(`/topic/bank-accounts/${accountId as string}/transactions`, (message) => {setNewRow(message.body);});
+    useSubscription(`/topic/bank-accounts/${accountId as string}/transactions`, (message) => {setNewRow(message.body);},
+        {
+            'Authorization': `Bearer ${access ?? ''}`,
+        });
 
     useEffect(() => {
         setConfig({ activeMenuKey: Paths.Users, headerTitle: `Счет №${dataAccount?.number as string}`,
