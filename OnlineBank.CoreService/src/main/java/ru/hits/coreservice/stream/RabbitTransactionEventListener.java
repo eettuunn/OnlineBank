@@ -4,12 +4,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
@@ -32,9 +34,10 @@ public class RabbitTransactionEventListener {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             transactionService.createTransaction(objectMapper.readValue(message, CreateTransactionMessage.class));
-        } catch (Exception e) {
+        }  catch (JsonProcessingException e) {
             log.error("Error processing message: " + e.getMessage());
             rabbitTemplate.send("transactionsExchange", "dlq-name", new Message(message.getBytes()));
+            throw new AmqpRejectAndDontRequeueException(e.getMessage());
         }
     }
 
