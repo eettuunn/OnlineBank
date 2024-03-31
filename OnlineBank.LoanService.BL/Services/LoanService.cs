@@ -129,6 +129,7 @@ public class LoanService : ILoanService
     {
         var loanEntity = await _context.Loans
             .Include(l => l.Payments)
+            .Include(l => l.LoanRate)
             .FirstOrDefaultAsync(l => l.Id == loanId) ?? throw new CantFindByIdException("loan", loanId);
         if(loanEntity.UserId != userId) throw new ConflictException("This is not your loan");
 
@@ -137,6 +138,8 @@ public class LoanService : ILoanService
             loanInfo = _mapper.Map<LoanListElementDto>(loanEntity),
             loanPayments = _mapper.Map<List<LoanPaymentDto>>(loanEntity.Payments)
         };
+        loanDto.loanInfo.interestRate = loanEntity.LoanRate.InterestRate;
+        loanDto.loanInfo.loanRateName = loanEntity.LoanRate.Name;
         loanDto.loanPayments = loanDto.loanPayments.OrderBy(p => p.paymentDate).ToList();
         
         return loanDto;
