@@ -1,5 +1,7 @@
 package com.akimov.mobilebank.ui.operations
 
+import android.util.Log
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.akimov.mobilebank.data.models.OperationType
 import com.akimov.mobilebank.data.repository.Repository
@@ -9,12 +11,17 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 
 class OperationsViewModel(
-    private val repository: Repository,
+    stavedStateHandle: SavedStateHandle,
+    private val repository: Repository
 ) : ViewModel() {
     private val _operations = MutableStateFlow<Map<String, List<OperationUI>>>(mapOf())
     private val _isLoading = MutableStateFlow(false)
     private val _accountName = MutableStateFlow("Account")
 
+
+    init {
+        Log.i("OperationsViewModel", stavedStateHandle.get<String>("ACCOUNT_ID").toString())
+    }
     val operations = _operations.asStateFlow()
     val isLoading = _isLoading.asStateFlow()
     val accountName = _accountName.asStateFlow()

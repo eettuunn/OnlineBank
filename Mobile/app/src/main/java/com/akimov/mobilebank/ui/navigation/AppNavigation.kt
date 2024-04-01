@@ -1,10 +1,8 @@
 package com.akimov.mobilebank.ui.navigation
 
-import android.os.Bundle
 import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.datastore.core.DataStore
-import androidx.navigation.NavArgument
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -23,7 +21,7 @@ private const val LOGIN_DESTINATION = "login"
 private const val OPERATIONS_DESTINATION = "operations"
 private const val ACCOUNTS_DESTINATION = "accounts"
 
-private const val ACCOUNT_ID_KEY = "ACCOUNT_ID"
+const val ACCOUNT_ID_KEY = "ACCOUNT_ID"
 
 suspend fun getStartDestination(): String {
     val dataStore by inject<DataStore<UserSettings>>(DataStore::class.java)
@@ -61,9 +59,9 @@ fun AppNavigation() {
                 }
             )
         }
-        composable(route = OPERATIONS_DESTINATION) {
+        composable(route = "$OPERATIONS_DESTINATION/{$ACCOUNT_ID_KEY}") {
             OperationsScreen(
-                accountID = navController.previousBackStackEntry?.arguments?.getString(
+                accountID = it.arguments?.getString(
                     ACCOUNT_ID_KEY
                 )
                     ?: throw NullPointerException("ID счёта не был передан в аргументы"),
@@ -73,17 +71,12 @@ fun AppNavigation() {
             )
         }
         composable(
-            route = ACCOUNTS_DESTINATION, arguments = listOf(
-                NavArgument()
-            )
+            route = ACCOUNTS_DESTINATION
         ) {
             AccountsScreen(
                 navigateToOperations = { accountId ->
-                    navController.navigateWithArguments(
-                        arguments = Bundle().apply {
-                            putString(ACCOUNT_ID_KEY, accountId)
-                        },
-                        route = OPERATIONS_DESTINATION
+                    navController.navigate(
+                        route = "$OPERATIONS_DESTINATION/$accountId",
                     ) {
                         restoreState = true
                         launchSingleTop = true

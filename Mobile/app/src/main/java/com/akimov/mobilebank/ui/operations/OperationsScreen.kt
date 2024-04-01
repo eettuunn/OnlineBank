@@ -51,14 +51,14 @@ import com.akimov.mobilebank.ui.theme.MobileBankTheme
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.collections.immutable.toImmutableList
-import org.koin.compose.koinInject
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun OperationsScreen(
     accountID: String,
     onNavigateBack: () -> Unit,
 ) {
-    val viewModel = koinInject<OperationsViewModel>()
+    val viewModel = koinViewModel<OperationsViewModel>()
     val operations by viewModel.operations.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val accountName by viewModel.accountName.collectAsState()

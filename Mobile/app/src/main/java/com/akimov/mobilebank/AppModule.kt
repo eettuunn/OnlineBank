@@ -174,6 +174,7 @@ val appModule = module {
     }
     viewModel {
         OperationsViewModel(
+            stavedStateHandle = get(),
             repository = get()
         )
     }
