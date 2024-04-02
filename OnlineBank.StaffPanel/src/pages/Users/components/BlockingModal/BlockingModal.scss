@@ -1,0 +1,19 @@
+@use '/src/shared/scss/color';
+
+.blocking-modal {
+    &__paragraph.ant-typography {
+        margin-bottom: 0;
+        color: color.$text;
+        line-height: 18px;
+        letter-spacing: 0.02em;
+    }
+
+    &__submit-btn {
+        padding: 0 20px;
+    }
+
+    &__cancel-btn {
+        color: color.$primary;
+        border: 0;
+    }
+}

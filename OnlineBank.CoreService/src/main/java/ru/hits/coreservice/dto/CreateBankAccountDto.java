@@ -16,7 +16,7 @@ public class CreateBankAccountDto {
     @NotBlank(message = "Название счёта является обязательным к заполнению")
     private String name;
 
-    @NotNull(message = "Идентификатор пользователя не может быть пустым")
-    private UUID userId;
+    @NotBlank(message = "Валюта счёта является обязательной к заполнению")
+    private String currencyCode;
 
 }

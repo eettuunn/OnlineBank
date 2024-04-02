@@ -1,0 +1,8 @@
+@use '/src/shared/scss/color';
+
+.main-header {
+    &__title.ant-typography {
+        color: color.$title;
+        letter-spacing: 0.02em;
+    }
+}

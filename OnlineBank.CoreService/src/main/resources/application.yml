@@ -1,6 +1,12 @@
+server:
+  port: 8080
+
 spring:
+  flyway:
+    locations: classpath:migrations
+    enabled: true
   datasource:
-    url: ${spring_datasource_url:jdbc:postgresql://postgres:5432/core-service-db}
+    url: ${spring_datasource_url:jdbc:postgresql://localhost:5432/core-service-db}
     username: ${spring_datasource_username:postgres}
     password: ${spring_datasource_password:postgres}
     driver-class-name: org.postgresql.Driver
@@ -8,15 +14,35 @@ spring:
     hibernate:
       ddl-auto: ${spring_jpa_hibernate_ddl-auto:update}
     database-platform: org.hibernate.dialect.PostgreSQL9Dialect
+#  rabbitmq:
+#    host: ${RABBITMQ_HOST:localhost}
+#    port: ${RABBITMQ_PORT:5672}
+#    username: ${RABBITMQ_USER:user}
+#    password: ${RABBITMQ_PASSWORD:1234}
+#    virtual_host: /
+#    queue:
+#      name: transactions
+#      durable: false
+#      exclusive: true
+#      autoDelete: true
+#  cloud:
+#    stream:
+#      function:
+#        definition: createTransactionEvent
+#      bindings:
+#        createTransactionEvent-in-0:
+#          destination: transactions
+#          content-type: application/json
 
 app:
   security:
     jwt-token:
       permit-all:
-        - /api/bank-accounts/token
+        - /api/bank-accounts/{id}/check-existence
+        - /api/bank-accounts/{id}/check-money
       root-path: /api
-      secret: qqqwwweeerrrtttyyyuuuiiiooopppqqqwwweeerrrtttyyyuuuiiiooopppqqqwwweeerrrtttyyyuuuiiiooopppqqqwwweeerrrtttyyyuuuiiiooopppqqqwwweeerrrtttyyyuuuiiiooopppqqqwwweeerrrtttyyyuuuiiiooopppqqqwwweeerrrtttyyyuuuiiiooopppqqqwwweeerrrtttyyyuuuiiiooopppqqqwwweeerrrttty
-      issuer: online-bank-api
+      secret: TheVeryStrongKeyOrPasswordQwerty123
+      issuer: bank_backend
       subject: User details
     integrations:
       root-path: /integration

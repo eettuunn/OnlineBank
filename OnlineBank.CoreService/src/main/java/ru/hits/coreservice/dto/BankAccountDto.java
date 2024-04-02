@@ -3,6 +3,7 @@ package ru.hits.coreservice.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import ru.hits.coreservice.entity.BankAccountEntity;
+import ru.hits.coreservice.entity.Money;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -20,7 +21,7 @@ public class BankAccountDto {
     private UUID id;
     private String name;
     private String number;
-    private BigDecimal balance;
+    private Money balance;
     private UUID ownerId;
     private Boolean isClosed;
 

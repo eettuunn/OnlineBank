@@ -1,0 +1,50 @@
+@use '/src/shared/scss/color';
+
+.loan-rates {
+    display: flex;
+    flex-direction: column;
+    row-gap: 12px;
+    min-width: 1200px;
+
+    .ant-btn {
+        margin-right: 10px;
+    }
+
+    &__block-search {
+        column-gap: 8px;
+    }
+
+    &__search-input {
+        width: 350px;
+        max-width: 350px;
+    }
+
+    &__button {
+        width: auto;
+    }
+
+    &__unblock-btn {
+        color: color.$unblock;
+
+        .anticon-stop {
+            margin-right: 6px;
+        }
+    }
+
+    &__unblock-btn:hover,
+    &__unblock-btn:focus {
+        color: white;
+        background-color: color.$unblock;
+    }
+
+    &__block-btn {
+        color: color.$block;
+    }
+
+    &__block-btn:hover,
+    &__block-btn:focus {
+        color: white;
+        background-color: color.$block;
+    }
+
+}

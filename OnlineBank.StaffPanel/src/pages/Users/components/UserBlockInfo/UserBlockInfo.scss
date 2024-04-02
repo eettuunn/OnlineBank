@@ -1,0 +1,59 @@
+@use '/src/shared/scss/color';
+
+.user-block-info {
+    margin-block: 24px;
+    padding: 24px;
+    line-height: 1.57;
+    background-color: #F4F9FC;
+    border-radius: 8px;
+
+    &__inner {
+        display: flex;
+        flex-flow: row nowrap;
+        // gap: 35px;
+    }
+
+    &__role-span {
+        // margin-right: 10px;
+        display: block;
+    }
+
+    .staff {
+        font-weight: 500;
+        color: color.$primary
+    }
+
+    &__col {
+        display: flex;
+        flex-flow: column;
+        gap: 8px;
+
+        &:not(:last-child) > * {
+            flex: 1 1 50%;
+            align-items: center;
+        }
+
+        &:last-child {
+            align-items: flex-end;
+            justify-content: space-between;
+            margin-left: auto;
+        }
+    }
+
+    &__title-with-weight {
+        color: color.$title;
+        font-weight: 500;
+        font-size: 26px;
+    }
+
+    &__title {
+        width: fit-content;
+        color: color.$title;
+        font-size: 18px;
+    }
+
+    &__buttons {
+        display: flex;
+        gap: 10px;
+    }
+}

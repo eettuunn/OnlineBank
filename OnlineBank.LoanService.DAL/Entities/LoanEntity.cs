@@ -21,6 +21,9 @@ public class LoanEntity
     public decimal Debt { get; set; }
     
     [Required]
+    public string CurrencyCode { get; set; }
+    
+    [Required]
     public Guid UserId { get; set; }
     
     [Required]
@@ -28,4 +31,7 @@ public class LoanEntity
     
     [Required]
     public LoanRateEntity LoanRate { get; set; }
+    
+    [Required]
+    public List<LoanPaymentEntity> Payments { get; set; }
 }

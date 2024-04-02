@@ -1,0 +1,146 @@
+@use '/src/shared/scss/color';
+
+.ant-pagination-item a {
+    color: color.$secondary;
+}
+
+.ant-pagination {
+    display: flex;
+    align-items: center;
+    height: 48px;
+    margin-left: 16px;
+
+    .ant-btn-icon-only>.anticon {
+        font-size: 12px;
+    }
+}
+
+.ant-pagination-item-active a {
+    color: white !important;
+
+    &:hover {
+        color: white !important;
+    }
+}
+
+.ant-pagination-disabled .ant-pagination-item-link {
+    color: color.$disabled;
+}
+
+.ant-pagination-item {
+    padding: 8px 0 !important;
+    font-weight: 400 !important;
+    font-size: 16px !important;
+    line-height: 16px !important;
+    letter-spacing: 0.01em !important;
+    border: 0 !important;
+
+    &:hover:not(.ant-pagination-item-active) {
+        background-color: color.$hover-button !important;
+        border-color: transparent !important;
+    }
+}
+
+.ant-pagination-prev .ant-pagination-item-link,
+.ant-pagination-next .ant-pagination-item-link {
+    border: 0 !important;
+    box-shadow: unset;
+
+    &:hover {
+        background-color: color.$hover-button;
+    }
+}
+
+.ant-pagination-prev button,
+.ant-pagination-next button {
+    color: color.$secondary;
+
+    &:focus {
+        color: color.$secondary;
+    }
+}
+
+.ant-pagination-jump-prev,
+.ant-pagination-jump-next {
+    &:hover {
+        background-color: color.$hover-button;
+    }
+}
+
+h1.ant-typography,
+div.ant-typography-h1,
+div.ant-typography-h1>textarea,
+.ant-typography h1 {
+    line-height: 40px;
+}
+
+.ant-pagination-total-text {
+    position: absolute;
+    right: 100px;
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    font-size: 16px;
+    line-height: 16px;
+    letter-spacing: 0.01em;
+
+    .ant-typography {
+        color: color.$secondary;
+    }
+
+    strong {
+        color: color.$text;
+        font-weight: 500;
+    }
+}
+
+.ant-pagination-options {
+    position: absolute;
+    right: 0;
+    padding-right: 16px;
+}
+
+.ant-table-thead>tr>th {
+    font-weight: 400;
+}
+
+.ant-table.ant-table-bordered>.ant-table-container>.ant-table-header>table>thead>tr>th:not(.ant-table-cell-scrollbar) {
+    border-right: 0;
+}
+
+.ant-table.ant-table-bordered>.ant-table-container>.ant-table-body>table>tbody>tr>td {
+    border-right: 0;
+}
+
+.ant-table.ant-table-bordered>.ant-table-container>.ant-table-body>table>tbody>tr>td.actions {
+    padding: 6.5px;
+}
+
+.ant-table.ant-table-bordered>.ant-table-container>.ant-table-body>table>tbody>tr>td.status {
+    padding: 10px 8px;
+}
+
+.ant-table.ant-table-bordered>.ant-table-footer {
+    border: 1px solid #F2F2F2;
+}
+
+.ant-table-footer>.ant-row-middle>.ant-typography {
+    color: color.$secondary;
+    font-size: 15px;
+    line-height: 15px;
+    letter-spacing: 0.01em;
+}
+
+.ant-table-cell {
+    line-height: 18px;
+}
+
+.ant-select-arrow {
+    color: color.$placeholder;
+}
+
+.ant-pagination+.ant-select {
+    width: 80px;
+    margin-right: 0;
+    margin-left: auto;
+}

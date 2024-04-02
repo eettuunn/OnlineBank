@@ -176,6 +176,9 @@ namespace OnlineBank.UserService.DAL.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
 
+                    b.Property<double>("LoanRating")
+                        .HasColumnType("double precision");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean");
 

@@ -9,4 +9,5 @@ public class UserInfoDto
     public bool ban { get; set; }
     public string phoneNumber { get; set; }
     public string passport { get; set; }
+    public double loanRating { get; set; }
 }

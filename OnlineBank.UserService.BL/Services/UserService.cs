@@ -2,6 +2,7 @@ using AutoMapper;
 using Common.Exceptions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using OnlineBank.LoanService.Common.Dtos.Loan;
 using OnlineBank.UserService.Common.Dtos;
 using OnlineBank.UserService.Common.Dtos.User;
 using OnlineBank.UserService.Common.Interfaces;
@@ -56,9 +57,31 @@ public class UserService : IUserService
         return user != null;
     }
 
+    public async Task EditUserLoanRating(UpdateRatingDto updateRatingDto, Guid userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString())
+            ?? throw new CantFindByIdException("user", userId);
+
+        if (updateRatingDto.amount <= 0 || updateRatingDto.amount > 100)
+        {
+            throw new ConflictException("User's loan rating must be in range 0 to 100");
+        }
+        
+        user.LoanRating = updateRatingDto.amount;
+        await _userManager.UpdateAsync(user);
+    }
+
+    public async Task<double> GetUserLoanRating(Guid userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString())
+                    ?? throw new CantFindByIdException("user", userId);
+        return user.LoanRating;
+    }
+
     public async Task CreateUser(CreateUserDto createUserDto)
     {
         var newUser = _mapper.Map<AppUser>(createUserDto);
+        newUser.LoanRating = 100;
         var result = await _userManager.CreateAsync(newUser);
 
         var user = await _userManager.FindByEmailAsync(createUserDto.email);
@@ -87,7 +110,11 @@ public class UserService : IUserService
     public async Task<LoginResponseDto> Login(LoginCredentialsDto loginCredentialsDto)
     {
         var user = await _userManager.FindByEmailAsync(loginCredentialsDto.email)
-                   ?? throw new NotFoundException($"Can't find user with email {loginCredentialsDto.email}");
+                   ?? throw new BadRequestException("Invalid credentials");
+        
+        var isPasswordValid = await _userManager.CheckPasswordAsync(user, loginCredentialsDto.password);
+        if (!isPasswordValid) throw new BadRequestException("Invalid credentials");
+        
         var token = await _tokenService.CreateToken(Guid.Parse(user.Id));
 
         var response = new LoginResponseDto

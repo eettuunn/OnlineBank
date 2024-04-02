@@ -30,7 +30,8 @@ public class BankAccountEntity {
 
     private String number;
 
-    private BigDecimal balance;
+    @Embedded
+    private Money balance;
 
     @Column(name = "owner_id")
     private UUID ownerId;
@@ -38,7 +39,7 @@ public class BankAccountEntity {
     @Column(name = "is_closed")
     private Boolean isClosed;
 
-    @Column(name = "transaction_date")
+    @Column(name = "creation_date")
     private LocalDateTime creationDate;
 
     @OneToMany(mappedBy = "bankAccount")
