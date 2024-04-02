@@ -30,7 +30,7 @@ class ChangeBalanceWorker(
                     transactionBody = TransactionBody(
                         amount = amount.toInt(),
                         transactionType = OperationType.DEPOSIT.name,
-                        userId = dataStore.data.first().uuid
+                        userId = dataStore.data.first().token
                     )
                 )
             }
@@ -41,7 +41,7 @@ class ChangeBalanceWorker(
                     transactionBody = TransactionBody(
                         amount = amount.toInt(),
                         transactionType = OperationType.WITHDRAW.name,
-                        userId = dataStore.data.first().uuid
+                        userId = dataStore.data.first().token
                     )
                 )
             }
@@ -52,7 +52,7 @@ class ChangeBalanceWorker(
                     transactionBody = TransactionBody(
                         amount = amount.toInt(),
                         transactionType = OperationType.TAKE_LOAN.name,
-                        userId = dataStore.data.first().uuid
+                        userId = dataStore.data.first().token
                     )
                 )
             }
@@ -63,7 +63,7 @@ class ChangeBalanceWorker(
                     transactionBody = TransactionBody(
                         amount = amount.toInt(),
                         transactionType = OperationType.REPAY_LOAN.name,
-                        userId = dataStore.data.first().uuid
+                        userId = dataStore.data.first().token
                     )
                 )
             }

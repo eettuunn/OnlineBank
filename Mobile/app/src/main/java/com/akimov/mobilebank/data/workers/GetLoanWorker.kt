@@ -29,7 +29,7 @@ class GetLoanWorker(
                     ),
                     loanRateId = params.inputData.getString("loanRateId")
                         ?: throw IllegalArgumentException("Loan rate id is required"),
-                    userId = dataStore.data.first().uuid,
+                    userId = dataStore.data.first().token,
                     bankAccountId = params.inputData.getString("bankAccountId")
                         ?: throw IllegalArgumentException("Bank account id is required")
                 )

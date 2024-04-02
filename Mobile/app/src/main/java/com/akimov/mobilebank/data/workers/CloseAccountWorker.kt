@@ -20,7 +20,7 @@ class CloseAccountWorker(
             coreService.closeAccount(
                 accountId = params.inputData.getString("accountId")
                     ?: throw IllegalArgumentException("Account id is required"),
-                userId = UserIdModel(dataStore.data.first().uuid)
+                userId = UserIdModel(dataStore.data.first().token)
             )
             Result.success()
         } catch (e: Throwable) {

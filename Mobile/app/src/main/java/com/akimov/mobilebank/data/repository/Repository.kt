@@ -63,7 +63,7 @@ class Repository(
 
     suspend fun updateAccounts() {
         val response = try {
-            coreService.getAccounts(UUID.fromString(dataStore.data.first().uuid))
+            coreService.getAccounts(UUID.fromString(dataStore.data.first().token))
         } catch (e: Throwable) {
             Log.e("Repository", "updateAccounts: ${e.message}")
             null
@@ -92,7 +92,7 @@ class Repository(
 
     suspend fun updateCredits() {
         val response = try {
-            loanService.getLoansList(dataStore.data.first().uuid)
+            loanService.getLoansList(dataStore.data.first().token)
         } catch (e: Throwable) {
             null
         }
@@ -132,7 +132,7 @@ class Repository(
 
     @Deprecated("")
     fun getAccountsOldVersion(): Flow<List<BankAccountNetwork>> = flow {
-        val response = coreService.getAccounts(UUID.fromString(dataStore.data.first().uuid))
+        val response = coreService.getAccounts(UUID.fromString(dataStore.data.first().token))
         if (response.isSuccessful) {
             val body = response.body()
             if (body != null) {
@@ -183,7 +183,7 @@ class Repository(
 
     @Deprecated("")
     fun getUserCreditsOldVersion(): Flow<List<CreditUi>> = flow {
-        val response = loanService.getLoansList(dataStore.data.first().uuid)
+        val response = loanService.getLoansList(dataStore.data.first().token)
         if (response.isSuccessful) {
             val body = response.body()
             if (body != null) {

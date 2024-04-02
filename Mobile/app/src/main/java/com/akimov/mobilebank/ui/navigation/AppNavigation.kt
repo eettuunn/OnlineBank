@@ -27,8 +27,8 @@ suspend fun getStartDestination(): String {
     val dataStore by inject<DataStore<UserSettings>>(DataStore::class.java)
 
     val isUserLogin: Boolean = dataStore.data.map {
-        Log.e("MainActivity", "isUserLogin: ${it.uuid}, ${it.selectedScreen}")
-        it.uuid != "" && it.uuid != null
+        Log.e("MainActivity", "isUserLogin: ${it.token}")
+        it.token != "" && it.token != null
     }.first()
 
     return if (isUserLogin) ACCOUNTS_DESTINATION else LOGIN_DESTINATION

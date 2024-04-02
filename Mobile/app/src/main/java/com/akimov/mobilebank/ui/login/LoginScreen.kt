@@ -1,6 +1,8 @@
 package com.akimov.mobilebank.ui.login
 
-import android.util.Log
+import android.annotation.SuppressLint
+import android.view.ViewGroup
+import android.webkit.WebView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -29,15 +31,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.datastore.core.DataStore
 import com.akimov.mobilebank.R
 import com.akimov.mobilebank.UserSettings
-import com.akimov.mobilebank.data.models.IdModel
-import com.akimov.mobilebank.data.models.SendingEmail
 import com.akimov.mobilebank.data.network.UserService
-import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
+@SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun LoginScreen(
     navigateToNextScreen: () -> Unit
@@ -46,19 +47,19 @@ fun LoginScreen(
     val dataStore = koinInject<DataStore<UserSettings>>()
     val scope = rememberCoroutineScope()
 
-    Content {
-        scope.launch {
-            try {
-                val id: IdModel = api.login(SendingEmail(it))
-                dataStore.updateData {
-                    it.toBuilder().setUuid(id.id.toString()).build()
-                }
-                navigateToNextScreen()
-            } catch (e: Exception) {
-                Log.e("LoginScreen", "Error: ${e.message}")
+    AndroidView(
+        factory = {
+            WebView(it).apply {
+                layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
+                settings.javaScriptEnabled = true
+                loadUrl("http://192.168.0.12:8000")
             }
-        }
-    }
+        },
+    )
+
 }
 
 @Composable

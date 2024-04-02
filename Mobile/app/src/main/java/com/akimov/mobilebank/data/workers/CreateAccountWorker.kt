@@ -23,7 +23,7 @@ class CreateAccountWorker(
                 api.createAccount(
                     createAccountUpload = CreateAccountUpload(
                         name,
-                        userId = UUID.fromString(dataStore.data.first().uuid)
+                        userId = UUID.fromString(dataStore.data.first().token)
                     )
                 )
                 return Result.success()

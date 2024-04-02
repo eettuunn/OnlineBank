@@ -23,7 +23,7 @@ class RenameAccountWorker(
                     ?: throw Exception("Missing accountId"),
                 changeNameUpload = ChangeNameUpload(
                     name = params.inputData.getString("name") ?: throw Exception("Missing name"),
-                    userId = UUID.fromString(dataStore.data.first().uuid)
+                    userId = UUID.fromString(dataStore.data.first().token)
                 )
             )
             Result.success()
