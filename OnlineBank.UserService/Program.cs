@@ -124,6 +124,7 @@ app.ConfigureUserServiceDAL();
 app.UseHttpsRedirection();
 
 app.UseExceptionMiddleware();
+app.UseRandomErrorMiddleware();
 
 app.UseAuthorization();
 
