@@ -87,7 +87,7 @@ public class ExceptionHandlerController extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(InternalServerException.class)
-    public ResponseEntity<ApiError> handleInternalServerException(NotFoundException exception,
+    public ResponseEntity<ApiError> handleInternalServerException(InternalServerException exception,
                                                             WebRequest request
     ) {
         logError(request, exception);

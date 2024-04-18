@@ -20,9 +20,7 @@ import ru.hits.coreservice.exception.ForbiddenException;
 import ru.hits.coreservice.exception.NotFoundException;
 import ru.hits.coreservice.helpingservices.CheckPaginationInfoService;
 import ru.hits.coreservice.repository.BankAccountRepository;
-import ru.hits.coreservice.repository.TransactionRepository;
 import ru.hits.coreservice.security.JwtUserData;
-//import ru.hits.coreservice.security.JwtUserData;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -38,7 +36,6 @@ public class BankAccountService {
     private final CheckPaginationInfoService checkPaginationInfoService;
     private final IntegrationRequestsService integrationRequestsService;
     private final CoinGateCurrencyExchangeService currencyExchangeService;
-
 
     public BankAccountsWithPaginationDto getAllBankAccounts(Sort.Direction creationDateSortDirection, Boolean isClosed, int pageNumber, int pageSize) {
         checkPaginationInfoService.checkPagination(pageNumber, pageSize);
