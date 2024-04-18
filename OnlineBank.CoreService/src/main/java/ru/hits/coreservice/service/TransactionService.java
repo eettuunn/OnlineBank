@@ -139,7 +139,7 @@ public class TransactionService {
 
         sendTransactionUpdate(new TransactionDto(transaction));
 
-        notificationService.sendNotification(bankAccount.getName(), additionalInformation);
+        notificationService.sendNotification(bankAccount.getName(), additionalInformation, createTransactionMessage.getAuthenticatedUserId());
         notificationService.sendNotifications(Collections.singletonList(bankAccount.getName()), Collections.singletonList(additionalInformation));
     }
 
@@ -182,7 +182,7 @@ public class TransactionService {
 
         sendTransactionUpdate(new TransactionDto(transaction));
 
-        notificationService.sendNotification(bankAccount.getName(), additionalInformation);
+        notificationService.sendNotification(bankAccount.getName(), additionalInformation,createTransactionMessage.getAuthenticatedUserId() );
         notificationService.sendNotifications(Collections.singletonList(bankAccount.getName()), Collections.singletonList(additionalInformation));
     }
 
@@ -257,7 +257,7 @@ public class TransactionService {
 
         sendTransactionUpdate(new TransactionDto(transactionFromBankAccount));
         sendTransactionUpdate(new TransactionDto(transactionToBankAccount));
-        notificationService.sendNotification(fromBankAccount.getName(), additionalInformation);
+        notificationService.sendNotification(fromBankAccount.getName(), additionalInformation, createTransactionMessage.getAuthenticatedUserId());
         List<String> titles = new ArrayList<>();
         titles.add(fromBankAccount.getName());
         titles.add(toBankAccount.getName());

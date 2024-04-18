@@ -6,20 +6,20 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.hits.coreservice.dto.*;
 import ru.hits.coreservice.entity.BankAccountEntity;
+import ru.hits.coreservice.entity.IdempotencyKeyEntity;
 import ru.hits.coreservice.entity.Money;
-import ru.hits.coreservice.enumeration.TransactionType;
 import ru.hits.coreservice.exception.ConflictException;
 import ru.hits.coreservice.exception.ForbiddenException;
 import ru.hits.coreservice.exception.NotFoundException;
 import ru.hits.coreservice.helpingservices.CheckPaginationInfoService;
 import ru.hits.coreservice.repository.BankAccountRepository;
+import ru.hits.coreservice.repository.IdempotencyKeyRepository;
 import ru.hits.coreservice.security.JwtUserData;
 
 import java.math.BigDecimal;
@@ -36,6 +36,7 @@ public class BankAccountService {
     private final CheckPaginationInfoService checkPaginationInfoService;
     private final IntegrationRequestsService integrationRequestsService;
     private final CoinGateCurrencyExchangeService currencyExchangeService;
+    private final IdempotencyKeyRepository idempotencyKeyRepository;
 
     public BankAccountsWithPaginationDto getAllBankAccounts(Sort.Direction creationDateSortDirection, Boolean isClosed, int pageNumber, int pageSize) {
         checkPaginationInfoService.checkPagination(pageNumber, pageSize);
@@ -113,8 +114,13 @@ public class BankAccountService {
     }
 
     @Transactional
-    public BankAccountWithoutTransactionsDto createBankAccount(CreateBankAccountDto createBankAccountDto) {
+    public BankAccountWithoutTransactionsDto createBankAccount(CreateBankAccountDto createBankAccountDto, String idempotencyKey) {
         UUID authenticatedUserId = getAuthenticatedUserId();
+
+        if (idempotencyKey != null && idempotencyKeyRepository.findByKey(idempotencyKey) != null) {
+            UUID entityId = idempotencyKeyRepository.findByKey(idempotencyKey).getEntityId();
+            return new BankAccountWithoutTransactionsDto(bankAccountRepository.findById(entityId).get());
+        }
 
         Currency currency = Currency.getInstance(createBankAccountDto.getCurrencyCode());
 
@@ -130,12 +136,24 @@ public class BankAccountService {
 
         bankAccount = bankAccountRepository.save(bankAccount);
 
+        IdempotencyKeyEntity idempotencyKeyEntity = IdempotencyKeyEntity.builder()
+                .key(idempotencyKey)
+                .entityId(bankAccount.getId())
+                .build();
+
+        idempotencyKeyRepository.save(idempotencyKeyEntity);
+
         return new BankAccountWithoutTransactionsDto(bankAccount);
     }
 
     @Transactional
-    public BankAccountWithoutTransactionsDto closeBankAccount(UUID bankAccountId) {
+    public BankAccountWithoutTransactionsDto closeBankAccount(UUID bankAccountId, String idempotencyKey) {
         UUID authenticatedUserId = getAuthenticatedUserId();
+
+        if (idempotencyKey != null && idempotencyKeyRepository.findByKey(idempotencyKey) != null) {
+            UUID entityId = idempotencyKeyRepository.findByKey(idempotencyKey).getEntityId();
+            return new BankAccountWithoutTransactionsDto(bankAccountRepository.findById(entityId).get());
+        }
 
         BankAccountEntity bankAccount = bankAccountRepository.findById(bankAccountId)
                 .orElseThrow(() -> new NotFoundException("Банковский счет с ID " + bankAccountId + " не найден"));
@@ -152,6 +170,13 @@ public class BankAccountService {
         bankAccount.setIsClosed(true);
 
         bankAccount = bankAccountRepository.save(bankAccount);
+
+        IdempotencyKeyEntity idempotencyKeyEntity = IdempotencyKeyEntity.builder()
+                .key(idempotencyKey)
+                .entityId(bankAccount.getId())
+                .build();
+
+        idempotencyKeyRepository.save(idempotencyKeyEntity);
 
         return new BankAccountWithoutTransactionsDto(bankAccount);
     }

@@ -22,10 +22,10 @@ public class NotificationService {
 
     private final FirebaseMessaging firebaseMessaging;
 
-    public void sendNotification(String title, String body) {
-        log.info("Отправка уведомления пользователю с id {}. title {} body {}", getAuthenticatedUserId(), title, body);
+    public void sendNotification(String title, String body, UUID authenticatedUserId) {
+        log.info("Отправка уведомления пользователю с id {}. title {} body {}", authenticatedUserId, title, body);
         var notification = buildNotification(title, body);
-        var messages = buildMessages(notification);
+        var messages = buildMessages(notification, authenticatedUserId);
         sendMessages(messages);
     }
 
@@ -57,7 +57,7 @@ public class NotificationService {
         return notifications;
     }
 
-    private List<Message> buildMessages(Notification notification) {
+    private List<Message> buildMessages(Notification notification, UUID authenticatedUserId) {
         List<Message> messages = new ArrayList<>(1);
         String deviceToken = "cZAh3cNZQDyMyitdROWaO_:APA91bHzxpfM9bFCNlun6QmeU_knEP3uUVOUywC_i_qHKRvRtq2sEBhVE01TL1aDl7bIsXCdeCLts34QgYEwr662Aglk-r-QzKWTE8QZmAI4mKBbSBYxFKNYttEmrw7JisVH7QSOrreO";
         messages.add(
@@ -68,7 +68,7 @@ public class NotificationService {
                         .build()
         );
         log.info("Создалось сообщение для отправки уведомления по токену {} пользователю {}",
-                deviceToken, getAuthenticatedUserId());
+                deviceToken, authenticatedUserId);
         return messages;
     }
 
@@ -83,8 +83,8 @@ public class NotificationService {
                             .setToken(deviceToken)
                             .build()
             );
-            log.info("Создалось сообщение для отправки уведомления по токену {} пользователю {}",
-                    deviceToken, getAuthenticatedUserId());
+//            log.info("Создалось сообщение для отправки уведомления по токену {} пользователю {}",
+//                    deviceToken, getAuthenticatedUserId());
         }
         return messages;
     }
@@ -105,12 +105,6 @@ public class NotificationService {
         } catch (FirebaseMessagingException e) {
             throw new InternalServerException("Не удалось отправить уведомление");
         }
-    }
-
-    private UUID getAuthenticatedUserId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        JwtUserData userData = (JwtUserData) authentication.getPrincipal();
-        return userData.getId();
     }
 
 }

@@ -56,15 +56,16 @@ public class BankAccountRestController {
     @GetMapping("/{id}")
     public ResponseEntity<BankAccountWithoutTransactionsDto> getBankAccountsByOwnerId(@PathVariable("id") UUID bankAccountId) {
         return new ResponseEntity<>(bankAccountService.getBankAccountById(bankAccountId), HttpStatus.OK);
-    }
+    }   
 
     @Operation(
             summary = "Открыть банковский счёт.",
             security = @SecurityRequirement(name = "bearerAuth")
     )
     @PostMapping("/open")
-    public ResponseEntity<BankAccountWithoutTransactionsDto> createBankAccount(@RequestBody @Valid CreateBankAccountDto createBankAccountDto) {
-        return new ResponseEntity<>(bankAccountService.createBankAccount(createBankAccountDto), HttpStatus.OK);
+    public ResponseEntity<BankAccountWithoutTransactionsDto> createBankAccount(@RequestBody @Valid CreateBankAccountDto createBankAccountDto,
+                                                                               @RequestHeader(value = "Idempotency-Key") String idempotencyKey) {
+        return new ResponseEntity<>(bankAccountService.createBankAccount(createBankAccountDto, idempotencyKey), HttpStatus.OK);
     }
 
     @Operation(
@@ -72,8 +73,9 @@ public class BankAccountRestController {
             security = @SecurityRequirement(name = "bearerAuth")
     )
     @PostMapping("/{id}/close")
-    public ResponseEntity<BankAccountWithoutTransactionsDto> closeBankAccount(@PathVariable("id") UUID bankAccountId) {
-        return new ResponseEntity<>(bankAccountService.closeBankAccount(bankAccountId), HttpStatus.OK);
+    public ResponseEntity<BankAccountWithoutTransactionsDto> closeBankAccount(@PathVariable("id") UUID bankAccountId,
+                                                                              @RequestHeader(value = "Idempotency-Key") String idempotencyKey) {
+        return new ResponseEntity<>(bankAccountService.closeBankAccount(bankAccountId, idempotencyKey), HttpStatus.OK);
     }
 
 //    @Operation(
