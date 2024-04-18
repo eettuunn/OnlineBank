@@ -86,6 +86,14 @@ public class ExceptionHandlerController extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(new ApiError(exception.getMessage()), HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(InternalServerException.class)
+    public ResponseEntity<ApiError> handleInternalServerException(NotFoundException exception,
+                                                            WebRequest request
+    ) {
+        logError(request, exception);
+        return new ResponseEntity<>(new ApiError(exception.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     /**
      * Метод обрабатывает исключение типа {@link BadRequestException}, которое возникает,
      * когда запрос содержит некорректные данные.

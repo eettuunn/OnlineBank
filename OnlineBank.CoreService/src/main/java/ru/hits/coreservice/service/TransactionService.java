@@ -27,9 +27,7 @@ import ru.hits.coreservice.security.JwtUserData;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -42,6 +40,7 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final IntegrationRequestsService integrationRequestsService;
     private final CheckPaginationInfoService checkPaginationInfoService;
+    private final NotificationService notificationService;
     private final CoinGateCurrencyExchangeService currencyExchangeService;
 
     public TransactionsWithPaginationDto getTransactionsByBankAccountId(UUID bankAccountId, TransactionType transactionType, int pageNumber, int pageSize) {
@@ -100,10 +99,6 @@ public class TransactionService {
     void processWithdrawOrRepayLoan(CreateTransactionMessage createTransactionMessage, String additionalInformation) {
         UUID authenticatedUserId = createTransactionMessage.getAuthenticatedUserId();
 
-        if (!integrationRequestsService.checkUserExistence(authenticatedUserId)) {
-            throw new NotFoundException("Пользователя с ID " + authenticatedUserId + " не существует");
-        }
-
         BankAccountEntity bankAccount = bankAccountRepository.findById(createTransactionMessage.getBankAccountId())
                 .orElseThrow(() -> new NotFoundException("Банковский счет с ID " + createTransactionMessage.getBankAccountId() + " не найден"));
 
@@ -144,15 +139,13 @@ public class TransactionService {
 
         sendTransactionUpdate(new TransactionDto(transaction));
 
+        notificationService.sendNotification(bankAccount.getName(), additionalInformation);
+        notificationService.sendNotifications(Collections.singletonList(bankAccount.getName()), Collections.singletonList(additionalInformation));
     }
 
     @Transactional
     void processDepositOrTakeLoan(CreateTransactionMessage createTransactionMessage, String additionalInformation) {
         UUID authenticatedUserId = createTransactionMessage.getAuthenticatedUserId();
-
-        if (!integrationRequestsService.checkUserExistence(authenticatedUserId)) {
-            throw new NotFoundException("Пользователя с ID " + authenticatedUserId + " не существует");
-        }
 
         BankAccountEntity bankAccount = bankAccountRepository.findById(createTransactionMessage.getBankAccountId())
                 .orElseThrow(() -> new NotFoundException("Банковский счет с ID " + createTransactionMessage.getBankAccountId() + " не найден"));
@@ -188,15 +181,14 @@ public class TransactionService {
         bankAccountRepository.save(bankAccount);
 
         sendTransactionUpdate(new TransactionDto(transaction));
+
+        notificationService.sendNotification(bankAccount.getName(), additionalInformation);
+        notificationService.sendNotifications(Collections.singletonList(bankAccount.getName()), Collections.singletonList(additionalInformation));
     }
 
     @Transactional
     void processTransfer(CreateTransactionMessage createTransactionMessage, String additionalInformation) {
         UUID authenticatedUserId = createTransactionMessage.getAuthenticatedUserId();
-
-        if (!integrationRequestsService.checkUserExistence(authenticatedUserId)) {
-            throw new NotFoundException("Пользователя с ID " + authenticatedUserId + " не существует");
-        }
 
         BankAccountEntity fromBankAccount = bankAccountRepository.findById(createTransactionMessage.getFromBankAccountId())
                 .orElseThrow(() -> new NotFoundException("Банковский счет, с которого отправляются деньги, с ID " + createTransactionMessage.getFromBankAccountId() + " не найден"));
@@ -265,7 +257,14 @@ public class TransactionService {
 
         sendTransactionUpdate(new TransactionDto(transactionFromBankAccount));
         sendTransactionUpdate(new TransactionDto(transactionToBankAccount));
-
+        notificationService.sendNotification(fromBankAccount.getName(), additionalInformation);
+        List<String> titles = new ArrayList<>();
+        titles.add(fromBankAccount.getName());
+        titles.add(toBankAccount.getName());
+        List<String> bodyList = new ArrayList<>();
+        bodyList.add(additionalInformation);
+        bodyList.add(additionalInformation);
+        notificationService.sendNotifications(titles, bodyList);
     }
 
     @Transactional
@@ -301,6 +300,8 @@ public class TransactionService {
         bankAccountRepository.save(masterBankAccount);
 
         sendTransactionUpdate(new TransactionDto(masterBankAccountTransaction));
+
+        notificationService.sendNotifications(Collections.singletonList(masterBankAccount.getName()), Collections.singletonList("Снятие средств"));
     }
 
     @Transactional
@@ -331,6 +332,8 @@ public class TransactionService {
         bankAccountRepository.save(masterBankAccount);
 
         sendTransactionUpdate(new TransactionDto(masterBankAccountTransaction));
+
+        notificationService.sendNotifications(Collections.singletonList(masterBankAccount.getName()), Collections.singletonList("Пополнение счета"));
     }
 
     private void sendTransactionUpdate(TransactionDto transaction) {

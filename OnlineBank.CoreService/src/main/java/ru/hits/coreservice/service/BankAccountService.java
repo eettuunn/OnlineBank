@@ -119,10 +119,6 @@ public class BankAccountService {
     public BankAccountWithoutTransactionsDto createBankAccount(CreateBankAccountDto createBankAccountDto) {
         UUID authenticatedUserId = getAuthenticatedUserId();
 
-        if (!integrationRequestsService.checkUserExistence(authenticatedUserId)) {
-            throw new NotFoundException("Пользователя с ID " + authenticatedUserId + " не существует");
-        }
-
         Currency currency = Currency.getInstance(createBankAccountDto.getCurrencyCode());
 
         BankAccountEntity bankAccount = BankAccountEntity.builder()
@@ -143,10 +139,6 @@ public class BankAccountService {
     @Transactional
     public BankAccountWithoutTransactionsDto closeBankAccount(UUID bankAccountId) {
         UUID authenticatedUserId = getAuthenticatedUserId();
-
-        if (!integrationRequestsService.checkUserExistence(authenticatedUserId)) {
-            throw new NotFoundException("Пользователя с ID " + authenticatedUserId + " не существует");
-        }
 
         BankAccountEntity bankAccount = bankAccountRepository.findById(bankAccountId)
                 .orElseThrow(() -> new NotFoundException("Банковский счет с ID " + bankAccountId + " не найден"));
@@ -334,10 +326,6 @@ public class BankAccountService {
     public BankAccountWithoutTransactionsDto updateBankAccountName(UUID bankAccountId,
                                                                    UpdateBankAccountNameDto updateBankAccountNameDto) {
         UUID authenticatedUserId = getAuthenticatedUserId();
-
-        if (!integrationRequestsService.checkUserExistence(authenticatedUserId)) {
-            throw new NotFoundException("Пользователя с ID " + authenticatedUserId + " не существует");
-        }
 
         BankAccountEntity bankAccount = bankAccountRepository.findById(bankAccountId)
                 .orElseThrow(() -> new NotFoundException("Банковский счет с ID " + bankAccountId + " не найден"));
