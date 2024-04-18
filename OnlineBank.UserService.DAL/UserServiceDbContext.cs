@@ -6,5 +6,6 @@ namespace OnlineBank.UserService.DAL;
 
 public class UserServiceDbContext : IdentityDbContext<AppUser>
 {
+    public DbSet<UserIdempotencyEntity> IdempotencyKeys { get; set; }
     public UserServiceDbContext(DbContextOptions<UserServiceDbContext> options) : base(options){}
 }

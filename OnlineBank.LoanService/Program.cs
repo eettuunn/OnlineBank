@@ -15,6 +15,7 @@ using OnlineBank.LoanService.BL.Services.Background;
 using OnlineBank.LoanService.Common.Interfaces;
 using OnlineBank.LoanService.Configs;
 using OnlineBank.LoanService.Configurators;
+using OnlineBank.LoanService.Middlewares;
 using OnlineBank.UserService.Common.Configs;
 using RabbitMQ.Client;
 
@@ -117,7 +118,8 @@ app.ConfigureLoanServiceDAL();
 app.UseHttpsRedirection();
 
 app.UseExceptionMiddleware();
-app.UseRandomErrorMiddleware();
+// app.UseRandomErrorMiddleware();
+app.UseMiddleware<LoanIdempotencyMiddleware>();
 
 app.UseAuthorization();
 

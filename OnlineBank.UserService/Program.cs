@@ -16,6 +16,7 @@ using OnlineBank.UserService.Common.Interfaces;
 using OnlineBank.UserService.Configurators;
 using OnlineBank.UserService.DAL;
 using OnlineBank.UserService.DAL.Entities;
+using OnlineBank.UserService.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -124,7 +125,8 @@ app.ConfigureUserServiceDAL();
 app.UseHttpsRedirection();
 
 app.UseExceptionMiddleware();
-app.UseRandomErrorMiddleware();
+// app.UseRandomErrorMiddleware();
+app.UseMiddleware<UserIdempotencyMiddleware>();
 
 app.UseAuthorization();
 
