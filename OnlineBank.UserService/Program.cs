@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
 using Common.Filters;
+using Common.Middlewares;
 using Common.Policies.Ban;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -124,6 +125,7 @@ app.ConfigureUserServiceDAL();
 
 app.UseHttpsRedirection();
 
+app.UseMiddleware<RequestsTracingMiddleware>();
 app.UseExceptionMiddleware();
 // app.UseRandomErrorMiddleware();
 app.UseMiddleware<UserIdempotencyMiddleware>();

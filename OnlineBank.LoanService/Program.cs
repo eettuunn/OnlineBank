@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using Common.Configs;
 using Common.Filters;
+using Common.Middlewares;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -117,6 +118,7 @@ app.ConfigureLoanServiceDAL();
 
 app.UseHttpsRedirection();
 
+app.UseMiddleware<RequestsTracingMiddleware>();
 app.UseExceptionMiddleware();
 // app.UseRandomErrorMiddleware();
 app.UseMiddleware<LoanIdempotencyMiddleware>();
