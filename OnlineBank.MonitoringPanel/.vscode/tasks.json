@@ -1,0 +1,14 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "npm",
+            "script": "lint:view",
+            "problemMatcher": [
+                "$eslint-stylish"
+            ],
+            "label": "npm: lint:view",
+            "detail": "eslint --ext ts,tsx,js,jsx src"
+        }
+    ]
+}
