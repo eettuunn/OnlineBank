@@ -1,10 +1,13 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import { Navigate, useRoutes } from 'react-router-dom';
 import { Spin } from 'antd';
+import { onMessage } from 'firebase/messaging';
 
 import { rootRoutes } from './Routes';
 import useEventBus from './shared/hooks/useEventBus/useEventBus';
 import { useAuth } from './shared/hooks/useAuth/useAuth';
+import { askForNotification, messaging } from './firebase';
+import eventEmitter from './shared/helpers/eventEmmiter';
 
 const Login = React.lazy(() => import('./pages/Login/Login'));
 const NotFound = React.lazy(() => import('./pages/NotFound/NotFound'));
@@ -41,6 +44,14 @@ const createRoutes = (isAuth: boolean) => [
 
 const App: React.FC = () => {
     useEventBus();
+    useEffect(() => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+        askForNotification();
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        onMessage(messaging, (payload) => {
+            eventEmitter.emit(payload.notification?.title as string, payload.notification?.body);
+        });
+    }, []);
 
     const { isAuth } = useAuth();
     const customRouter = useRoutes(createRoutes(isAuth));
