@@ -1,6 +1,6 @@
-namespace OnlineBank.LoanService.Common.Dtos.Loan;
+namespace OnlineBank.MonitoringService.Models.Dtos;
 
-public class RequestTracingDto
+public class RequestDto
 {
     public string Url { get; set; }
     public string Method { get; set; }

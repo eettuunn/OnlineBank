@@ -1,7 +1,8 @@
-namespace OnlineBank.LoanService.Common.Dtos.Loan;
+namespace OnlineBank.MonitoringService.Models.Entities;
 
-public class RequestTracingDto
+public class RequestEntity
 {
+    public Guid Id { get; set; }
     public string Url { get; set; }
     public string Method { get; set; }
     public string Protocol { get; set; }

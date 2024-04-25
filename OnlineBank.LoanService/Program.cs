@@ -56,6 +56,7 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.Configure<IntegrationApisUrls>(builder.Configuration.GetSection("IntegrationApisUrls"));
+var integrationApisUrls = builder.Configuration.GetSection("IntegrationApisUrls").Get<IntegrationApisUrls>();
 
 builder.Services.AddScoped<ILoanRateService, LoanRateService>();
 builder.Services.AddScoped<ILoanService, LoanService>();
@@ -75,6 +76,7 @@ builder.Services.AddSingleton<IConnection>(x =>
         Port = int.Parse(rabbitMqConnection.Port)
     }.CreateConnection()
 );
+
 
 builder.Services.AddAuthentication(opt => {
         opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -118,7 +120,7 @@ app.ConfigureLoanServiceDAL();
 
 app.UseHttpsRedirection();
 
-app.UseMiddleware<RequestsTracingMiddleware>();
+app.UseMiddleware<RequestsTracingMiddleware>(integrationApisUrls.MonitoringServicePostRequestUrl);
 app.UseExceptionMiddleware();
 // app.UseRandomErrorMiddleware();
 app.UseMiddleware<LoanIdempotencyMiddleware>();

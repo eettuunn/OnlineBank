@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using OnlineBank.Common.Middlewares.ExceptionHandler;
+using OnlineBank.LoanService.Configs;
 using OnlineBank.UserService.BL;
 using OnlineBank.UserService.BL.Services;
 using OnlineBank.UserService.Common.Configs;
@@ -110,6 +111,9 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
     .AddSignInManager<SignInManager<AppUser>>()
     .AddDefaultTokenProviders();
 
+builder.Services.Configure<IntegrationApisUrls>(builder.Configuration.GetSection("IntegrationApisUrls"));
+var integrationApisUrls = builder.Configuration.GetSection("IntegrationApisUrls").Get<IntegrationApisUrls>();
+
 builder.ConfigureUserServiceDAL();
 var app = builder.Build();
 
@@ -125,7 +129,7 @@ app.ConfigureUserServiceDAL();
 
 app.UseHttpsRedirection();
 
-app.UseMiddleware<RequestsTracingMiddleware>();
+app.UseMiddleware<RequestsTracingMiddleware>(integrationApisUrls.MonitoringServicePostRequestUrl);
 app.UseExceptionMiddleware();
 // app.UseRandomErrorMiddleware();
 app.UseMiddleware<UserIdempotencyMiddleware>();
