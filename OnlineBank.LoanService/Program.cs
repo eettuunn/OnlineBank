@@ -62,7 +62,9 @@ builder.Services.AddScoped<ILoanRateService, LoanRateService>();
 builder.Services.AddScoped<ILoanService, LoanService>();
 builder.Services.AddScoped<ILoanRatingHelper, LoanRatingHelper>();
 builder.Services.AddScoped<IMessageProducer, MessageProducer>();
-// builder.Services.AddHostedService<LoanPaymentChecker>();
+builder.Services.AddScoped<RetryRequestExecutor>();
+builder.Services.AddScoped<CircuitBreakerExecutor>();
+builder.Services.AddHostedService<LoanPaymentChecker>();
 builder.Services.AddAutoMapper(typeof(LoanServiceMapper));
 
 var rabbitMqConnection = builder.Configuration.GetSection("RabbitMqConnection").Get<RabbitMqConnection>();
@@ -122,7 +124,7 @@ app.UseHttpsRedirection();
 
 app.UseMiddleware<RequestsTracingMiddleware>(integrationApisUrls.MonitoringServicePostRequestUrl);
 app.UseExceptionMiddleware();
-// app.UseRandomErrorMiddleware();
+app.UseRandomErrorMiddleware();
 app.UseMiddleware<LoanIdempotencyMiddleware>();
 
 app.UseAuthorization();
