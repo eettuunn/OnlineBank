@@ -1,11 +1,12 @@
-﻿FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
+﻿FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
 ENV ASPNETCORE_ENVIRONMENT=Development
+ENV ASPNETCORE_URLS http://*:80
 
-FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 COPY ["OnlineBank.UserService/OnlineBank.UserService.csproj", "OnlineBank.UserService/"]
 COPY ["OnlineBank.UserService.BL/OnlineBank.UserService.BL.csproj", "OnlineBank.UserService.BL/"]
