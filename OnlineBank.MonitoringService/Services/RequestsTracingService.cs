@@ -38,7 +38,7 @@ public class RequestsTracingService
             .ToListAsync();
 
         var requests = new RequestsListDto();
-        var successCounter = 0;
+        var errorsCounter = 0;
         foreach (var r in requestsEntities)
         {
             var requestDto = new RequestDto
@@ -52,12 +52,12 @@ public class RequestsTracingService
             };
             requests.Requests.Add(requestDto);
             
-            if (r.Status == 200) successCounter++;
+            if (r.Status != 200) errorsCounter++;
         }
 
-        if (successCounter != 0)
+        if (errorsCounter != 0)
         {
-            requests.ErrorsPercent = successCounter / (double)requests.Requests.Count * 100;
+            requests.ErrorsPercent = errorsCounter / (double)requests.Requests.Count * 100;
         }
         else
         {

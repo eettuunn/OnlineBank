@@ -124,7 +124,7 @@ app.UseHttpsRedirection();
 
 app.UseMiddleware<RequestsTracingMiddleware>(integrationApisUrls.MonitoringServicePostRequestUrl);
 app.UseExceptionMiddleware();
-app.UseRandomErrorMiddleware();
+// app.UseRandomErrorMiddleware();
 app.UseMiddleware<LoanIdempotencyMiddleware>();
 
 app.UseAuthorization();

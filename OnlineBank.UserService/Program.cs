@@ -131,7 +131,7 @@ app.UseHttpsRedirection();
 
 app.UseMiddleware<RequestsTracingMiddleware>(integrationApisUrls.MonitoringServicePostRequestUrl);
 app.UseExceptionMiddleware();
-app.UseRandomErrorMiddleware();
+// app.UseRandomErrorMiddleware();
 app.UseMiddleware<UserIdempotencyMiddleware>();
 
 app.UseAuthorization();
