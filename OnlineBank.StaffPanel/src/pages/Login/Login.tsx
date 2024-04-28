@@ -1,41 +1,30 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import React, { useEffect, useMemo } from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
 import { block } from 'bem-cn';
-import Icon from '@ant-design/icons';
-import { Button, Form, Input, Layout, Typography } from 'antd';
+import { Button, Layout } from 'antd';
 
 import './Login.scss';
 import { useAuth } from '../../shared/hooks/useAuth/useAuth';
-import { ICredentials } from '../../shared/hooks/useAuth/types';
+import { urlAuth } from '../../shared/constants';
+import { getStorageValue } from '../../shared/hooks/useLocalStorage/useLocalStorage';
 
-const { Text } = Typography;
 const b = block('login');
 
 const Login: React.FC = () => {
-    const { isAuth, login, isLoginFetching } = useAuth();
+    const { isAuth, login } = useAuth();
 
-    const [ form ] = Form.useForm();
-    const [ disabledBtn, setDisabledBtn ] = useState<boolean>(true);
-
-    const onFormChange = useCallback(() => {
-        if (form.getFieldValue('email') && form.getFieldError('email').length === 0) {
-            setDisabledBtn(false);
-        } else {
-            setDisabledBtn(true);
-        }
-    }, [ form ]);
+    const { search } = useLocation();
+    const authData = useMemo(() =>
+        ({
+            token: search?.split('&')[0]?.substring(7),
+            id: search?.split('&')[1]?.substring(3),
+        }), [ search ]);
 
     useEffect(() => {
-        setDisabledBtn(isLoginFetching);
-    }, [ isLoginFetching ]);
-
-    const onFinish = useCallback(
-        (credentials: ICredentials) => {
-            console.log(credentials);
-            login(credentials);
-        },
-        [ login ],
-    );
+        if (!getStorageValue('access')) {
+            login(authData);
+        }
+    }, [ authData, login ]);
 
     if (isAuth) {
         return <Navigate to="/" />;
@@ -44,40 +33,13 @@ const Login: React.FC = () => {
     return (
         <Layout>
             <div className={b().toString()}>
-                <Form autoComplete="off" className={b('form').toString()} form={form} layout="vertical" onFieldsChange={onFormChange} onFinish={onFinish}>
-                    <div className={b('form-text-header-container').toString()}>
-                        <Text className={b('form-text-header').toString()}>Администрирование банка</Text>
-                    </div>
-                    <Form.Item
-                        className={b('form-item').toString()}
-                        label="Email"
-                        name="email"
-                        rules={[ { required: true, type: 'email', message: 'Введите логин' } ]}
-                    >
-                        <Input
-                            className={b('form-input').toString()}
-                            placeholder="email"
-                            prefix={<Icon className={b('form-user-icon').toString()}/>}
-                        />
-                    </Form.Item>
-                    <Form.Item
-                        className={b('form-item').toString()}
-                        label="Пароль"
-                        name="password"
-                        rules={[ { required: true, message: 'Введите логин' } ]}
-                    >
-                        <Input
-                            className={b('form-input').toString()}
-                            placeholder="password"
-                            type='password'
-                        />
-                    </Form.Item>
-                    <Form.Item className={b('form-item').toString()}>
-                        <Button className={b('form-login-button').toString()} disabled={disabledBtn} htmlType="submit" size="large" type="primary">
-                            Войти
-                        </Button>
-                    </Form.Item>
-                </Form>
+                Необходимо авторизоваться
+                <Button onClick={() => {
+                    console.log(urlAuth);
+                    if (urlAuth)
+                        location.href = `${urlAuth}?url=http://localhost:3001/login`;
+                }
+                }>Перейти на страницу авторизации</Button>
             </div>
         </Layout>
     );

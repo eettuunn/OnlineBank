@@ -60,6 +60,21 @@ namespace OnlineBank.LoanService.DAL.Migrations
                     b.ToTable("Loans");
                 });
 
+            modelBuilder.Entity("OnlineBank.LoanService.DAL.Entities.LoanIdempotencyEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("IdempotencyKeys");
+                });
+
             modelBuilder.Entity("OnlineBank.LoanService.DAL.Entities.LoanPaymentEntity", b =>
                 {
                     b.Property<Guid>("Id")

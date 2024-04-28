@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using Common.Configs;
 using Common.Filters;
+using Common.Middlewares;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -15,6 +16,7 @@ using OnlineBank.LoanService.BL.Services.Background;
 using OnlineBank.LoanService.Common.Interfaces;
 using OnlineBank.LoanService.Configs;
 using OnlineBank.LoanService.Configurators;
+using OnlineBank.LoanService.Middlewares;
 using OnlineBank.UserService.Common.Configs;
 using RabbitMQ.Client;
 
@@ -54,11 +56,14 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.Configure<IntegrationApisUrls>(builder.Configuration.GetSection("IntegrationApisUrls"));
+var integrationApisUrls = builder.Configuration.GetSection("IntegrationApisUrls").Get<IntegrationApisUrls>();
 
 builder.Services.AddScoped<ILoanRateService, LoanRateService>();
 builder.Services.AddScoped<ILoanService, LoanService>();
 builder.Services.AddScoped<ILoanRatingHelper, LoanRatingHelper>();
 builder.Services.AddScoped<IMessageProducer, MessageProducer>();
+builder.Services.AddScoped<RetryRequestExecutor>();
+builder.Services.AddScoped<CircuitBreakerExecutor>();
 builder.Services.AddHostedService<LoanPaymentChecker>();
 builder.Services.AddAutoMapper(typeof(LoanServiceMapper));
 
@@ -73,6 +78,7 @@ builder.Services.AddSingleton<IConnection>(x =>
         Port = int.Parse(rabbitMqConnection.Port)
     }.CreateConnection()
 );
+
 
 builder.Services.AddAuthentication(opt => {
         opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -116,7 +122,10 @@ app.ConfigureLoanServiceDAL();
 
 app.UseHttpsRedirection();
 
+app.UseMiddleware<RequestsTracingMiddleware>(integrationApisUrls.MonitoringServicePostRequestUrl);
 app.UseExceptionMiddleware();
+// app.UseRandomErrorMiddleware();
+app.UseMiddleware<LoanIdempotencyMiddleware>();
 
 app.UseAuthorization();
 

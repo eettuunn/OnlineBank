@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -43,15 +43,18 @@
       <_ContentIncludedByDefault Remove="OnlineBank.UserService\OnlineBank.UserService\obj\OnlineBank.UserService.csproj.nuget.dgspec.json" />
       <_ContentIncludedByDefault Remove="OnlineBank.UserService\OnlineBank.UserService\obj\project.assets.json" />
       <_ContentIncludedByDefault Remove="OnlineBank.UserService\OnlineBank.UserService\obj\project.packagespec.json" />
-      <Content Include="..\.dockerignore">
-        <Link>.dockerignore</Link>
-      </Content>
     </ItemGroup>
 
     <ItemGroup>
       <_ContentIncludedByDefault Remove="OnlineBank.UserService\OnlineBank.UserService\obj\OnlineBank.UserService.csproj.nuget.dgspec.json" />
       <_ContentIncludedByDefault Remove="OnlineBank.UserService\OnlineBank.UserService\obj\project.assets.json" />
       <_ContentIncludedByDefault Remove="OnlineBank.UserService\OnlineBank.UserService\obj\project.packagespec.json" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="..\.dockerignore">
+        <Link>.dockerignore</Link>
+      </Content>
     </ItemGroup>
 
 </Project>

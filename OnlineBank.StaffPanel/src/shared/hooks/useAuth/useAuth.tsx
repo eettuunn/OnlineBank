@@ -21,10 +21,11 @@ interface IAuth {
     isFetching?: boolean;
     isError?: boolean;
     user?: string;
-    login: ({ email }: ICredentials) => void;
+    login: (data: ICredentials) => void;
     data?: IGetCurrentUser;
     currentRole?: Role;
-    isLoginFetching: boolean;
+    isLoginFetching?: boolean;
+    id: string;
 }
 
 /**
@@ -41,6 +42,7 @@ const authContext = createContext<IAuth>({
     data: undefined,
     currentRole: undefined,
     isLoginFetching: false,
+    id: '',
 });
 
 export const ProvideAuth: React.FC = ({ children }) => {
@@ -60,14 +62,14 @@ export const useAuth = (): IAuth => useContext(authContext);
 const useProvideAuth = (): IAuth => {
     const [ storedValue, setStoredValue ] = useLocalStorage('access', '');
     const [ isAuth, setIsAuth ] = useState(false);
-
-    const [ loginQuery, { isLoading: isLoginFetching, data: userData } ] = useLoginMutation();
+    const [ id, setUserId ] = useState('');
 
     useEffect(() => {
-        if (storedValue) {
+        if (storedValue || localStorage.getItem('access')) {
             const data = tokenDecode(storedValue);
             if (data.ban !== 'True' && data.role === Role.staff) {
                 setIsAuth(true);
+                setUserId(data.id);
             }
         } else {
             setIsAuth(false);
@@ -75,35 +77,23 @@ const useProvideAuth = (): IAuth => {
         }
     }, [ storedValue ]);
 
-    useEffect(() => {
-        if (userData?.token) {
-            const data = tokenDecode(storedValue);
-            if (data.ban !== 'True' && data.role === Role.staff) {
-                setIsAuth(true);
-            }
-            setStoredValue(userData?.token);
-        }
-    }, [ setStoredValue, storedValue, userData ]);
-
-    /**
-     * локальный вход с помощью логина и пароля
-     * @param email
-     */
+    // useEffect(() => {
+    //     if (data.token) {
+    //         const data = tokenDecode(storedValue);
+    //         if (data.ban !== 'True' && data.role === Role.staff) {
+    //             setIsAuth(true);
+    //         }
+    //         setStoredValue(userData?.token);
+    //     }
+    // }, [ setStoredValue, storedValue, userData ]);
 
     const login = (data: ICredentials) => {
-        loginQuery(data)
-            .unwrap()
-            .then((res: { token: string; id: string }) => {
-                setStoredValue(res.token);
-            })
-            .catch((error) => {
-                console.log(error);
-            });
+        setStoredValue(data.token);
     };
 
     return {
         isAuth,
         login,
-        isLoginFetching,
+        id,
     };
 };

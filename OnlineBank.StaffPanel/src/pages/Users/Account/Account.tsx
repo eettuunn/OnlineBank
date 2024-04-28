@@ -13,10 +13,11 @@ import { Paths, apiBaseUrl } from '../../../shared/constants';
 import { useLayoutConfig } from '../../../shared/hooks/useLayoutConfig/useLayoutConfig';
 import { TransactionType, TransactionTypeRus, columnsTransaction } from '../constants';
 import AccountBlockInfo from '../components/AccountBlockInfo/AccountBlockInfo';
-import { useGetAccountInfoQuery, useGetAccountTransactionQuery } from '../api/accountsApi';
-import { useAppSelector } from '../../../redux/hooks';
+import { accountsApi, useGetAccountInfoQuery, useGetAccountTransactionQuery } from '../api/accountsApi';
+import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { dateParse } from '../../../shared/helpers/dateParse';
 import { ITransaction } from '../api/types';
+import { getStorageValue } from '../../../shared/hooks/useLocalStorage/useLocalStorage';
 
 const b = block('account');
 const { Content } = Layout;
@@ -25,14 +26,19 @@ const AccountRaw: React.FC = () => {
     const { setConfig } = useLayoutConfig();
     const navigate = useNavigate();
     const { accountId, userId } = useParams();
+    const dispatch = useAppDispatch();
 
     const pagination = useAppSelector(store => store.pagination.empty);
 
     const { data: dataAccount } = useGetAccountInfoQuery(accountId as string);
     const { isLoading: isLoadingTransactions, data: dataTransactions } = useGetAccountTransactionQuery({ id: accountId as string, params: pagination });
+    const access = getStorageValue<string>('access');
 
     const [ newRow, setNewRow ] = useState('');
-    useSubscription(`/topic/bank-accounts/${accountId as string}/transactions`, (message) => {setNewRow(message.body);});
+    useSubscription(`/topic/bank-accounts/${accountId as string}/transactions`, (message) => {setNewRow(message.body);},
+        {
+            'Authorization': `Bearer ${access ?? ''}`,
+        });
 
     useEffect(() => {
         setConfig({ activeMenuKey: Paths.Users, headerTitle: `Счет №${dataAccount?.number as string}`,
@@ -83,6 +89,7 @@ const AccountRaw: React.FC = () => {
     useEffect(() => {
         setDataSource(dataTransactions?.data ?? []);
         if (wsValue) {
+            dispatch(accountsApi.util.invalidateTags([ 'Account' ]));
             setDataSource([ wsValue, ...dataSource ]);
         }
     }, [ dataTransactions?.data, wsValue ]);

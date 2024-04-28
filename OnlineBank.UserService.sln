@@ -22,6 +22,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlineBank.LoanService.Comm
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlineBank.LoanService", "OnlineBank.LoanService\OnlineBank.LoanService.csproj", "{5778336E-866A-4D3F-B5B7-5C35B11D034A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MonitoringService", "MonitoringService", "{0FF85BE9-F2B2-4809-9D51-BB938FE6A04A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlineBank.MonitoringService", "OnlineBank.MonitoringService\OnlineBank.MonitoringService.csproj", "{2BEC08CE-0B74-4D7E-AADD-B2ED98ADA006}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -64,6 +68,10 @@ Global
 		{5778336E-866A-4D3F-B5B7-5C35B11D034A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5778336E-866A-4D3F-B5B7-5C35B11D034A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5778336E-866A-4D3F-B5B7-5C35B11D034A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2BEC08CE-0B74-4D7E-AADD-B2ED98ADA006}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2BEC08CE-0B74-4D7E-AADD-B2ED98ADA006}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2BEC08CE-0B74-4D7E-AADD-B2ED98ADA006}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2BEC08CE-0B74-4D7E-AADD-B2ED98ADA006}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{0B731FB9-985C-4965-ADAD-3D0F10FD7C99} = {57E377F4-739D-4EB6-8066-6CDFF27AE0DD}
@@ -74,5 +82,6 @@ Global
 		{3DC787B5-636A-4834-A44C-7651356930E1} = {6D4CE622-D299-451B-B401-E03F30313878}
 		{3EBF2B70-AE81-45B4-9C54-7FE39645019B} = {6D4CE622-D299-451B-B401-E03F30313878}
 		{5778336E-866A-4D3F-B5B7-5C35B11D034A} = {6D4CE622-D299-451B-B401-E03F30313878}
+		{2BEC08CE-0B74-4D7E-AADD-B2ED98ADA006} = {0FF85BE9-F2B2-4809-9D51-BB938FE6A04A}
 	EndGlobalSection
 EndGlobal
