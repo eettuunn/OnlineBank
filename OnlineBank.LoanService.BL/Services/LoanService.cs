@@ -21,13 +21,15 @@ public class LoanService : ILoanService
     private readonly IntegrationApisUrls _integrationApisUrls;
     private readonly IMessageProducer _messageProducer;
     private readonly ILoanRatingHelper _loanRatingHelper;
+    private readonly RetryRequestExecutor _retryRequestExecutor;
 
-    public LoanService(LoanServiceDbContext context, IMapper mapper, IOptions<IntegrationApisUrls> options, IMessageProducer messageProducer, ILoanRatingHelper loanRatingHelper)
+    public LoanService(LoanServiceDbContext context, IMapper mapper, IOptions<IntegrationApisUrls> options, IMessageProducer messageProducer, ILoanRatingHelper loanRatingHelper, RetryRequestExecutor retryRequestExecutor)
     {
         _context = context;
         _mapper = mapper;
         _messageProducer = messageProducer;
         _loanRatingHelper = loanRatingHelper;
+        _retryRequestExecutor = retryRequestExecutor;
         _integrationApisUrls = options.Value;
     }
 
@@ -105,7 +107,7 @@ public class LoanService : ILoanService
 
     public async Task<List<LoanListElementDto>> GetUserLoans(Guid userId)
     {
-        await IsUserExists(userId);
+        await _retryRequestExecutor.ExecuteFunc(() => IsUserExists(userId));
         
         var loans = await _context
             .Loans
@@ -129,6 +131,7 @@ public class LoanService : ILoanService
     {
         var loanEntity = await _context.Loans
             .Include(l => l.Payments)
+            .Include(l => l.LoanRate)
             .FirstOrDefaultAsync(l => l.Id == loanId) ?? throw new CantFindByIdException("loan", loanId);
         if(loanEntity.UserId != userId) throw new ConflictException("This is not your loan");
 
@@ -137,6 +140,8 @@ public class LoanService : ILoanService
             loanInfo = _mapper.Map<LoanListElementDto>(loanEntity),
             loanPayments = _mapper.Map<List<LoanPaymentDto>>(loanEntity.Payments)
         };
+        loanDto.loanInfo.interestRate = loanEntity.LoanRate.InterestRate;
+        loanDto.loanInfo.loanRateName = loanEntity.LoanRate.Name;
         loanDto.loanPayments = loanDto.loanPayments.OrderBy(p => p.paymentDate).ToList();
         
         return loanDto;
@@ -164,7 +169,7 @@ public class LoanService : ILoanService
         }
     }
     
-    private async Task IsUserExists(Guid userId)
+    private async Task<bool> IsUserExists(Guid userId)
     {
         using (var client = new HttpClient())
         {
@@ -178,7 +183,7 @@ public class LoanService : ILoanService
                 
                 if (!exists) throw new CantFindByIdException("userId", userId);
                 
-                return;
+                return true;
             }
 
             throw new Exception(response.StatusCode.ToString());

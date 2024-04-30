@@ -38,5 +38,15 @@ public class ExceptionMiddlewareService
             context.Response.StatusCode = StatusCodes.Status409Conflict;
             await context.Response.WriteAsJsonAsync(new { message = exception.Message });
         }
+        catch (InternalServerErrorException exception)
+        {
+            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+            await context.Response.WriteAsJsonAsync(new { message = exception.Message });
+        }
+        catch (NotModifiedException exception)
+        {
+            context.Response.StatusCode = StatusCodes.Status304NotModified;
+            await context.Response.WriteAsJsonAsync(new { message = exception.Message });
+        }
     }
 }

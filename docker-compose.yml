@@ -35,6 +35,7 @@ services:
       ConnectionStrings__PostgresLoanService: "host=postgres_image;port=5432;database=bank_loan_db3;username=postgres;password=root"
       IntegrationApisUrls__UserServiceUrl: "http://host.docker.internal:7788"
       IntegrationApisUrls__CoreServiceUrl: "http://host.docker.internal:8080"
+      IntegrationApisUrls__MonitoringServicePostRequestUrl: "http://host.docker.internal:7777/monitoring_api"
     restart: on-failure
     depends_on:
       - "postgres_image"
@@ -47,6 +48,18 @@ services:
       - "7788:80"
     environment:
       ConnectionStrings__PostgresUserService: "host=postgres_image;port=5432;database=bank_users_db3;username=postgres;password=root"
+      IntegrationApisUrls__MonitoringServicePostRequestUrl: "http://host.docker.internal:7777/monitoring_api"
+    restart: on-failure
+    depends_on:
+      - "postgres_image"
+  
+  bank-monitoring-service:
+    container_name: bank-monitoring-service
+    image: eebbuunn/onlinebank.monitoringservice:latest
+    ports:
+      - "7777:80"
+    environment:
+      ConnectionStrings__PostgresMonitoringService: "host=postgres_image;port=5432;database=bank_monitoring_db;username=postgres;password=root"
     restart: on-failure
     depends_on:
       - "postgres_image"

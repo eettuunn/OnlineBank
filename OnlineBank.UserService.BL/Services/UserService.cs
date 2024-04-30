@@ -84,6 +84,14 @@ public class UserService : IUserService
         newUser.LoanRating = 100;
         var result = await _userManager.CreateAsync(newUser);
 
+        if (!result.Succeeded)
+        {
+            foreach (var error in result.Errors)
+            {
+                throw new Exception(error.Description);
+            }
+        }
+
         var user = await _userManager.FindByEmailAsync(createUserDto.email);
         foreach (var role in createUserDto.roles)
         {
