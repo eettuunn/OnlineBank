@@ -38,7 +38,7 @@ const Login: React.FC = () => {
                 <Button onClick={() => {
                     console.log(urlAuth);
                     if (urlAuth)
-                        location.href = `${urlAuth}?url=http://localhost:3001/login`;
+                        location.href = `${urlAuth}?url=http://localhost:3002/login`;
                 }
                 }>Перейти на страницу авторизации</Button>
             </div>

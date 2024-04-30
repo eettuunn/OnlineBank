@@ -1,25 +1,35 @@
 import { ColumnGroupType, ColumnType } from 'antd/lib/table';
 
-export const columnsUser: (ColumnGroupType<Record<string, unknown>> | ColumnType<Record<string, unknown>>)[] = [
+export const columnsLog: (ColumnGroupType<Record<string, unknown>> | ColumnType<Record<string, unknown>>)[] = [
 
     {
-        key: 'userName',
-        title: 'Полное имя',
-        dataIndex: 'userName',
+        key: 'url',
+        title: 'URL',
+        dataIndex: 'url',
     },
     {
-        key: 'email',
-        title: 'Почта',
-        dataIndex: 'email',
+        key: 'method',
+        title: 'Метод',
+        dataIndex: 'method',
     },
     {
-        key: 'roles',
-        title: 'Роль',
-        dataIndex: 'roles',
+        key: 'protocol',
+        title: 'Протокол',
+        dataIndex: 'protocol',
     },
     {
-        key: 'ban',
+        key: 'status',
         title: 'Статус',
-        dataIndex: 'ban',
+        dataIndex: 'status',
+    },
+    {
+        key: 'spentTimeInMs',
+        title: 'Время в миллисекундах',
+        dataIndex: 'spentTimeInMs',
+    },
+    {
+        key: 'apiName',
+        title: 'API',
+        dataIndex: 'apiName',
     },
 ];

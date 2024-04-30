@@ -65,7 +65,7 @@ const useProvideAuth = (): IAuth => {
     useEffect(() => {
         if (storedValue || localStorage.getItem('access')) {
             const data = tokenDecode(storedValue);
-            if (data.ban !== 'True') {
+            if (data.ban !== 'True' && data.role === 'Staff') {
                 setIsAuth(true);
                 setUserId(data.id);
             }
@@ -74,16 +74,6 @@ const useProvideAuth = (): IAuth => {
             window.localStorage.clear();
         }
     }, [ storedValue ]);
-
-    // useEffect(() => {
-    //     if (data.token) {
-    //         const data = tokenDecode(storedValue);
-    //         if (data.ban !== 'True' && data.role === Role.staff) {
-    //             setIsAuth(true);
-    //         }
-    //         setStoredValue(userData?.token);
-    //     }
-    // }, [ setStoredValue, storedValue, userData ]);
 
     const login = (data: ICredentials) => {
         setStoredValue(data.token);

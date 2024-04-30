@@ -12,17 +12,3 @@ export interface INamedPath extends IRoute {
     path: string;
     title: string;
 }
-
-export interface IResponseLists<T> {
-    pageInfo: {
-        total: number,
-        pageNumber: number,
-        pageSize: number,
-    }
-    data: T
-}
-
-export interface IRequestParams {
-    pageNumber: number,
-    pageSize: number,
-}
