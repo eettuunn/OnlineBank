@@ -15,17 +15,18 @@ const { Content } = Layout;
 const Chart: React.FC = () => {
     const { setConfig } = useLayoutConfig();
 
-    const { isFetching: isFetchingCore, data: dataCore, refetch: refetchCore } = useGetLogQuery({ apiName: ApiName.CoreService });
-    const { isFetching: isFetchingUser, data: dataUser, refetch: refetchUser } = useGetLogQuery({ apiName: ApiName.UserService });
-    const { isFetching: isFetchingLoan, data: dataLoan, refetch: refetchLoan } = useGetLogQuery({ apiName: ApiName.LoanService });
+    const { isFetching: isFetchingCore, data: dataCore } = useGetLogQuery({ apiName: ApiName.CoreService });
+    const { isFetching: isFetchingUser, data: dataUser } = useGetLogQuery({ apiName: ApiName.UserService });
+    const { isFetching: isFetchingLoan, data: dataLoan } = useGetLogQuery({ apiName: ApiName.LoanService });
 
     useEffect(() => {
         setConfig({ activeMenuKey: Paths.Chart, headerTitle: 'График' });
     }, [ setConfig ]);
 
     const data = [
-        { year: '1991', value: 3 },
-        { year: '1992', value: 4 },
+        { year: 'CoreService', value: dataCore?.errorsPercent },
+        { year: 'LoanService', value: dataLoan?.errorsPercent },
+        { year: 'UserService', value: dataUser?.errorsPercent },
     ];
 
     const config = {
@@ -50,7 +51,7 @@ const Chart: React.FC = () => {
         <div className={b().toString()}>
             <MainHeader />
             <Content>
-                <Line {...config} />
+                <Line {...config} loading={isFetchingCore || isFetchingLoan || isFetchingUser}/>
             </Content>
         </div>
     );
