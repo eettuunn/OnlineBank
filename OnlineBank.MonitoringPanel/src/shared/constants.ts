@@ -1,5 +1,6 @@
 export enum Paths {
     Log = 'log',
+    Chart = 'Chart',
 }
 
 export const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;

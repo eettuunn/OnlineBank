@@ -7,6 +7,7 @@ import axios, {
     RawAxiosResponseHeaders,
     ResponseType,
 } from 'axios';
+import axiosRetry from 'axios-retry';
 import { BaseQueryFn } from '@reduxjs/toolkit/query';
 
 import { apiBaseUrl, apiPrefix } from '../constants';
@@ -38,6 +39,18 @@ export type BaseQueryFnType = BaseQueryFn<IAxiosParams, unknown, unknown>;
  * Инстанс аксиоса
  */
 export const instance = axios.create({ baseURL: apiBaseUrl ? `${apiBaseUrl}` : '' });
+
+axiosRetry(axios, {
+    retries: 3, // number of retries
+    // retryDelay: (retryCount) => {
+    //     console.log(`retry attempt: ${retryCount}`);
+    //     return retryCount * 100; // time interval between retries
+    // },
+    // retryCondition: error =>
+    //     // if retry condition is not specified, by default idempotent requests are retried
+    //     error.response?.status === 500
+    // ,
+});
 
 /**
  * Интерцептор на запрос
