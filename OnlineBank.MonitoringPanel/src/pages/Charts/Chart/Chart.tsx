@@ -24,14 +24,14 @@ const Chart: React.FC = () => {
     }, [ setConfig ]);
 
     const data = [
-        { year: 'CoreService', value: dataCore?.errorsPercent },
-        { year: 'LoanService', value: dataLoan?.errorsPercent },
-        { year: 'UserService', value: dataUser?.errorsPercent },
+        { service: 'CoreService', value: dataCore?.errorsPercent },
+        { service: 'LoanService', value: dataLoan?.errorsPercent },
+        { service: 'UserService', value: dataUser?.errorsPercent },
     ];
 
     const config = {
         data,
-        xField: 'year',
+        xField: 'service',
         yField: 'value',
         point: {
             shapeField: 'square',

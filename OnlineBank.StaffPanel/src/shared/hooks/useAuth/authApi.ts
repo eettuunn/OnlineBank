@@ -1,4 +1,4 @@
-import { createApi } from '@reduxjs/toolkit/query/react';
+import { createApi, retry } from '@reduxjs/toolkit/query/react';
 
 import { axiosBaseQuery } from '../../api/query';
 
@@ -9,7 +9,7 @@ import { ICredentials } from './types';
  */
 export const authApi = createApi({
     reducerPath: 'authApi',
-    baseQuery: axiosBaseQuery('/user_api/user'),
+    baseQuery: retry(axiosBaseQuery('/user_api/user')),
     tagTypes: [ 'Auth', 'Me' ],
     endpoints: builder => ({
         login: builder.mutation<{ token: string; id: string }, ICredentials>({

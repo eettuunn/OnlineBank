@@ -1,13 +1,13 @@
-import { createApi } from '@reduxjs/toolkit/query/react';
+import { createApi, retry } from '@reduxjs/toolkit/query/react';
 
-import { axiosBaseQuery } from '../../../shared/api/query';
 import { IRequestParams, IResponseLists } from '../../../shared/types';
+import { axiosBaseQuery } from '../../../shared/api/query';
 
 import { IAccount, IAccountsResponse, ITransaction } from './types';
 
 export const accountsApi = createApi({
     reducerPath: 'accountsApi',
-    baseQuery: axiosBaseQuery('/api'),
+    baseQuery: retry(axiosBaseQuery('/api')),
     tagTypes: [ 'Accounts', 'Transactions', 'Account' ],
     endpoints: builder => ({
         getUserAccounts: builder.query<IAccountsResponse, { id: string, params: IRequestParams }>({

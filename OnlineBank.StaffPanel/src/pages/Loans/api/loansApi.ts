@@ -1,4 +1,4 @@
-import { createApi } from '@reduxjs/toolkit/query/react';
+import { createApi, retry } from '@reduxjs/toolkit/query/react';
 
 import { axiosBaseQuery } from '../../../shared/api/query';
 import { IResponseLists } from '../../../shared/types';
@@ -7,7 +7,7 @@ import { ICreateLoanRate, ILoan, ILoanRate, ILoanResponse } from './types';
 
 export const loansApi = createApi({
     reducerPath: 'loansApi',
-    baseQuery: axiosBaseQuery('/loan_api'),
+    baseQuery: retry(axiosBaseQuery('/loan_api')),
     tagTypes: [ 'LoanRates' ],
     endpoints: builder => ({
         getUsersLoans: builder.query<IResponseLists<ILoan>, string>({
