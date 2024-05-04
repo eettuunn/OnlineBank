@@ -18,6 +18,14 @@ app.use(
   })
 );
 app.use(
+  "/monitoring_api",
+  createProxyMiddleware({
+    target: `${host}:7777`,
+    ws: true,
+    changeOrigin: true,
+  })
+);
+app.use(
   "/api/transactions",
   createProxyMiddleware({
     target: `${host}:8080`,

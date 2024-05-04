@@ -12,6 +12,8 @@ import { BaseQueryFn, retry } from '@reduxjs/toolkit/query';
 import { apiBaseUrl, apiPrefix } from '../constants';
 import eventEmitter from '../helpers/eventEmmiter';
 import { getStorageValue } from '../hooks/useLocalStorage/useLocalStorage';
+import { monitoringApi, useGetCoreMonitoringQuery } from './monitoringApi';
+import { store } from '../../redux/store';
 
 export interface IAxiosParams {
     method: AxiosRequestConfig['method'];
@@ -60,7 +62,7 @@ const successInterceptors = (response: AxiosResponse) => response;
 instance.interceptors.request.use(requestInterceptors);
 instance.interceptors.response.use(successInterceptors);
 
-const emitError = (error: AxiosError) => {
+const emitError = (error: AxiosError, baseUrl?: string) => {
     switch (error.response?.status) {
         case 400:
             eventEmitter.emit('dataError', error.response?.data);
@@ -76,6 +78,9 @@ const emitError = (error: AxiosError) => {
             break;
         case 500:
             eventEmitter.emit('serverError');
+            console.log(baseUrl);
+            retry.fail(baseUrl);
+            // monitoringApi.util.invalidateTags([''])
             break;
         case 503:
             eventEmitter.emit('serverNotAvailableError');
@@ -115,7 +120,7 @@ export const query = async <T>(
     } catch (axiosError) {
         const err = axiosError as AxiosError;
         if (!notCauseError) {
-            emitError(err);
+            emitError(err, baseUrl);
         }
 
         return {

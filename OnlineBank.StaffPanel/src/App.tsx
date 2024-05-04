@@ -8,6 +8,7 @@ import useEventBus from './shared/hooks/useEventBus/useEventBus';
 import { useAuth } from './shared/hooks/useAuth/useAuth';
 import { askForNotification, messaging } from './firebase';
 import eventEmitter from './shared/helpers/eventEmmiter';
+import { useGetCoreMonitoringQuery, useGetUserMonitoringQuery, useGetLoanMonitoringQuery } from './shared/api/monitoringApi';
 
 const Login = React.lazy(() => import('./pages/Login/Login'));
 const NotFound = React.lazy(() => import('./pages/NotFound/NotFound'));
@@ -55,6 +56,9 @@ const App: React.FC = () => {
 
     const { isAuth } = useAuth();
     const customRouter = useRoutes(createRoutes(isAuth));
+    useGetCoreMonitoringQuery(undefined);
+    useGetUserMonitoringQuery(undefined);
+    useGetLoanMonitoringQuery(undefined);
 
     return <Suspense fallback={<Spin />}>{customRouter}</Suspense>;
 };
