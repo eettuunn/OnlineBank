@@ -9,28 +9,28 @@ export interface IMonitoringData {
 export const monitoringApi = createApi({
     reducerPath: 'monitoringApi',
     baseQuery: axiosBaseQuery('/monitoring_api'),
-    tagTypes: [ 'CoreMonitoring', 'UserMonitoring', 'LoanMonitoring' ],
+    tagTypes: [ 'coreErrorPercent', 'userErrorPercent', 'loanErrorPercent' ],
     endpoints: builder => ({
         getCoreMonitoring: builder.query<IMonitoringData, undefined>({
             query: () => ({
                 url: '?apiName=CoreService',
                 method: 'get',
             }),
-            providesTags: [ 'CoreMonitoring' ],
+            providesTags: [ 'coreErrorPercent' ],
         }),
         getUserMonitoring: builder.query<IMonitoringData, undefined>({
             query: () => ({
                 url: '?apiName=UserService',
                 method: 'get',
             }),
-            providesTags: [ 'UserMonitoring' ],
+            providesTags: [ 'userErrorPercent' ],
         }),
         getLoanMonitoring: builder.query<IMonitoringData, undefined>({
             query: () => ({
                 url: '?apiName=LoanService',
                 method: 'get',
             }),
-            providesTags: [ 'LoanMonitoring' ],
+            providesTags: [ 'loanErrorPercent' ],
         }),
     }),
 });

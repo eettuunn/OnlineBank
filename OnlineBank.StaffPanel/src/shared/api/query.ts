@@ -12,8 +12,6 @@ import { BaseQueryFn, retry } from '@reduxjs/toolkit/query';
 import { apiBaseUrl, apiPrefix } from '../constants';
 import eventEmitter from '../helpers/eventEmmiter';
 import { getStorageValue } from '../hooks/useLocalStorage/useLocalStorage';
-import { monitoringApi, useGetCoreMonitoringQuery } from './monitoringApi';
-import { store } from '../../redux/store';
 
 export interface IAxiosParams {
     method: AxiosRequestConfig['method'];
@@ -62,25 +60,49 @@ const successInterceptors = (response: AxiosResponse) => response;
 instance.interceptors.request.use(requestInterceptors);
 instance.interceptors.response.use(successInterceptors);
 
+export const enum Api {
+    api = 'api',
+    user_api = 'user_api',
+    loan_api = 'loan_api',
+}
+
+export const enum ErrorPercentName {
+    coreErrorPercent = 'coreErrorPercent',
+    userErrorPercent = 'userErrorPercent',
+    loanErrorPercent = 'loanErrorPercent',
+}
+
+export const ApiToServiceName = {
+    [Api.api]: ErrorPercentName.coreErrorPercent,
+    [Api.user_api]: ErrorPercentName.userErrorPercent,
+    [Api.loan_api]: ErrorPercentName.loanErrorPercent,
+};
+
 const emitError = (error: AxiosError, baseUrl?: string) => {
+    const serviceName = ApiToServiceName[baseUrl?.slice(1) as Api];
+    const errorPercent = getStorageValue(serviceName);
+    console.log(baseUrl?.slice(1), ': ', serviceName, ' = ', errorPercent);
     switch (error.response?.status) {
         case 400:
             eventEmitter.emit('dataError', error.response?.data);
+            retry.fail(baseUrl);
             break;
         case 401:
             eventEmitter.emit('401Error');
+            retry.fail(baseUrl);
             break;
         case 403:
             eventEmitter.emit('accessError');
+            retry.fail(baseUrl);
             break;
         case 404:
             eventEmitter.emit('notFoundError');
             break;
         case 500:
             eventEmitter.emit('serverError');
-            console.log(baseUrl);
-            retry.fail(baseUrl);
-            // monitoringApi.util.invalidateTags([''])
+            if (Number(errorPercent) > 70) {
+                retry.fail(baseUrl);
+            }
             break;
         case 503:
             eventEmitter.emit('serverNotAvailableError');

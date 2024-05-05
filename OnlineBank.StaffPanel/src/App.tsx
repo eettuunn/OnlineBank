@@ -9,6 +9,7 @@ import { useAuth } from './shared/hooks/useAuth/useAuth';
 import { askForNotification, messaging } from './firebase';
 import eventEmitter from './shared/helpers/eventEmmiter';
 import { useGetCoreMonitoringQuery, useGetUserMonitoringQuery, useGetLoanMonitoringQuery } from './shared/api/monitoringApi';
+import useLocalStorage from './shared/hooks/useLocalStorage/useLocalStorage';
 
 const Login = React.lazy(() => import('./pages/Login/Login'));
 const NotFound = React.lazy(() => import('./pages/NotFound/NotFound'));
@@ -56,9 +57,24 @@ const App: React.FC = () => {
 
     const { isAuth } = useAuth();
     const customRouter = useRoutes(createRoutes(isAuth));
-    useGetCoreMonitoringQuery(undefined);
-    useGetUserMonitoringQuery(undefined);
-    useGetLoanMonitoringQuery(undefined);
+    const { data: coreErrorPercentData } = useGetCoreMonitoringQuery(undefined,  { pollingInterval: 10000 });
+    const { data: userErrorPercentData } = useGetUserMonitoringQuery(undefined, { pollingInterval: 10000 });
+    const { data: loanErrorPercentData } = useGetLoanMonitoringQuery(undefined, { pollingInterval: 10000 });
+    const [ , setCoreErrorPercent ] = useLocalStorage('coreErrorPercent', 0);
+    const [ , setUserErrorPercent ] = useLocalStorage('userErrorPercent', 0);
+    const [ , setLoanErrorPercent ] = useLocalStorage('loanErrorPercent', 0);
+
+    useEffect(() => {
+        setCoreErrorPercent(coreErrorPercentData?.errorsPercent);
+    }, [ coreErrorPercentData, setCoreErrorPercent ]);
+
+    useEffect(() => {
+        setUserErrorPercent(userErrorPercentData?.errorsPercent);
+    }, [ userErrorPercentData, setUserErrorPercent ]);
+
+    useEffect(() => {
+        setLoanErrorPercent(loanErrorPercentData?.errorsPercent);
+    }, [ loanErrorPercentData, setLoanErrorPercent ]);
 
     return <Suspense fallback={<Spin />}>{customRouter}</Suspense>;
 };
