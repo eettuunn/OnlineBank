@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import block from 'bem-cn';
 import { Button, Card, Layout, List } from 'antd';
+import { v4 as uuidv4 } from 'uuid';
 import { useNavigate } from 'react-router-dom';
+import deepEqual from 'deep-equal';
 
 import { useLayoutConfig } from '../../../shared/hooks/useLayoutConfig/useLayoutConfig';
 import { Paths, adminId, masterAccountId } from '../../../shared/constants';
@@ -9,6 +11,7 @@ import MainHeader from '../../../features/MainHeader/MainHeader';
 import { useCreateLoanRateMutation, useGetLoanRatesQuery } from '../api/loansApi';
 import ModalCreateRate from '../components/ModalCreateRate/ModalCreateRate';
 import { ICreateLoanRate } from '../api/types';
+import useLocalStorage from '../../../shared/hooks/useLocalStorage/useLocalStorage';
 
 import './LoanRates.scss';
 
@@ -23,19 +26,33 @@ const LoanRates: React.FC = () => {
     const { isLoading: isLoadingRates, data: dataRates } = useGetLoanRatesQuery(undefined);
     const [ create, { isLoading: isLoadingCreate } ] = useCreateLoanRateMutation();
 
+    const [ formValues, setFormValues ] = useLocalStorage<{ data: ICreateLoanRate, key: string } | undefined>('loanFormData', undefined);
+
     useEffect(() => {
         setConfig({ activeMenuKey: Paths.Loans, headerTitle: 'Кредитные тарифы' });
     }, [ setConfig ]);
 
     const onCreateLoanRate = useCallback(
         async (values: ICreateLoanRate) => {
-            const result = await create({
+            const data = {
                 name: values.name,
                 interestRate: values.interestRate,
+            };
+            let key = uuidv4();
+            if (deepEqual(formValues?.data, data)) {
+                key = formValues?.key ?? uuidv4();
+            }
+            setFormValues({ data: values, key: key });
+            const result = await create({
+                data: {
+                    name: values.name,
+                    interestRate: values.interestRate,
+                },
+                idempotency_key: key,
             });
             return result;
         },
-        [ create ],
+        [ create, formValues?.data, setFormValues ],
     );
 
     return (

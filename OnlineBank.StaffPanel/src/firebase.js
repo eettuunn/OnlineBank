@@ -1,9 +1,10 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from 'firebase/app';
-import { getMessaging, getToken } from 'firebase/messaging';
+import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 import { getFirestore } from 'firebase/firestore';
+import eventEmitter from './shared/helpers/eventEmmiter';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -22,10 +23,18 @@ export const db = getFirestore(app);
 export const messaging = getMessaging(app);
 
 export const askForNotification = async () => {
-    const permission = await Notification.requestPermission()
-    console.log(permission)
+    const permission = await Notification.requestPermission();
+    console.log(permission);
     if (permission === 'granted') {
-        const token = await getToken(messaging, {vapidKey: 'BNHFBFqa0wB8QnVqaOQhJf1UZaT7q2JiMLVf0hXicKeHLTGoGds7NV5kKzuX0hGr9bt8sDOdOrQl6uwoF9melTU'})
-        console.log(token)
+        const token = await getToken(messaging, { vapidKey: 'BNHFBFqa0wB8QnVqaOQhJf1UZaT7q2JiMLVf0hXicKeHLTGoGds7NV5kKzuX0hGr9bt8sDOdOrQl6uwoF9melTU' });
+        console.log(token);
     }
 };
+
+onMessage(messaging, payload => {
+    console.log('Message received. ', payload);
+    // Customize notification here
+    const notificationTitle = payload.notification.title;
+    const notificationOptions = payload.notification.body;
+    eventEmitter.emit('customMessage', 'info', `${notificationTitle} ${notificationOptions}`);
+});

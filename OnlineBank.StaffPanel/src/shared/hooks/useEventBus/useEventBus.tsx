@@ -36,6 +36,10 @@ const useEventBus = (): void => {
             notification.error({ duration: 2, placement: 'top', message: 'Сервер недоступен' });
         };
 
+        const notModified = () => {
+            notification.error({ duration: 2, placement: 'top', message: 'Повторяющиеся данные' });
+        };
+
         const timeoutErrorMessage = () => {
             notification.error({ duration: 2, placement: 'top', message: 'Сервер не ответил вовремя' });
         };
@@ -57,6 +61,7 @@ const useEventBus = (): void => {
         eventEmitter.on('timeoutError', timeoutErrorMessage);
         eventEmitter.on('unrecognizedError', unrecognizedErrorMessage);
         eventEmitter.on('customMessage', customMessage);
+        eventEmitter.on('NotModified', notModified);
 
         return () => {
             eventEmitter.off('authError', authErrorMessage);
@@ -68,6 +73,7 @@ const useEventBus = (): void => {
             eventEmitter.off('timeoutError', timeoutErrorMessage);
             eventEmitter.off('unrecognizedError', unrecognizedErrorMessage);
             eventEmitter.off('customMessage', customMessage);
+            eventEmitter.off('NotModified', notModified);
         };
     }, []);
 };

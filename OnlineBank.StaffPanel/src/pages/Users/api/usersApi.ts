@@ -44,11 +44,12 @@ export const usersApi = createApi({
             }),
             invalidatesTags: [ 'Users' ],
         }),
-        createUser: builder.mutation<string, ICreateUser>({
-            query: data => ({
+        createUser: builder.mutation<string, { data: ICreateUser, idempotency_key: string }>({
+            query: ({ data, idempotency_key }) => ({
                 url: '/user',
                 method: 'post',
                 data,
+                headers: { 'Idempotency-Key': idempotency_key },
             }),
             invalidatesTags: [ 'Users' ],
         }),

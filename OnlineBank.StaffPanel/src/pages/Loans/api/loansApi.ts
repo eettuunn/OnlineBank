@@ -23,11 +23,12 @@ export const loansApi = createApi({
             }),
             providesTags: [ 'LoanRates' ],
         }),
-        createLoanRate: builder.mutation<string, ICreateLoanRate>({
-            query: data => ({
+        createLoanRate: builder.mutation<string, { data: ICreateLoanRate, idempotency_key: string }>({
+            query: ({ data, idempotency_key }) => ({
                 url: '/rate',
                 method: 'post',
                 data,
+                headers: { 'Idempotency-Key': idempotency_key },
             }),
             invalidatesTags: [ 'LoanRates' ],
         }),

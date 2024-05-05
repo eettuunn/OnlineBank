@@ -55,7 +55,13 @@ const requestInterceptors = (req: InternalAxiosRequestConfig) => {
 /**
  * Интерцептор на успешный ответ сервера
  */
-const successInterceptors = (response: AxiosResponse) => response;
+const successInterceptors = (response: AxiosResponse) => {
+    if (response.status == 304) {
+        eventEmitter.emit('Not Modified');
+        retry.fail(response);
+    }
+    return response;
+};
 
 instance.interceptors.request.use(requestInterceptors);
 instance.interceptors.response.use(successInterceptors);
@@ -93,6 +99,11 @@ const emitError = (error: AxiosError, baseUrl?: string) => {
             break;
         case 403:
             eventEmitter.emit('accessError');
+            retry.fail(baseUrl);
+            break;
+        case 304:
+            eventEmitter.emit('NotModified');
+            console.log('NotModified');
             retry.fail(baseUrl);
             break;
         case 404:

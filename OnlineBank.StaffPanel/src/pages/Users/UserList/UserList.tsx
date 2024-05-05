@@ -1,8 +1,12 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import { isDeepStrictEqual } from 'util';
+
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import block from 'bem-cn';
 import { Button, Layout } from 'antd';
 import Icon from '@ant-design/icons/lib/components/Icon';
 import { useNavigate } from 'react-router-dom';
+import { v4 as uuidv4 } from 'uuid';
+import deepEqual from 'deep-equal';
 
 import { useLayoutConfig } from '../../../shared/hooks/useLayoutConfig/useLayoutConfig';
 import { Paths } from '../../../shared/constants';
@@ -16,6 +20,7 @@ import BlockingModal from '../components/BlockingModal/BlockingModal';
 import { FormBlockingMode } from '../types';
 import { useBlockUserMutation, useCreateUserMutation, useGetUsersQuery, useUnblockUserMutation } from '../api/usersApi';
 import { useAppSelector } from '../../../redux/hooks';
+import useLocalStorage from '../../../shared/hooks/useLocalStorage/useLocalStorage';
 
 import './UserList.scss';
 
@@ -41,6 +46,8 @@ const UserList: React.FC = () => {
     const [ blockUser, { isLoading: isLoadingBlock } ] = useBlockUserMutation();
     const [ unblockUser, { isLoading: isLoadingUnblock } ] = useUnblockUserMutation();
 
+    const [ formValues, setFormValues ] = useLocalStorage<{ data: ICreateUser, key: string } | undefined>('userFormData', undefined);
+
     useEffect(() => {
         setConfig({ activeMenuKey: Paths.Users, headerTitle: 'Пользователи' });
     }, [ setConfig ]);
@@ -50,16 +57,25 @@ const UserList: React.FC = () => {
      */
     const onCreateUser = useCallback(
         async (values: ICreateUser) => {
-            const result = await create({
+            const data = {
                 email: values.email,
                 userName: values.userName,
                 phoneNumber: values.phoneNumber,
                 roles: values.roles,
                 passport: values.passport,
+            };
+            let key = uuidv4();
+            if (deepEqual(formValues?.data, data)) {
+                key = formValues?.key ?? uuidv4();
+            }
+            setFormValues({ data: values, key: key });
+            const result = await create({
+                data: data,
+                idempotency_key: key,
             });
             return result;
         },
-        [ create ],
+        [ create, formValues?.data, setFormValues ],
     );
 
     /**
