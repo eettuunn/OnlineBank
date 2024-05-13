@@ -74,7 +74,7 @@ public class NotificationService {
 
     private List<Message> buildMessages(List<Notification> notifications) {
         List<Message> messages = new ArrayList<>(1);
-        String deviceToken = "ecr9OvxmuvRRWIBjn-VX-N:APA91bESLVmbSCtbMzmRcTHEdZYUZ2FNPLY0eO33BV464Lve8AO8EVzlLxDVOkmtQEYIC3LpoiTk7xiezhSUg-Fv-D_PgV-W2JjgaN2JBXUj8Ug1_R4gAC8TkleHLReygDtTy7XdzCV2";
+        String deviceToken = "eNKxhCPfHligAi6rAM8daC:APA91bFneb8GfB90eKfsoBzxXzzm24RH6Ro8t8u23wK76aVU8EwgsIuGbfN5bHk9DZGnjklbNWYJiIxMkBwy9a67S3jVRJl-DK5NHrelYz6Ovo0sC0j6fZv4nM3S7Kszz4vJ0feFmgWN";
         for (var notification : notifications) {
             messages.add(
                     Message
