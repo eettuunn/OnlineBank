@@ -1,4 +1,4 @@
-package ru.hits.coreservice.controller;
+package ru.hits.coreservice;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -84,6 +84,14 @@ public class ExceptionHandlerController extends ResponseEntityExceptionHandler {
     ) {
         logError(request, exception);
         return new ResponseEntity<>(new ApiError(exception.getMessage()), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(InternalServerException.class)
+    public ResponseEntity<ApiError> handleInternalServerException(InternalServerException exception,
+                                                            WebRequest request
+    ) {
+        logError(request, exception);
+        return new ResponseEntity<>(new ApiError(exception.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     /**
