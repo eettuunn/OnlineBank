@@ -14,7 +14,7 @@ public class ServiceErrorSimulatorAspect {
 
     private final Random random = new Random();
 
-    @Before("execution(* ru.hits.coreservice.service.*.*(..))")
+    @Before("execution(* ru.hits.coreservice.controller.*.*(..))")
     public void simulateServiceError() {
         LocalDateTime currentTime = LocalDateTime.now();
         int probability = currentTime.getMinute() % 2 == 0 ? 90 : 50; // 90% в четные минуты, 50% в нечетные
