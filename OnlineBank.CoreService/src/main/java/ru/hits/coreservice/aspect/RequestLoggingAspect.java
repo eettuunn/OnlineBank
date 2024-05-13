@@ -98,7 +98,7 @@ public class RequestLoggingAspect {
 
         try {
             ResponseEntity<String> response = restTemplate.exchange(
-                    "http://localhost:7777/monitoring_api",
+                    "http://host.docker.internal:7777/monitoring_api",
                     HttpMethod.POST,
                     requestEntity,
                     String.class);
